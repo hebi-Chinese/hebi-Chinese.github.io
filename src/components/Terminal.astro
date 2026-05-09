@@ -1,0 +1,59 @@
+---
+// Terminal card — fun profile display
+---
+<style>
+  .terminal-section { padding: var(--section-dense) 0; }
+  .terminal-card {
+    background: #1a1612;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--surface-2);
+    max-width: 42rem;
+  }
+  .dots {
+    display: flex; gap: 6px;
+    padding: 0.8rem 1.2rem;
+    background: rgba(255,255,255,0.05);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .line { padding: 0.3rem 1.2rem; line-height: 1.8; white-space: pre-wrap; }
+  .prompt { color: var(--accent); }
+  .cmd { color: var(--surface-2); }
+  .output { color: #a89880; }
+  .highlight { color: var(--accent); }
+  .cursor-blink {
+    display: inline-block;
+    width: 6px; height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    animation: termBlink 1s step-end infinite;
+  }
+  @keyframes termBlink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  @media (max-width: 480px) { .terminal-card { font-size: 0.62rem; padding: var(--space-4); } }
+</style>
+
+<section class="terminal-section">
+  <div class="wrap">
+    <div class="terminal-card" data-reveal>
+      <div class="dots">
+        <span class="dot dot-r"></span>
+        <span class="dot dot-y"></span>
+        <span class="dot dot-g"></span>
+      </div>
+      <div class="line"><span class="prompt">~ $</span> <span class="cmd">cat /etc/hebi/profile</span></div>
+      <div class="line"><span class="output">name: 何必</span></div>
+      <div class="line"><span class="output">doing: 毕业 + 等副本开启</span></div>
+      <div class="line"><span class="output">stack: <span class="highlight">Python, Zig, C#, LangGraph, PyTorch</span></span></div>
+      <div class="line"><span class="output">projects: Euterpe, Euterpe.Bot, MHW-Assistant, CC-MCP-MiMo-Bridge</span></div>
+      <div class="line"><span class="output">hobbies: <span class="highlight">游戏, 番剧, 健身房</span></span></div>
+      <div class="line"><span class="output">now: <span class="highlight">在毕业, 在等下一关</span></span></div>
+      <div class="line"><span class="output">status: <span class="highlight">主线进行中</span></span></div>
+      <div class="line"><span class="prompt">~ $</span> <span class="cursor-blink"></span></div>
+    </div>
+  </div>
+</section>

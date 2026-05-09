@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import '../styles/global.css';
+---
+<BaseLayout title="何必 / about">
+  <Nav />
+  <main style="padding-top: 6rem; min-height: 100vh;">
+    <div class="wrap">
+      <div class="section-label" data-reveal>About</div>
+      <h2 class="section-title" data-reveal style="margin-bottom: 3rem;">关于这个人</h2>
+
+      <div data-reveal style="max-width: 42rem; margin-bottom: 3rem;">
+        <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: var(--text-h2); font-weight: var(--text-h2-w); margin-bottom: var(--space-2);">怎么走到这里的</h3>
+        <p style="font-size: var(--text-body); color: var(--text-secondary); line-height: var(--text-body-lh);">非科班，自学走进 AI。一开始什么都不懂，就是觉得"这个东西我想做出来"。一年里摸着石头做了不少事，踩了不少坑，但也真的跑通了。</p>
+      </div>
+
+      <div data-reveal style="max-width: 42rem; margin-bottom: 3rem;">
+        <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: var(--text-h2); font-weight: var(--text-h2-w); margin-bottom: var(--space-2);">不写代码的时候</h3>
+        <p style="font-size: var(--text-body); color: var(--text-secondary); line-height: var(--text-body-lh);">现在的循环：游戏、番、健身房。</p>
+      </div>
+    </div>
+  </main>
+  <ScrollReveal />
+</BaseLayout>

@@ -1,0 +1,39 @@
+---
+// Skills pills — horizontal scroll track
+---
+<style>
+  .skills-section { padding: var(--section-dense) 0; }
+  .skills-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+  }
+  .skill-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--surface-2);
+    border-radius: 100px;
+    letter-spacing: 0.04em;
+    transition: all var(--duration-fast);
+    white-space: nowrap;
+  }
+  .skill-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+</style>
+
+<section class="skills-section">
+  <div class="wrap">
+    <div class="skills-track" data-reveal>
+      {['Python', 'C#', 'Zig', 'C', 'SQL', 'LangGraph', 'LangChain', 'QLoRA', 'PyTorch', 'Unsloth', 'MCP', 'OpenRouter', 'FastAPI', 'Docker', 'PostgreSQL', 'Redis', 'Win32 API', 'IL2CPP', 'Git', 'Claude Code'].map(skill => (
+        <span class="skill-pill">{skill}</span>
+      ))}
+    </div>
+  </div>
+</section>

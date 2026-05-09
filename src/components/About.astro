@@ -1,0 +1,48 @@
+---
+// About section — expandable story blocks
+---
+<style>
+  .about { padding: var(--section-normal) 0; }
+  .about-header { margin-bottom: 4rem; }
+  .about-story { max-width: 42rem; margin-bottom: 3rem; }
+  .about-story:last-child { margin-bottom: 0; }
+  .about-story-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: var(--text-h2);
+    font-weight: var(--text-h2-w);
+    margin-bottom: var(--space-2);
+    color: var(--text-primary);
+  }
+  .about-story-lead {
+    font-size: var(--text-body);
+    font-weight: var(--text-small-w);
+    color: var(--text-secondary);
+    line-height: var(--text-body-lh);
+    margin-bottom: 0.8rem;
+  }
+  @media (max-width: 768px) { .about-story { max-width: 100%; } }
+</style>
+
+<section class="about" id="about">
+  <div class="wrap">
+    <div class="about-header" data-reveal>
+      <div class="section-label">About</div>
+      <h2 class="section-title">关于这个人</h2>
+    </div>
+
+    <div class="about-story" data-reveal>
+      <h3 class="about-story-title">怎么走到这里的</h3>
+      <p class="about-story-lead">非科班，自学走进 AI。一开始什么都不懂，就是觉得"这个东西我想做出来"。一年里摸着石头做了不少事，踩了不少坑，但也真的跑通了。</p>
+    </div>
+
+    <div class="about-story" data-reveal>
+      <h3 class="about-story-title">不写代码的时候</h3>
+      <p class="about-story-lead">现在的循环：游戏、番、健身房。</p>
+    </div>
+
+    <div class="about-story" data-reveal>
+      <h3 class="about-story-title">推荐的东西</h3>
+      <p class="about-story-lead">最近发现 vibe coding 很好用，将 vibe coding 融入为生活的一部分，我感觉这是我保持活力的源泉之一。有了 vibe coding，对于现代生活的感知，也会变得不一样起来。</p>
+    </div>
+  </div>
+</section>

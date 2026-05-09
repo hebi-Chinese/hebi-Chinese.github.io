@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import '../styles/global.css';
+---
+<BaseLayout title="何必 / now">
+  <Nav />
+  <main style="padding-top: 6rem; min-height: 100vh;">
+    <div class="wrap">
+      <div class="section-label" data-reveal>Now</div>
+      <h2 class="section-title" data-reveal style="margin-bottom: 3rem;">当下</h2>
+      <div data-reveal style="max-width: 42rem;">
+        <p style="font-size: var(--text-body); color: var(--text-secondary); line-height: var(--text-body-lh);">主线：学习。副本：即将解锁。</p>
+      </div>
+    </div>
+  </main>
+  <ScrollReveal />
+</BaseLayout>

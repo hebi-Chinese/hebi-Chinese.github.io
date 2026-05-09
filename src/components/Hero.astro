@@ -1,0 +1,248 @@
+---
+// Hero section with ripple canvas + text repulsion
+---
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    padding-top: 3.25rem;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 15%; left: -10%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(196, 113, 11, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    filter: blur(80px);
+  }
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-eyebrow);
+    font-weight: var(--text-eyebrow-w);
+    color: var(--text-muted);
+    letter-spacing: var(--text-eyebrow-ls);
+    text-transform: uppercase;
+    margin-bottom: var(--space-8);
+  }
+  .hero-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: var(--text-display);
+    font-weight: var(--text-display-w);
+    line-height: var(--text-display-lh);
+    margin-bottom: var(--space-8);
+    letter-spacing: var(--text-display-ls);
+  }
+  .hero-name .char {
+    display: inline-block;
+    transition: color 0.6s var(--ease-out-expo), transform 0.1s ease-out;
+    will-change: transform;
+  }
+  .hero-name .char:hover { color: var(--accent); }
+  .hero-name .char.repulse-return {
+    transition: transform 0.8s cubic-bezier(0.25, 1.5, 0.5, 1), color 0.6s var(--ease-out-expo);
+  }
+  .hero-sub {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-bottom: var(--space-12);
+  }
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-caption);
+    font-weight: var(--text-caption-w);
+    color: var(--text-secondary);
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--surface-3);
+    border-radius: 100px;
+    letter-spacing: var(--text-caption-ls);
+    transition: border-color var(--duration-fast), color var(--duration-fast);
+  }
+  .hero-tag:hover { border-color: var(--accent); color: var(--accent); }
+  .hero-cta {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    padding: 0.65rem 1.5rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all var(--duration-normal) var(--ease-out-expo);
+    border: none;
+  }
+  .btn-primary { background: var(--accent); color: var(--surface-0); }
+  .btn-primary:hover {
+    box-shadow: 0 0 30px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+  }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--surface-3); }
+  .btn-ghost:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+
+  .ripple-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+  .hero > .wrap { position: relative; z-index: 2; }
+
+  @media (max-width: 768px) {
+    .hero { min-height: 85vh; }
+    .hero-eyebrow { font-size: 0.5rem; }
+    .hero-tag { font-size: 0.6rem; padding: 0.25rem 0.7rem; }
+  }
+</style>
+
+<section class="hero">
+  <canvas class="ripple-canvas" id="rippleCanvas"></canvas>
+  <div class="wrap">
+    <p class="hero-eyebrow" data-reveal>何必 / hebi</p>
+    <h1 class="hero-name" data-reveal>
+      <span class="char">何</span><span class="char">必</span>
+    </h1>
+    <div class="hero-sub" data-reveal>
+      <span class="hero-tag">主线：学习</span>
+      <span class="hero-tag">副本：???</span>
+      <span class="hero-tag">buff：晚10点的播客</span>
+    </div>
+    <div class="hero-cta" data-reveal>
+      <a href="/projects" class="btn btn-primary">看看做了什么</a>
+      <a href="mailto:3521739097@qq.com" class="btn btn-ghost">打个招呼</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // === MOUSE TRACKING ===
+  let curX = 0, curY = 0;
+  document.addEventListener('mousemove', (e) => { curX = e.clientX; curY = e.clientY; });
+
+  // === TEXT REPULSION ===
+  (() => {
+    const nameChars = document.querySelectorAll('.hero-name .char');
+    const REPULSE_RADIUS = 150;
+    const REPULSE_STRENGTH = 60;
+    function repulse() {
+      for (const char of nameChars) {
+        const rect = (char as HTMLElement).getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = curX - cx;
+        const dy = curY - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < REPULSE_RADIUS && dist > 0) {
+          const force = (1 - dist / REPULSE_RADIUS) * REPULSE_STRENGTH;
+          const angle = Math.atan2(dy, dx);
+          (char as HTMLElement).style.transform = `translate(${-Math.cos(angle) * force}px, ${-Math.sin(angle) * force}px)`;
+          char.classList.remove('repulse-return');
+        } else if ((char as HTMLElement).style.transform && (char as HTMLElement).style.transform !== 'translate(0px, 0px)') {
+          char.classList.add('repulse-return');
+          (char as HTMLElement).style.transform = 'translate(0px, 0px)';
+        }
+      }
+      requestAnimationFrame(repulse);
+    }
+    repulse();
+  })();
+
+  // === RIPPLE CANVAS ===
+  (() => {
+    const canvas = document.getElementById('rippleCanvas') as HTMLCanvasElement;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    let W: number, H: number;
+    function resize() {
+      const hero = document.querySelector('.hero');
+      if (!hero) return;
+      W = canvas.width = hero.clientWidth;
+      H = canvas.height = hero.clientHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const ripples: Ripple[] = [];
+    class Ripple {
+      x: number; y: number; radius: number; maxRadius: number; speed: number; life: number; lineWidth: number;
+      constructor(x: number, y: number, maxRadius?: number, speed?: number, lineWidth?: number) {
+        this.x = x; this.y = y; this.radius = 0;
+        this.maxRadius = maxRadius || 250 + Math.random() * 150;
+        this.speed = speed || 1.2 + Math.random() * 0.8;
+        this.life = 1; this.lineWidth = lineWidth || 1.5;
+      }
+      update() { this.radius += this.speed; this.life = 1 - this.radius / this.maxRadius; return this.life > 0; }
+      draw(ctx: CanvasRenderingContext2D) {
+        if (this.life <= 0) return;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(196, 113, 11, ${this.life * 0.12})`;
+        ctx.lineWidth = this.lineWidth * this.life; ctx.stroke();
+        if (this.radius > 20) {
+          ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 0.65, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(196, 113, 11, ${this.life * 0.06})`;
+          ctx.lineWidth = this.lineWidth * this.life * 0.5; ctx.stroke();
+        }
+      }
+    }
+
+    let lastRippleTime = 0;
+    document.addEventListener('mousemove', (e) => {
+      const now = Date.now();
+      if (now - lastRippleTime > 100) {
+        const rect = canvas.getBoundingClientRect();
+        ripples.push(new Ripple(e.clientX - rect.left, e.clientY - rect.top));
+        lastRippleTime = now;
+      }
+    });
+    document.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left, y = e.clientY - rect.top;
+      for (let i = 0; i < 3; i++) ripples.push(new Ripple(x, y, 350 + i * 120, 1.8 + i * 0.4, 2.5 - i * 0.5));
+    });
+
+    const waves = Array.from({ length: 4 }, () => ({
+      x: Math.random() * 1200, y: Math.random() * 800,
+      vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2,
+      size: 150 + Math.random() * 200, phase: Math.random() * Math.PI * 2
+    }));
+    let time = 0;
+
+    function animate() {
+      ctx!.clearRect(0, 0, W, H);
+      time += 0.004;
+      for (const w of waves) {
+        w.x += w.vx; w.y += w.vy;
+        if (w.x < -w.size) w.x = W + w.size;
+        if (w.x > W + w.size) w.x = -w.size;
+        if (w.y < -w.size) w.y = H + w.size;
+        if (w.y > H + w.size) w.y = -w.size;
+        const pulse = 0.5 + 0.5 * Math.sin(time + w.phase);
+        const grad = ctx!.createRadialGradient(w.x, w.y, 0, w.x, w.y, w.size);
+        grad.addColorStop(0, `rgba(196, 113, 11, ${0.025 * pulse})`);
+        grad.addColorStop(0.5, `rgba(196, 113, 11, ${0.012 * pulse})`);
+        grad.addColorStop(1, 'rgba(196, 113, 11, 0)');
+        ctx!.fillStyle = grad;
+        ctx!.fillRect(0, 0, W, H);
+      }
+      for (let i = ripples.length - 1; i >= 0; i--) {
+        if (!ripples[i].update()) ripples.splice(i, 1);
+        else ripples[i].draw(ctx!);
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+
+  // === SCROLL REVEAL ===
+  const els = document.querySelectorAll('[data-reveal]');
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
+    }
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
+  els.forEach(el => io.observe(el));
+</script>

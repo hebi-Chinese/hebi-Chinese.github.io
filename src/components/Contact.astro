@@ -1,0 +1,48 @@
+---
+// Contact section
+---
+<style>
+  .contact { padding: var(--section-normal) 0; }
+  .sig-word {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(3rem, 2rem + 5vw, 6rem);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: var(--space-8);
+  }
+  .s-accent { color: var(--accent); }
+  .contact-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .contact-link {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    transition: color var(--duration-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .contact-link:hover { color: var(--accent); }
+  .ext { font-size: 0.6rem; }
+</style>
+
+<section class="contact">
+  <div class="wrap">
+    <div class="sig-word" data-reveal>
+      <span class="s-accent">何必</span>.
+    </div>
+    <div class="contact-links" data-reveal>
+      <a href="https://github.com/hebi-Chinese" target="_blank" class="contact-link">
+        GitHub <span class="ext">&uarr;</span>
+      </a>
+      <a href="mailto:3521739097@qq.com" class="contact-link">
+        Email <span class="ext">&uarr;</span>
+      </a>
+    </div>
+  </div>
+</section>

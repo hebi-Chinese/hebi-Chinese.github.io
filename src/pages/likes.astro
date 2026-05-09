@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Nav from '../components/Nav.astro';
+import ScrollReveal from '../components/ScrollReveal.astro';
+import '../styles/global.css';
+---
+<BaseLayout title="何必 / likes">
+  <Nav />
+  <main style="padding-top: 6rem; min-height: 100vh;">
+    <div class="wrap">
+      <div class="section-label" data-reveal>Likes</div>
+      <h2 class="section-title" data-reveal style="margin-bottom: 3rem;">推荐的东西</h2>
+
+      <div data-reveal style="max-width: 42rem; margin-bottom: 3rem;">
+        <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: var(--text-h2); font-weight: var(--text-h2-w); margin-bottom: var(--space-2);">vibe coding</h3>
+        <p style="font-size: var(--text-body); color: var(--text-secondary); line-height: var(--text-body-lh);">最近发现 vibe coding 很好用，将 vibe coding 融入为生活的一部分，我感觉这是我保持活力的源泉之一。有了 vibe coding，对于现代生活的感知，也会变得不一样起来。</p>
+      </div>
+    </div>
+  </main>
+  <ScrollReveal />
+</BaseLayout>

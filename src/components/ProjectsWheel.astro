@@ -1,0 +1,188 @@
+---
+// Projects — 3D card wheel
+const projects = [
+  { num: '01', title: 'Euterpe', brief: 'Muse Dash 社区反作弊系统 · 服务社区 20k+', tags: ['Zig', 'C#', 'Win32 API', 'IL2CPP'], backTitle: 'Euterpe 反作弊系统', backDesc: '双栈分离架构（Zig sentinel + C# Mod），DLC 三层蜜罐检测，覆盖 5 类作弊场景。独立设计与实现，社区主理人授权架构决策。', link: 'https://github.com/Euterpe-org', linkText: 'GitHub →' },
+  { num: '02', title: 'Euterpe.Bot', brief: '多 Agent 智能助手 · 零指令交互', tags: ['LangGraph', 'Python', 'PostgreSQL', 'Docker'], backTitle: 'Euterpe.Bot 多 Agent 系统', backDesc: 'Worker-Writer-Supervisor 三元解耦，三级漏斗触发，PendingIntent 状态机。跨 QQ/Discord 双平台。', link: 'https://github.com/Euterpe-org', linkText: 'GitHub →' },
+  { num: '03', title: 'MHW 复盘助手', brief: 'Qwen2.5-7B 领域微调 · 端到端验证', tags: ['QLoRA', 'PyTorch', 'Unsloth'], backTitle: 'MHW 复盘助手', backDesc: '端到端微调 pipeline：CPT 71 万 tokens + SFT 2421 条。消费级硬件验证小资源场景下 LLM 微调可行性。', link: '#', linkText: '查看详情 →' },
+  { num: '04', title: 'CC-MCP-MiMo-Bridge', brief: '双模型协作 MCP 管线 · MIT 开源', tags: ['Python', 'FastMCP', 'Anthropic SDK'], backTitle: 'CC-MCP-MiMo-Bridge', backDesc: 'Claude（决策+review）+ MiMo（执行）双模型协作，单 turn 闭环。3 个 MCP 工具，trace 全程可审计。', link: 'https://github.com/hebi-Chinese/CC-mcp-mimo-bridge', linkText: 'GitHub →' },
+];
+---
+<style>
+  .projects { padding: var(--section-sparse) 0; overflow: hidden; }
+  .projects-header { margin-bottom: 2rem; }
+
+  .wheel-stage {
+    position: relative; width: 100%;
+    height: clamp(340px, 36vw, 440px);
+    perspective: 1000px; cursor: grab;
+    user-select: none; -webkit-user-select: none;
+    display: flex; align-items: center; justify-content: center; overflow: visible;
+  }
+  .wheel-stage:active { cursor: grabbing; }
+  .wheel-group { position: relative; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+
+  .wheel-card {
+    position: absolute;
+    width: clamp(280px, 30vw, 380px); height: clamp(200px, 22vw, 260px);
+    transform-style: preserve-3d; cursor: pointer; transition: filter 0.3s;
+    left: 50%; top: 50%; transform-origin: center center;
+  }
+  .wheel-card-inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d; transition: transform 0.6s var(--ease-out-expo);
+  }
+  .wheel-card.is-flipped .wheel-card-inner { transform: rotateY(180deg); }
+
+  .wheel-card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: var(--radius-lg); border: 1px solid var(--surface-2);
+    padding: clamp(1.2rem, 2.5vw, 2rem);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .wheel-card-front { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+  .wheel-card-front::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0; transition: opacity var(--duration-normal);
+  }
+  .wheel-card:hover .wheel-card-front::before { opacity: 1; }
+  .wheel-card-front::after {
+    content: ''; position: absolute; inset: -1px; border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, transparent 40%, var(--accent) 50%, transparent 60%);
+    background-size: 300% 300%; z-index: -1; opacity: 0;
+    transition: opacity 0.4s; animation: borderShimmer 4s ease infinite;
+  }
+  .wheel-card:hover .wheel-card-front::after { opacity: 1; }
+  @keyframes borderShimmer { 0% { background-position: 100% 100%; } 50% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+
+  .wheel-card-back { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.08); transform: rotateY(180deg); }
+
+  .wheel-card-num { font-family: 'Instrument Serif', serif; font-size: 3rem; font-weight: 400; color: var(--surface-3); line-height: 1; margin-bottom: 0.8rem; transition: color var(--duration-normal); }
+  .wheel-card:hover .wheel-card-num { color: rgba(232, 168, 76, 0.15); }
+  .wheel-card-title { font-family: 'Space Grotesk', sans-serif; font-size: var(--text-h2); font-weight: var(--text-h2-w); margin-bottom: var(--space-2); }
+  .wheel-card-title a { color: var(--text-primary); border-bottom: 1px solid transparent; transition: border-color var(--duration-fast), color var(--duration-fast); pointer-events: auto; position: relative; z-index: 2; }
+  .wheel-card-title a:hover { border-color: var(--accent); color: var(--accent); }
+  .wheel-card-brief { font-size: var(--text-small); font-weight: var(--text-small-w); color: var(--text-secondary); line-height: var(--text-small-lh); flex: 1; }
+  .wheel-card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.8rem; }
+  .wheel-card-tags span { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 400; color: var(--text-muted); padding: 0.2rem 0.55rem; background: var(--surface-3); border-radius: 100px; letter-spacing: 0.04em; }
+
+  .wheel-card-back .back-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 0.6rem; }
+  .wheel-card-back .back-desc { font-size: 0.82rem; font-weight: 300; color: var(--text-secondary); line-height: 1.7; flex: 1; }
+  .wheel-card-back .back-link { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent); margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+
+  .wheel-hint { text-align: center; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; opacity: 0.6; }
+
+  @media (max-width: 768px) {
+    .wheel-card { width: clamp(220px, 55vw, 300px); height: clamp(160px, 40vw, 220px); }
+    .wheel-stage { height: clamp(300px, 50vw, 400px); }
+  }
+  @media (max-width: 480px) {
+    .wheel-card { width: clamp(200px, 70vw, 280px); height: clamp(150px, 45vw, 200px); }
+    .wheel-stage { height: clamp(260px, 45vw, 350px); }
+  }
+</style>
+
+<section class="projects" id="projects">
+  <div class="wrap">
+    <div class="projects-header" data-reveal>
+      <div class="section-label">Projects</div>
+      <h2 class="section-title">做过的、在做的、想做的</h2>
+    </div>
+    <div class="wheel-stage" id="wheelStage">
+      <div class="wheel-group" id="wheelGroup">
+        {projects.map(p => (
+          <div class="wheel-card">
+            <div class="wheel-card-inner">
+              <div class="wheel-card-face wheel-card-front">
+                <div class="wheel-card-num">{p.num}</div>
+                <div class="wheel-card-title"><a href={p.link} target="_blank">{p.title}</a></div>
+                <p class="wheel-card-brief">{p.brief}</p>
+                <div class="wheel-card-tags">{p.tags.map(t => <span>{t}</span>)}</div>
+              </div>
+              <div class="wheel-card-face wheel-card-back">
+                <div class="back-title">{p.backTitle}</div>
+                <p class="back-desc">{p.backDesc}</p>
+                <a href={p.link} target="_blank" class="back-link">{p.linkText}</a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+    <p class="wheel-hint" data-reveal>左右拖拽旋转 · 点击翻转 · 标题可跳转</p>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const stage = document.getElementById('wheelStage');
+    const cards = document.querySelectorAll('.wheel-card');
+    const count = cards.length;
+    if (!stage || count === 0) return;
+
+    const radius = Math.min(window.innerWidth * 0.38, 440);
+    const angleStep = (2 * Math.PI) / count;
+    cards.forEach((card, i) => { (card as any)._angle = i * angleStep; });
+
+    let rotation = 0, velocity = 0;
+    const friction = 0.94, dragSensitivity = 0.003;
+    let isDragging = false, lastMoveTime = 0, lastMouseX = 0;
+
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+      isDragging = true;
+      const clientX = (e as MouseEvent).clientX ?? (e as TouchEvent).touches?.[0]?.clientX ?? 0;
+      lastMouseX = clientX; lastMoveTime = Date.now(); velocity = 0;
+      stage.style.cursor = 'grabbing';
+    };
+    const onPointerMove = (e: MouseEvent | TouchEvent) => {
+      if (!isDragging) return;
+      const clientX = (e as MouseEvent).clientX ?? (e as TouchEvent).touches?.[0]?.clientX ?? 0;
+      const dx = clientX - lastMouseX;
+      const now = Date.now(); const dt = Math.max(now - lastMoveTime, 1);
+      velocity = (dx * dragSensitivity) / (dt / 16);
+      rotation += dx * dragSensitivity;
+      lastMouseX = clientX; lastMoveTime = now;
+    };
+    const onPointerUp = () => { isDragging = false; stage.style.cursor = 'grab'; };
+
+    stage.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+    stage.addEventListener('touchstart', onPointerDown, { passive: true });
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('touchend', onPointerUp);
+
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) return;
+        card.classList.toggle('is-flipped');
+      });
+    });
+
+    function render() {
+      if (!isDragging) {
+        velocity *= friction;
+        if (Math.abs(velocity) < 0.00005) velocity = 0;
+        rotation += velocity;
+      }
+      cards.forEach(card => {
+        const angle = (card as any)._angle + rotation;
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius;
+        const depthNorm = (z + radius) / (2 * radius);
+        const scale = 0.55 + depthNorm * 0.45;
+        const opacity = 0.15 + depthNorm * 0.85;
+        const zIndex = Math.round(depthNorm * 100);
+        const blur = depthNorm < 0.25 ? (1 - depthNorm / 0.25) * 3 : 0;
+        (card as HTMLElement).style.transform = `translate(-50%, -50%) translate3d(${x}px, 0, ${z}px) scale(${scale})`;
+        (card as HTMLElement).style.opacity = String(opacity);
+        (card as HTMLElement).style.zIndex = String(zIndex);
+        (card as HTMLElement).style.filter = blur > 0 ? `blur(${blur}px)` : 'none';
+        (card as HTMLElement).style.pointerEvents = depthNorm < 0.3 ? 'none' : 'auto';
+      });
+      requestAnimationFrame(render);
+    }
+    render();
+  })();
+</script>
