@@ -14,18 +14,33 @@ export async function getStaticPaths() {
 
 const { essay } = Astro.props;
 const { Content } = await render(essay);
+
+// Split title at first ":" (full-width or half) for two-line layout
+const rawTitle = essay.data.title;
+const colonIdx = (() => {
+  const a = rawTitle.indexOf(':');
+  const b = rawTitle.indexOf(':');
+  if (a < 0) return b;
+  if (b < 0) return a;
+  return Math.min(a, b);
+})();
+const titleMain = colonIdx >= 0 ? rawTitle.slice(0, colonIdx + 1) : rawTitle;
+const titleSub = colonIdx >= 0 ? rawTitle.slice(colonIdx + 1).trim() : '';
 ---
-<BaseLayout title={`${essay.data.title} / 何必`}>
+<BaseLayout title={`${rawTitle} / 何必`}>
   <Nav />
   <main style="padding-top: 6rem; min-height: 100vh;">
-    <div class="wrap" style="max-width: 52rem;">
-      <a href="/essays" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 2rem; display: inline-block;">← essays</a>
-      <time style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem;">
-        {essay.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
-      </time>
-      <h1 style="font-family: 'Instrument Serif', serif; font-size: var(--text-h1); font-weight: var(--text-h1-w); line-height: var(--text-h1-lh); margin-bottom: 2rem;">
-        {essay.data.title}
-      </h1>
+    <div class="essay-shell">
+      <a href="/essays" class="essay-back">← essays</a>
+      <header class="essay-head">
+        <time datetime={essay.data.date.toISOString()}>
+          {essay.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+        </time>
+        <h1>
+          <span class="title-main">{titleMain}</span>
+          {titleSub && <span class="title-sub">{titleSub}</span>}
+        </h1>
+      </header>
       <article class="essay-body">
         <Content />
       </article>
@@ -34,6 +49,49 @@ const { Content } = await render(essay);
 </BaseLayout>
 
 <style is:global>
+  .essay-shell {
+    width: 100%;
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+  .essay-back {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .essay-head {
+    max-width: 38rem;
+    margin-bottom: 3rem;
+  }
+  .essay-head time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .essay-head h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: var(--text-h1);
+    font-weight: var(--text-h1-w);
+    line-height: var(--text-h1-lh);
+    margin: 0;
+  }
+  .essay-head h1 .title-main {
+    display: block;
+  }
+  .essay-head h1 .title-sub {
+    display: block;
+    font-size: 0.7em;
+    color: var(--text-secondary);
+    margin-top: 0.3rem;
+  }
   .essay-body {
     font-size: var(--text-body);
     color: var(--text-secondary);
