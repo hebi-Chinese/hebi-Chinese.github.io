@@ -18,7 +18,7 @@ const { Content } = await render(essay);
 <BaseLayout title={`${essay.data.title} / 何必`}>
   <Nav />
   <main style="padding-top: 6rem; min-height: 100vh;">
-    <div class="wrap" style="max-width: 42rem;">
+    <div class="wrap" style="max-width: 52rem;">
       <a href="/essays" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 2rem; display: inline-block;">← essays</a>
       <time style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem;">
         {essay.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
@@ -26,9 +26,53 @@ const { Content } = await render(essay);
       <h1 style="font-family: 'Instrument Serif', serif; font-size: var(--text-h1); font-weight: var(--text-h1-w); line-height: var(--text-h1-lh); margin-bottom: 2rem;">
         {essay.data.title}
       </h1>
-      <article style="font-size: var(--text-body); color: var(--text-secondary); line-height: var(--text-body-lh);">
+      <article class="essay-body">
         <Content />
       </article>
     </div>
   </main>
 </BaseLayout>
+
+<style is:global>
+  .essay-body {
+    font-size: var(--text-body);
+    color: var(--text-secondary);
+    line-height: var(--text-body-lh);
+  }
+  .essay-body p {
+    margin: 0 0 1.4rem;
+  }
+  .essay-body img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 2rem auto;
+    border-radius: 4px;
+  }
+  .essay-body .essay-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  .essay-body .essay-compare img,
+  .essay-body .essay-compare p {
+    margin: 0;
+  }
+  .essay-body .essay-compare figure {
+    margin: 0;
+  }
+  .essay-body .essay-compare figcaption {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-align: center;
+    margin-top: 0.4rem;
+  }
+  @media (max-width: 600px) {
+    .essay-body .essay-compare {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

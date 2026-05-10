@@ -37,8 +37,24 @@ tags: ["AI", "模型对比", "Claude", "mimo", "vibe coding"]
 
 PS:日常脑血栓场景哈哈……这不是上赶着给我送素材吗(扶额)。
 
+<div class="essay-compare">
+
+<figure>
+
 ![Claude 表现](./图2-claude.png)
 
+<figcaption>Claude (cli)</figcaption>
+
+</figure>
+
+<figure>
+
 ![mimo 表现](./图3-mimo.png)
+
+<figcaption>mimo (desktop)</figcaption>
+
+</figure>
+
+</div>
 
 均为 Claude code 环境,cli 版为 Claude,desktop 版为 mimo。
