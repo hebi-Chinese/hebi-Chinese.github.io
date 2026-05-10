@@ -37,9 +37,7 @@ tags: ["AI", "模型对比", "Claude", "mimo", "vibe coding"]
 
 PS:就在我写完这篇文章后,分别发给他俩。突然发现这就是鲜明的例子啊。
 
-<div class="essay-compare">
-
-<figure>
+<figure class="essay-figure">
 
 ![Claude 表现](./图2-claude.png)
 
@@ -47,14 +45,12 @@ PS:就在我写完这篇文章后,分别发给他俩。突然发现这就是鲜�
 
 </figure>
 
-<figure>
+<figure class="essay-figure">
 
 ![mimo 表现](./图3-mimo.png)
 
 <figcaption>mimo (desktop)</figcaption>
 
 </figure>
-
-</div>
 
 均为 Claude code 环境,cli 版为 Claude,desktop 版为 mimo。
