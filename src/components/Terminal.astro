@@ -3,14 +3,37 @@
 ---
 <style>
   .terminal-section { padding: var(--section-dense) 0; }
+  .terminal-reveal { max-width: 42rem; }
   .terminal-card {
     background: #1a1612;
     border-radius: var(--radius-lg);
     overflow: hidden;
+    position: relative;
+    isolation: isolate;
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.7rem;
     color: var(--surface-2);
-    max-width: 42rem;
+    width: 100%;
+  }
+  .terminal-reveal[data-pixel-reveal] .terminal-card {
+    clip-path: inset(0 0 100% 0);
+  }
+  .terminal-reveal[data-pixel-reveal] .terminal-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background:
+      radial-gradient(circle, rgba(250, 248, 244, 0.9) 1px, transparent 1.3px) 0 0 / 8px 8px,
+      linear-gradient(180deg, transparent 45%, rgba(196, 113, 11, 0.18) 70%, transparent 100%);
+    opacity: 0;
+  }
+  .terminal-reveal[data-pixel-reveal].is-visible .terminal-card {
+    animation: terminalPixelReveal 640ms steps(10, end) forwards;
+  }
+  .terminal-reveal[data-pixel-reveal].is-visible .terminal-card::after {
+    animation: terminalPixelScan 640ms steps(10, end) forwards;
   }
   .dots {
     display: flex; gap: 6px;
@@ -34,26 +57,54 @@
     animation: termBlink 1s step-end infinite;
   }
   @keyframes termBlink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  @keyframes terminalPixelReveal {
+    0% { clip-path: inset(0 0 100% 0); }
+    30% { clip-path: inset(0 0 72% 0); }
+    55% { clip-path: inset(0 0 43% 0); }
+    78% { clip-path: inset(0 0 17% 0); }
+    100% { clip-path: inset(0); }
+  }
+  @keyframes terminalPixelScan {
+    0% { opacity: 0; transform: translateY(-35%); }
+    20% { opacity: 0.8; }
+    75% { opacity: 0.35; }
+    100% { opacity: 0; transform: translateY(35%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .terminal-reveal[data-pixel-reveal] .terminal-card,
+    .terminal-reveal[data-pixel-reveal].is-visible .terminal-card {
+      animation: none;
+      clip-path: inset(0);
+    }
+
+    .terminal-reveal[data-pixel-reveal] .terminal-card::after,
+    .terminal-reveal[data-pixel-reveal].is-visible .terminal-card::after {
+      content: none;
+      animation: none;
+    }
+  }
   @media (max-width: 480px) { .terminal-card { font-size: 0.62rem; padding: var(--space-4); } }
 </style>
 
 <section class="terminal-section">
   <div class="wrap">
-    <div class="terminal-card" data-reveal>
-      <div class="dots">
-        <span class="dot dot-r"></span>
-        <span class="dot dot-y"></span>
-        <span class="dot dot-g"></span>
+    <div class="terminal-reveal" data-reveal data-pixel-reveal>
+      <div class="terminal-card">
+        <div class="dots">
+          <span class="dot dot-r"></span>
+          <span class="dot dot-y"></span>
+          <span class="dot dot-g"></span>
+        </div>
+        <div class="line"><span class="prompt">~ $</span> <span class="cmd">cat /etc/hebi/profile</span></div>
+        <div class="line"><span class="output">name: 何必</span></div>
+        <div class="line"><span class="output">doing: 毕业 + 等副本开启</span></div>
+        <div class="line"><span class="output">stack: <span class="highlight">Python, Zig, C#, LangGraph, PyTorch</span></span></div>
+        <div class="line"><span class="output">projects: Euterpe, Euterpe.Bot, MHW-Assistant, CC-MCP-MiMo-Bridge</span></div>
+        <div class="line"><span class="output">hobbies: <span class="highlight">游戏, 番剧, 健身房</span></span></div>
+        <div class="line"><span class="output">now: <span class="highlight">在毕业, 在等下一关</span></span></div>
+        <div class="line"><span class="output">status: <span class="highlight">主线进行中</span></span></div>
+        <div class="line"><span class="prompt">~ $</span> <span class="cursor-blink"></span></div>
       </div>
-      <div class="line"><span class="prompt">~ $</span> <span class="cmd">cat /etc/hebi/profile</span></div>
-      <div class="line"><span class="output">name: 何必</span></div>
-      <div class="line"><span class="output">doing: 毕业 + 等副本开启</span></div>
-      <div class="line"><span class="output">stack: <span class="highlight">Python, Zig, C#, LangGraph, PyTorch</span></span></div>
-      <div class="line"><span class="output">projects: Euterpe, Euterpe.Bot, MHW-Assistant, CC-MCP-MiMo-Bridge</span></div>
-      <div class="line"><span class="output">hobbies: <span class="highlight">游戏, 番剧, 健身房</span></span></div>
-      <div class="line"><span class="output">now: <span class="highlight">在毕业, 在等下一关</span></span></div>
-      <div class="line"><span class="output">status: <span class="highlight">主线进行中</span></span></div>
-      <div class="line"><span class="prompt">~ $</span> <span class="cursor-blink"></span></div>
     </div>
   </div>
 </section>

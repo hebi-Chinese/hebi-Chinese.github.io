@@ -1,5 +1,6 @@
 ---
 // Hero section with ripple canvas + text repulsion
+import HeroBlueprint from './HeroBlueprint.astro';
 ---
 <style>
   .hero {
@@ -8,6 +9,7 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
+    overflow: hidden;
     padding-top: 3.25rem;
   }
   .hero::before {
@@ -91,6 +93,10 @@
   .ripple-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .hero > .wrap { position: relative; z-index: 2; }
 
+  @media (min-width: 1200px) and (min-height: 1000px) {
+    .hero > .wrap { transform: translateY(-5vh); }
+  }
+
   @media (max-width: 768px) {
     .hero { min-height: 85vh; }
     .hero-eyebrow { font-size: 0.5rem; }
@@ -100,6 +106,7 @@
 
 <section class="hero">
   <canvas class="ripple-canvas" id="rippleCanvas"></canvas>
+  <HeroBlueprint />
   <div class="wrap">
     <p class="hero-eyebrow" data-reveal>何必 / hebi</p>
     <h1 class="hero-name" data-reveal>

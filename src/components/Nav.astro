@@ -1,16 +1,65 @@
 ---
 // Nav component — shared across all pages
+const navItems = [
+  { href: '/about', label: 'about' },
+  { href: '/projects', label: 'work' },
+  { href: '/essays', label: 'essays' },
+  { href: '/notes', label: 'notes' },
+  { href: '/likes', label: 'likes' },
+  { href: 'https://github.com/hebi-Chinese', label: 'github', isExternal: true },
+];
 ---
+<style>
+  .nav-link-text {
+    display: inline-flex;
+    overflow: hidden;
+    padding-block: 0.2em;
+    margin-block: -0.2em;
+  }
+
+  .nav-link-char {
+    display: inline-block;
+    transition:
+      color var(--duration-fast),
+      transform 360ms var(--ease-out-expo);
+    transition-delay: calc(var(--char-index) * 24ms);
+  }
+
+  .nav-links a:hover .nav-link-char,
+  .nav-links a:focus-visible .nav-link-char {
+    color: var(--text-primary);
+    transform: translateY(-0.28em);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-link-char {
+      transition: color var(--duration-fast);
+    }
+
+    .nav-links a:hover .nav-link-char,
+    .nav-links a:focus-visible .nav-link-char {
+      transform: none;
+    }
+  }
+</style>
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <a href="/" class="nav-logo">何必</a>
     <div class="nav-links">
-      <a href="/about">about</a>
-      <a href="/projects">work</a>
-      <a href="/essays">essays</a>
-      <a href="/notes">notes</a>
-      <a href="/likes">likes</a>
-      <a href="https://github.com/hebi-Chinese" target="_blank">github</a>
+      {navItems.map((item) => (
+        <a
+          href={item.href}
+          target={item.isExternal ? '_blank' : undefined}
+          rel={item.isExternal ? 'noreferrer' : undefined}
+          aria-label={item.label}
+        >
+          <span class="nav-link-text" aria-hidden="true">
+            {item.label.split('').map((char, index) => (
+              <span class="nav-link-char" style={`--char-index: ${index}`}>{char}</span>
+            ))}
+          </span>
+        </a>
+      ))}
     </div>
     <button class="nav-burger" id="navBurger" aria-label="Menu">
       <span></span><span></span><span></span>

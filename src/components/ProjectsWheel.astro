@@ -28,11 +28,29 @@ const projects = [
     transform-style: preserve-3d; cursor: pointer; transition: filter 0.3s;
     left: 50%; top: 50%; transform-origin: center center;
   }
+  .wheel-card-tilt {
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale(1);
+    transition: transform 420ms var(--ease-out-expo);
+  }
   .wheel-card-inner {
     position: relative; width: 100%; height: 100%;
-    transform-style: preserve-3d; transition: transform 0.6s var(--ease-out-expo);
+    transform-style: preserve-3d;
+    transition: transform 0.6s var(--ease-out-expo);
   }
   .wheel-card.is-flipped .wheel-card-inner { transform: rotateY(180deg); }
+  .wheel-card.is-hovered .wheel-card-tilt {
+    transform:
+      translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 16px)
+      rotateX(var(--tilt-x, 0deg))
+      rotateY(var(--tilt-y, 0deg))
+      scale(1.018);
+  }
+  .wheel-stage.has-hovered-card .wheel-card:not(.is-hovered) .wheel-card-face {
+    opacity: 0.52;
+    filter: saturate(0.3);
+  }
 
   .wheel-card-face {
     position: absolute; inset: 0;
@@ -40,6 +58,9 @@ const projects = [
     border-radius: var(--radius-lg); border: 1px solid var(--surface-2);
     padding: clamp(1.2rem, 2.5vw, 2rem);
     display: flex; flex-direction: column; overflow: hidden;
+    transition:
+      opacity var(--duration-normal) var(--ease-out-expo),
+      filter var(--duration-normal) var(--ease-out-expo);
   }
   .wheel-card-front { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
   .wheel-card-front::before {
@@ -74,6 +95,48 @@ const projects = [
 
   .wheel-hint { text-align: center; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; opacity: 0.6; }
 
+  .wheel-pointer-label {
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 120;
+    pointer-events: none;
+    opacity: 0;
+    transform: translate3d(var(--pointer-x, 0px), var(--pointer-y, 0px), 0) scale(0.82);
+    padding: 0.35rem 0.55rem;
+    border: 1px solid rgba(26, 22, 18, 0.16);
+    border-radius: 100px;
+    background: rgba(250, 248, 244, 0.88);
+    color: var(--text-primary);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    transition: opacity var(--duration-fast), transform 120ms ease-out;
+  }
+  .wheel-pointer-label.is-visible {
+    opacity: 1;
+    transform: translate3d(var(--pointer-x, 0px), var(--pointer-y, 0px), 0) scale(1);
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    .wheel-pointer-label { display: none; }
+    .wheel-card-tilt { transform: none !important; }
+    .wheel-stage.has-hovered-card .wheel-card:not(.is-hovered) .wheel-card-face {
+      opacity: 1;
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wheel-pointer-label { display: none; }
+    .wheel-card-tilt { transform: none !important; transition: none; }
+    .wheel-stage.has-hovered-card .wheel-card:not(.is-hovered) .wheel-card-face {
+      opacity: 1;
+      filter: none;
+    }
+  }
+
   @media (max-width: 768px) {
     .wheel-card { width: clamp(220px, 55vw, 300px); height: clamp(160px, 40vw, 220px); }
     .wheel-stage { height: clamp(300px, 50vw, 400px); }
@@ -94,22 +157,25 @@ const projects = [
       <div class="wheel-group" id="wheelGroup">
         {projects.map(p => (
           <div class="wheel-card">
-            <div class="wheel-card-inner">
-              <div class="wheel-card-face wheel-card-front">
-                <div class="wheel-card-num">{p.num}</div>
-                <div class="wheel-card-title"><a href={p.link} target="_blank">{p.title}</a></div>
-                <p class="wheel-card-brief">{p.brief}</p>
-                <div class="wheel-card-tags">{p.tags.map(t => <span>{t}</span>)}</div>
-              </div>
-              <div class="wheel-card-face wheel-card-back">
-                <div class="back-title">{p.backTitle}</div>
-                <p class="back-desc">{p.backDesc}</p>
-                <a href={p.link} target="_blank" class="back-link">{p.linkText}</a>
+            <div class="wheel-card-tilt">
+              <div class="wheel-card-inner">
+                <div class="wheel-card-face wheel-card-front">
+                  <div class="wheel-card-num">{p.num}</div>
+                  <div class="wheel-card-title"><a href={p.link} target="_blank">{p.title}</a></div>
+                  <p class="wheel-card-brief">{p.brief}</p>
+                  <div class="wheel-card-tags">{p.tags.map(t => <span>{t}</span>)}</div>
+                </div>
+                <div class="wheel-card-face wheel-card-back">
+                  <div class="back-title">{p.backTitle}</div>
+                  <p class="back-desc">{p.backDesc}</p>
+                  <a href={p.link} target="_blank" class="back-link">{p.linkText}</a>
+                </div>
               </div>
             </div>
           </div>
         ))}
       </div>
+      <div class="wheel-pointer-label" id="wheelPointerLabel" aria-hidden="true">查看</div>
     </div>
     <p class="wheel-hint" data-reveal>左右拖拽旋转 · 点击翻转 · 标题可跳转</p>
   </div>
@@ -119,6 +185,7 @@ const projects = [
   (() => {
     const stage = document.getElementById('wheelStage');
     const cards = document.querySelectorAll('.wheel-card');
+    const pointerLabel = document.getElementById('wheelPointerLabel');
     const count = cards.length;
     if (!stage || count === 0) return;
 
@@ -129,9 +196,74 @@ const projects = [
     let rotation = 0, velocity = 0;
     const friction = 0.94, dragSensitivity = 0.003;
     let isDragging = false, lastMoveTime = 0, lastMouseX = 0;
+    let focusedCard: Element | null = null;
+    let pointerFrame = 0;
+    let pendingPointer: { clientX: number; clientY: number; target: HTMLElement } | null = null;
+    const canUsePointerEffects = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+      && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const resetCardTilt = (card: Element) => {
+      const tilt = card.querySelector('.wheel-card-tilt') as HTMLElement | null;
+      if (!tilt) return;
+      tilt.style.removeProperty('--tilt-x');
+      tilt.style.removeProperty('--tilt-y');
+      tilt.style.removeProperty('--shift-x');
+      tilt.style.removeProperty('--shift-y');
+    };
+
+    const setFocusedCard = (activeCard: Element | null, showPointerLabel = false) => {
+      if (focusedCard !== activeCard) {
+        if (focusedCard) resetCardTilt(focusedCard);
+        focusedCard = activeCard;
+        stage.classList.toggle('has-hovered-card', Boolean(activeCard));
+        cards.forEach(card => card.classList.toggle('is-hovered', card === activeCard));
+      }
+      pointerLabel?.classList.toggle('is-visible', Boolean(activeCard) && showPointerLabel);
+    };
+
+    const clearPointerEffects = () => {
+      pendingPointer = null;
+      if (pointerFrame) cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+      setFocusedCard(null);
+    };
+
+    const updateCardPointerEffects = () => {
+      pointerFrame = 0;
+      const pointer = pendingPointer;
+      pendingPointer = null;
+      if (!pointer || isDragging) return;
+      const { clientX, clientY, target } = pointer;
+      const card = target.closest('.wheel-card') as HTMLElement | null;
+      if (!card || card.style.pointerEvents === 'none') {
+        setFocusedCard(null);
+        return;
+      }
+
+      setFocusedCard(card, true);
+      const cardRect = card.getBoundingClientRect();
+      const normalizedX = ((clientX - cardRect.left) / cardRect.width - 0.5) * 2;
+      const normalizedY = ((clientY - cardRect.top) / cardRect.height - 0.5) * 2;
+      const tilt = card.querySelector('.wheel-card-tilt') as HTMLElement | null;
+      tilt?.style.setProperty('--tilt-x', `${(-normalizedY * 2.4).toFixed(2)}deg`);
+      tilt?.style.setProperty('--tilt-y', `${(normalizedX * 3.2).toFixed(2)}deg`);
+      tilt?.style.setProperty('--shift-x', `${(normalizedX * 3).toFixed(2)}px`);
+      tilt?.style.setProperty('--shift-y', `${(normalizedY * 2).toFixed(2)}px`);
+
+      const stageRect = stage.getBoundingClientRect();
+      pointerLabel?.style.setProperty('--pointer-x', `${clientX - stageRect.left + 16}px`);
+      pointerLabel?.style.setProperty('--pointer-y', `${clientY - stageRect.top + 16}px`);
+    };
+
+    const scheduleCardPointerEffects = (e: MouseEvent) => {
+      pendingPointer = { clientX: e.clientX, clientY: e.clientY, target: e.target as HTMLElement };
+      if (pointerFrame) return;
+      pointerFrame = requestAnimationFrame(updateCardPointerEffects);
+    };
 
     const onPointerDown = (e: MouseEvent | TouchEvent) => {
       isDragging = true;
+      clearPointerEffects();
       const clientX = (e as MouseEvent).clientX ?? (e as TouchEvent).touches?.[0]?.clientX ?? 0;
       lastMouseX = clientX; lastMoveTime = Date.now(); velocity = 0;
       stage.style.cursor = 'grabbing';
@@ -153,6 +285,10 @@ const projects = [
     stage.addEventListener('touchstart', onPointerDown, { passive: true });
     window.addEventListener('touchmove', onPointerMove, { passive: true });
     window.addEventListener('touchend', onPointerUp);
+    if (canUsePointerEffects) {
+      stage.addEventListener('mousemove', scheduleCardPointerEffects);
+      stage.addEventListener('mouseleave', clearPointerEffects);
+    }
 
     cards.forEach(card => {
       card.addEventListener('click', (e) => {
