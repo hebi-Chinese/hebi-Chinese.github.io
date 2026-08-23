@@ -14,21 +14,211 @@ export async function getStaticPaths() {
 
 const { note } = Astro.props;
 const { Content } = await render(note);
+
+const noteDate = note.data.date.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'UTC',
+});
+const noteTimestampLabel = note.data.time ? `${noteDate} · ${note.data.time}` : noteDate;
+const noteDateTime = note.data.time
+  ? `${note.data.date.toISOString().slice(0, 10)}T${note.data.time}:00`
+  : note.data.date.toISOString().slice(0, 10);
 ---
 <BaseLayout title={`${note.data.title} / 何必`}>
   <Nav />
-  <main style="padding-top: 6rem; min-height: 100vh;">
-    <div class="wrap" style="max-width: 42rem;">
-      <a href="/notes" style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 2rem; display: inline-block;">← notes</a>
-      <time style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.1em; display: block; margin-bottom: 0.5rem;">
-        {note.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
-      </time>
-      <h1 style="font-family: 'Instrument Serif', serif; font-size: var(--text-h1); font-weight: var(--text-h1-w); line-height: var(--text-h1-lh); margin-bottom: 2rem;">
-        {note.data.title}
-      </h1>
-      <article style="font-size: var(--text-body); color: var(--text-secondary); line-height: var(--text-body-lh);">
+  <main class="note-page">
+    <div class="note-shell">
+      <header class="note-header">
+        <div class="note-meta">
+          <a href="/notes" class="note-back">← notes</a>
+          <time datetime={noteDateTime}>{noteTimestampLabel}</time>
+        </div>
+        <h1>{note.data.title}</h1>
+        <span class="note-title-mark" aria-hidden="true"></span>
+      </header>
+      <article class="note-body">
         <Content />
       </article>
     </div>
   </main>
 </BaseLayout>
+
+<style is:global>
+  .note-page {
+    min-height: 100vh;
+    padding: clamp(6.5rem, 8vw, 8rem) 0 var(--space-24);
+  }
+
+  .note-shell {
+    width: min(100%, 48rem);
+    margin: 0 auto;
+    padding: 0 clamp(var(--space-6), 5vw, var(--space-12));
+  }
+
+  .note-header {
+    margin-bottom: clamp(var(--space-16), 8vw, var(--space-24));
+  }
+
+  .note-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--surface-2);
+  }
+
+  .note-meta a,
+  .note-meta time {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-caption);
+    letter-spacing: var(--text-caption-ls);
+  }
+
+  .note-meta a {
+    transition: color var(--duration-fast);
+  }
+
+  .note-meta a:hover,
+  .note-meta a:focus-visible {
+    color: var(--accent);
+  }
+
+  .note-header h1 {
+    max-width: 42rem;
+    color: var(--text-primary);
+    font-family: 'Instrument Serif', 'Songti SC', 'STSong', serif;
+    font-size: clamp(2.25rem, 1.55rem + 3vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+
+  .note-title-mark {
+    display: block;
+    width: var(--space-16);
+    height: 2px;
+    margin-top: var(--space-8);
+    background: var(--accent);
+  }
+
+  .note-body {
+    max-width: 39rem;
+    color: var(--text-primary);
+    font-family: 'Space Grotesk', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif;
+    font-size: clamp(1rem, 0.94rem + 0.22vw, 1.08rem);
+    line-height: 1.95;
+    letter-spacing: 0.01em;
+    counter-reset: note-section;
+  }
+
+  .note-body p {
+    margin: 0;
+  }
+
+  .note-body p + p {
+    margin-top: clamp(calc(var(--space-12) + var(--space-2)), 5vw, var(--space-16));
+  }
+
+  .note-body h2 {
+    display: grid;
+    grid-template-columns: var(--space-8) minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-3);
+    margin: var(--space-24) 0 var(--space-8);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--surface-3);
+    color: var(--text-primary);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(1.12rem, 1.02rem + 0.35vw, 1.28rem);
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    counter-increment: note-section;
+  }
+
+  .note-body h2:first-child {
+    margin-top: 0;
+  }
+
+  .note-body h2::before {
+    content: '0' counter(note-section);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-eyebrow);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+  }
+
+  .note-body strong {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .note-body ul,
+  .note-body ol,
+  .note-body blockquote {
+    margin: calc(var(--space-12) + var(--space-2)) 0 0;
+  }
+
+  .note-body ul,
+  .note-body ol {
+    padding-left: var(--space-8);
+  }
+
+  .note-body li + li {
+    margin-top: var(--space-3);
+  }
+
+  .note-body blockquote {
+    padding-left: var(--space-4);
+    border-left: 2px solid var(--surface-3);
+    color: var(--text-muted);
+  }
+
+  .note-body code {
+    padding: 0.1em 0.35em;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em;
+  }
+
+  .note-body img {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    margin: var(--space-8) auto;
+    border-radius: var(--radius-sm);
+  }
+
+  @media (max-width: 600px) {
+    .note-page {
+      padding-top: var(--space-24);
+    }
+
+    .note-shell {
+      padding: 0 var(--space-6);
+    }
+
+    .note-header {
+      margin-bottom: var(--space-16);
+    }
+
+    .note-header h1 {
+      font-size: clamp(2rem, 10vw, 2.75rem);
+      letter-spacing: -0.025em;
+    }
+
+    .note-body h2 {
+      grid-template-columns: var(--space-6) minmax(0, 1fr);
+      margin-top: calc(var(--space-16) + var(--space-4));
+    }
+  }
+</style>

@@ -7,13 +7,28 @@ import '../../styles/global.css';
 
 const notes = (await getCollection('notes', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const formatNoteTimestamp = (date: Date, time?: string) => {
+  const formattedDate = date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    timeZone: 'UTC',
+  });
+  return time ? `${formattedDate} · ${time}` : formattedDate;
+};
+
+const toDateTimeAttribute = (date: Date, time?: string) => {
+  const datePart = date.toISOString().slice(0, 10);
+  return time ? `${datePart}T${time}:00` : datePart;
+};
 ---
 <BaseLayout title="何必 / notes">
   <Nav />
   <main style="padding-top: 6rem; min-height: 100vh;">
     <div class="wrap">
       <div class="section-label" data-reveal>Notes</div>
-      <h2 class="section-title" data-reveal style="margin-bottom: 3rem;">碎片</h2>
+      <h1 class="section-title" data-reveal style="margin-bottom: 3rem;">碎片</h1>
 
       {notes.length === 0 ? (
         <div data-reveal style="padding: 3rem 0; text-align: center;">
@@ -25,12 +40,12 @@ const notes = (await getCollection('notes', ({ data }) => !data.draft))
         <div style="max-width: 42rem;">
           {notes.map(note => (
             <a href={`/notes/${note.slug}`} style="display: block; padding: 1.5rem 0; border-bottom: 1px solid var(--surface-2);">
-              <time style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.1em;">
-                {note.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+              <time datetime={toDateTimeAttribute(note.data.date, note.data.time)} style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.1em;">
+                {formatNoteTimestamp(note.data.date, note.data.time)}
               </time>
-              <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 500; color: var(--text-secondary); margin-top: 0.4rem;">
+              <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 500; color: var(--text-secondary); margin-top: 0.4rem;">
                 {note.data.title}
-              </h3>
+              </h2>
             </a>
           ))}
         </div>
