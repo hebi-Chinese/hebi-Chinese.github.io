@@ -6,6 +6,7 @@ const publicRoutes = [
   '/about',
   '/projects',
   '/notes',
+  '/notes/typing-or-speaking',
   '/essays',
   '/essays/post-01',
   '/likes',
@@ -30,7 +31,7 @@ for (const route of publicRoutes) {
   });
 }
 
-for (const route of ['/', '/about', '/projects', '/notes', '/essays', '/essays/post-01']) {
+for (const route of ['/', '/about', '/projects', '/notes', '/notes/typing-or-speaking', '/essays', '/essays/post-01']) {
   test(`${route} has no serious WCAG 2.1 AA violation`, async ({ page }) => {
     await page.goto(route);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
@@ -50,6 +51,22 @@ test('about profile headings follow the page hierarchy', async ({ page }) => {
 
   await expect(page.getByRole('heading', { level: 1, name: '关于这个人' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2 })).toHaveCount(6);
+});
+
+test('notes preserve the authored date and optional time', async ({ page }) => {
+  await page.goto('/notes');
+
+  const timestamp = page.locator('time').first();
+  await expect(timestamp).toHaveText('2026/08/12 · 11:30');
+  await expect(timestamp).toHaveAttribute('datetime', '2026-08-12T11:30:00');
+});
+
+test('essays preserve the authored calendar date', async ({ page }) => {
+  await page.goto('/essays');
+
+  const timestamp = page.locator('time').first();
+  await expect(timestamp).toHaveText('2026/05/10');
+  await expect(timestamp).toHaveAttribute('datetime', '2026-05-10');
 });
 
 const responsiveCases = [

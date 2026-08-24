@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Nav from '../../components/Nav.astro';
 import { getCollection, render } from 'astro:content';
+import { formatContentDate, toContentDate } from '../../utils/content-date';
 import '../../styles/global.css';
 
 export async function getStaticPaths() {
@@ -33,8 +34,8 @@ const titleSub = colonIdx >= 0 ? rawTitle.slice(colonIdx + 1).trim() : '';
     <div class="essay-shell">
       <a href="/essays" class="article-back">← essays</a>
       <header class="essay-head">
-        <time datetime={essay.data.date.toISOString()}>
-          {essay.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+        <time datetime={toContentDate(essay.data.date)}>
+          {formatContentDate(essay.data.date)}
         </time>
         <h1>
           <span class="title-main">{titleMain}</span>

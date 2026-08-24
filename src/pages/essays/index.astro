@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Nav from '../../components/Nav.astro';
 import { getCollection } from 'astro:content';
+import { formatContentDate, toContentDate } from '../../utils/content-date';
 import '../../styles/global.css';
 
 const essays = (await getCollection('essays', ({ data }) => !data.draft))
@@ -25,8 +26,8 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
           {essays.map(essay => (
             <li>
               <a href={`/essays/${essay.id}`}>
-                <time datetime={essay.data.date.toISOString()}>
-                  {essay.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+                <time datetime={toContentDate(essay.data.date)}>
+                  {formatContentDate(essay.data.date)}
                 </time>
                 <h2>{essay.data.title}</h2>
                 {essay.data.description && <p>{essay.data.description}</p>}
