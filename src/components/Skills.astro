@@ -18,7 +18,10 @@
     border: 1px solid var(--surface-2);
     border-radius: 100px;
     letter-spacing: 0.04em;
-    transition: all var(--duration-fast);
+    transition:
+      background var(--duration-fast),
+      border-color var(--duration-fast),
+      color var(--duration-fast);
     white-space: nowrap;
   }
   .skill-pill:hover {
@@ -28,7 +31,7 @@
   }
 </style>
 
-<section class="skills-section">
+<div class="skills-section">
   <div class="wrap">
     <div class="skills-track" data-reveal>
       {['Python', 'C#', 'Zig', 'C', 'SQL', 'LangGraph', 'LangChain', 'QLoRA', 'PyTorch', 'Unsloth', 'MCP', 'OpenRouter', 'FastAPI', 'Docker', 'PostgreSQL', 'Redis', 'Win32 API', 'IL2CPP', 'Git', 'Claude Code'].map(skill => (
@@ -36,4 +39,4 @@
       ))}
     </div>
   </div>
-</section>
+</div>

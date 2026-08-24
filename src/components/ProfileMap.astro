@@ -1,0 +1,239 @@
+---
+import type { ProfileSection, ProfileSectionKey } from '../data/site';
+import { getProfileDisplayNumber } from '../data/site';
+
+interface Props {
+  sections: readonly ProfileSection[];
+}
+
+const { sections } = Astro.props;
+const sectionNumberByKey = new Map<ProfileSectionKey, string>(
+  sections.map((section, index) => [section.key, getProfileDisplayNumber(index)]),
+);
+const getSectionNumber = (key: ProfileSectionKey) => sectionNumberByKey.get(key) ?? '';
+---
+
+<style>
+  .profile-map {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding: var(--space-4);
+    color: var(--text-muted);
+  }
+
+  .profile-map__label,
+  .profile-map__note {
+    position: relative;
+    z-index: 2;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-caption);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .profile-map__note {
+    justify-self: end;
+    color: var(--text-muted);
+  }
+
+  .profile-map__drawing {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: visible;
+    background-image: radial-gradient(circle, var(--surface-2) 1.1px, transparent 1.2px);
+    background-position: 20px 18px;
+    background-size: 42px 42px;
+  }
+
+  .profile-map__axis,
+  .profile-map__node,
+  .profile-map__signal,
+  .profile-map__origin {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .profile-map__axis {
+    fill: none;
+    stroke: var(--surface-3);
+    stroke-width: 0.8;
+  }
+
+  .profile-map__node {
+    color: var(--text-muted);
+    opacity: 0.76;
+    transition:
+      color 220ms var(--ease-out-expo),
+      opacity 220ms ease,
+      transform 280ms var(--ease-out-expo);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .profile-map.is-filtering .profile-map__node:not(.is-active) {
+    opacity: 0.22;
+  }
+
+  .profile-map__node.is-active {
+    color: var(--accent);
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+
+  .profile-map__path,
+  .profile-map__ring,
+  .profile-map__marker {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.15;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .profile-map__ring--soft {
+    opacity: 0.34;
+  }
+
+  .profile-map__marker-fill {
+    fill: var(--surface-0);
+    stroke: currentColor;
+    stroke-width: 1.15;
+  }
+
+  .profile-map__index,
+  .profile-map__caption,
+  .profile-map__axis-label {
+    fill: currentColor;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .profile-map__index {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+  }
+
+  .profile-map__caption {
+    font-size: 7px;
+    letter-spacing: 0.1em;
+  }
+
+  .profile-map__axis-label {
+    color: var(--surface-3);
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+
+  .profile-map__continuation {
+    stroke-dasharray: 4 5;
+  }
+
+  .profile-map__signal {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 0.9;
+    opacity: 0.42;
+  }
+
+  .profile-map__origin {
+    fill: var(--accent);
+    opacity: 0.68;
+  }
+
+  @media (max-width: 900px) {
+    .profile-map {
+      padding: var(--space-3) var(--space-4);
+    }
+
+    .profile-map__drawing {
+      max-width: 36rem;
+      margin-inline: auto;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .profile-map__node {
+      transition: none;
+    }
+
+    .profile-map.is-filtering .profile-map__node:not(.is-active) {
+      opacity: 0.76;
+    }
+
+    .profile-map__node.is-active {
+      transform: none;
+    }
+  }
+</style>
+
+<div class="profile-map" data-profile-map>
+  <span class="profile-map__label">SVG / profile map</span>
+
+  <svg
+    class="profile-map__drawing"
+    viewBox="0 0 360 420"
+    preserveAspectRatio="xMidYMid meet"
+    aria-hidden="true"
+  >
+    <path class="profile-map__axis" d="M22 388H338M28 394V24" />
+    <path class="profile-map__axis" d="M75 384v8M128 384v8M181 384v8M234 384v8M287 384v8" />
+    <path class="profile-map__axis" d="M24 335h8M24 282h8M24 229h8M24 176h8M24 123h8M24 70h8" />
+    <text class="profile-map__axis-label" x="334" y="405">X</text>
+    <text class="profile-map__axis-label" x="15" y="30">Y</text>
+
+    <g class="profile-map__node" data-profile-node="foundation">
+      <path class="profile-map__path" d="M58 354C58 326 64 308 82 292C91 284 94 270 94 254" />
+      <circle class="profile-map__ring profile-map__ring--soft" cx="58" cy="354" r="14" />
+      <circle class="profile-map__ring" cx="58" cy="354" r="8" />
+      <circle class="profile-map__origin" cx="58" cy="354" r="2.7" />
+      <circle class="profile-map__marker-fill" cx="94" cy="248" r="15" />
+      <text class="profile-map__index" x="87" y="251">{getSectionNumber('foundation')}</text>
+    </g>
+
+    <g class="profile-map__node" data-profile-node="focus">
+      <path class="profile-map__path" d="M94 233C94 207 107 192 126 192H164" />
+      <rect class="profile-map__marker" x="91" y="207" width="6" height="6" />
+      <circle class="profile-map__marker-fill" cx="166" cy="192" r="15" />
+      <text class="profile-map__index" x="159" y="195">{getSectionNumber('focus')}</text>
+    </g>
+
+    <g class="profile-map__node" data-profile-node="judgment">
+      <path class="profile-map__path" d="M181 192H210C226 192 236 202 236 218V248" />
+      <circle class="profile-map__ring profile-map__ring--soft" cx="181" cy="192" r="25" />
+      <circle class="profile-map__ring profile-map__ring--soft" cx="181" cy="192" r="20" />
+      <circle class="profile-map__marker-fill" cx="181" cy="192" r="16" />
+      <text class="profile-map__index" x="174" y="195">{getSectionNumber('judgment')}</text>
+      <rect class="profile-map__marker" x="233" y="248" width="6" height="6" />
+    </g>
+
+    <g class="profile-map__node" data-profile-node="anchors">
+      <path class="profile-map__path" d="M181 176C181 142 199 124 226 124H254C273 124 282 113 282 94" />
+      <rect class="profile-map__marker" x="223" y="121" width="6" height="6" />
+      <circle class="profile-map__marker-fill" cx="282" cy="78" r="15" />
+      <text class="profile-map__index" x="275" y="81">{getSectionNumber('anchors')}</text>
+      <path class="profile-map__marker" d="M302 69v18M294 78h16M297 85l5 5 5-5" />
+    </g>
+
+    <g class="profile-map__node" data-profile-node="recommendation">
+      <path class="profile-map__path" d="M236 254V274C236 290 246 300 262 300H284" />
+      <circle class="profile-map__marker-fill" cx="300" cy="300" r="15" />
+      <text class="profile-map__index" x="293" y="303">{getSectionNumber('recommendation')}</text>
+      <circle class="profile-map__signal" cx="322" cy="300" r="10" />
+      <circle class="profile-map__signal" cx="322" cy="300" r="18" />
+      <circle class="profile-map__signal" cx="322" cy="300" r="27" />
+    </g>
+
+    <g class="profile-map__node" data-profile-node="next-stage">
+      <path class="profile-map__path" d="M181 208V314C181 330 191 340 207 340H240" />
+      <rect class="profile-map__marker" x="178" y="278" width="6" height="6" />
+      <circle class="profile-map__marker-fill" cx="256" cy="340" r="15" />
+      <text class="profile-map__index" x="249" y="343">{getSectionNumber('next-stage')}</text>
+      <path class="profile-map__path profile-map__continuation" d="M271 340V365C271 377 279 384 291 384H323" />
+      <path class="profile-map__marker" d="M318 380l6 4-6 4" />
+      <text class="profile-map__caption" x="274" y="374">TO BE CONTINUED</text>
+    </g>
+  </svg>
+
+  <span class="profile-map__note">visual field · 01</span>
+</div>

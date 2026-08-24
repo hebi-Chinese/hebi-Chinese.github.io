@@ -2,12 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Nav from '../../components/Nav.astro';
 import { getCollection, render } from 'astro:content';
+import { formatContentTimestamp, toContentDateTime } from '../../utils/content-date';
 import '../../styles/global.css';
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => !data.draft);
   return notes.map(note => ({
-    params: { slug: note.slug },
+    params: { slug: note.id },
     props: { note },
   }));
 }
@@ -15,16 +16,8 @@ export async function getStaticPaths() {
 const { note } = Astro.props;
 const { Content } = await render(note);
 
-const noteDate = note.data.date.toLocaleDateString('zh-CN', {
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  timeZone: 'UTC',
-});
-const noteTimestampLabel = note.data.time ? `${noteDate} · ${note.data.time}` : noteDate;
-const noteDateTime = note.data.time
-  ? `${note.data.date.toISOString().slice(0, 10)}T${note.data.time}:00`
-  : note.data.date.toISOString().slice(0, 10);
+const noteTimestampLabel = formatContentTimestamp(note.data.date, note.data.time);
+const noteDateTime = toContentDateTime(note.data.date, note.data.time);
 ---
 <BaseLayout title={`${note.data.title} / 何必`}>
   <Nav />

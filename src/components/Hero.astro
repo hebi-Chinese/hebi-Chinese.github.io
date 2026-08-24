@@ -1,5 +1,6 @@
 ---
-// Hero section with ripple canvas + text repulsion
+import HeroBlueprint from './HeroBlueprint.astro';
+import { siteProfile } from '../data/site';
 ---
 <style>
   .hero {
@@ -8,6 +9,7 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
+    overflow: hidden;
     padding-top: 3.25rem;
   }
   .hero::before {
@@ -39,7 +41,6 @@
   .hero-name .char {
     display: inline-block;
     transition: color 0.6s var(--ease-out-expo), transform 0.1s ease-out;
-    will-change: transform;
   }
   .hero-name .char:hover { color: var(--accent); }
   .hero-name .char.repulse-return {
@@ -77,7 +78,12 @@
     padding: 0.65rem 1.5rem;
     border-radius: 100px;
     cursor: pointer;
-    transition: all var(--duration-normal) var(--ease-out-expo);
+    transition:
+      background var(--duration-normal) var(--ease-out-expo),
+      border-color var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo),
+      color var(--duration-normal) var(--ease-out-expo),
+      transform var(--duration-normal) var(--ease-out-expo);
     border: none;
   }
   .btn-primary { background: var(--accent); color: var(--surface-0); }
@@ -91,15 +97,24 @@
   .ripple-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .hero > .wrap { position: relative; z-index: 2; }
 
+  @media (min-width: 1200px) and (min-height: 1000px) {
+    .hero > .wrap { transform: translateY(-5vh); }
+  }
+
   @media (max-width: 768px) {
     .hero { min-height: 85vh; }
     .hero-eyebrow { font-size: 0.5rem; }
     .hero-tag { font-size: 0.6rem; padding: 0.25rem 0.7rem; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .ripple-canvas { display: none; }
+    .hero-name .char { transition: color var(--duration-fast); }
+  }
 </style>
 
-<section class="hero">
-  <canvas class="ripple-canvas" id="rippleCanvas"></canvas>
+<section class="hero" data-hero>
+  <canvas class="ripple-canvas" data-ripple-canvas aria-hidden="true"></canvas>
+  <HeroBlueprint />
   <div class="wrap">
     <p class="hero-eyebrow" data-reveal>何必 / hebi</p>
     <h1 class="hero-name" data-reveal>
@@ -112,137 +127,186 @@
     </div>
     <div class="hero-cta" data-reveal>
       <a href="/projects" class="btn btn-primary">看看做了什么</a>
-      <a href="mailto:3521739097@qq.com" class="btn btn-ghost">打个招呼</a>
+      <a href={`mailto:${siteProfile.email}`} class="btn btn-ghost">打个招呼</a>
     </div>
   </div>
 </section>
 
 <script>
-  // === MOUSE TRACKING ===
-  let curX = 0, curY = 0;
-  document.addEventListener('mousemove', (e) => { curX = e.clientX; curY = e.clientY; });
+  document.querySelectorAll<HTMLElement>('[data-hero]').forEach((root) => {
+    if (root.dataset.heroReady === 'true') return;
+    root.dataset.heroReady = 'true';
 
-  // === TEXT REPULSION ===
-  (() => {
-    const nameChars = document.querySelectorAll('.hero-name .char');
-    const REPULSE_RADIUS = 150;
-    const REPULSE_STRENGTH = 60;
-    function repulse() {
-      for (const char of nameChars) {
-        const rect = (char as HTMLElement).getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = curX - cx;
-        const dy = curY - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < REPULSE_RADIUS && dist > 0) {
-          const force = (1 - dist / REPULSE_RADIUS) * REPULSE_STRENGTH;
-          const angle = Math.atan2(dy, dx);
-          (char as HTMLElement).style.transform = `translate(${-Math.cos(angle) * force}px, ${-Math.sin(angle) * force}px)`;
-          char.classList.remove('repulse-return');
-        } else if ((char as HTMLElement).style.transform && (char as HTMLElement).style.transform !== 'translate(0px, 0px)') {
-          char.classList.add('repulse-return');
-          (char as HTMLElement).style.transform = 'translate(0px, 0px)';
-        }
-      }
-      requestAnimationFrame(repulse);
-    }
-    repulse();
-  })();
+    const canvas = root.querySelector<HTMLCanvasElement>('[data-ripple-canvas]');
+    const nameCharacters = Array.from(root.querySelectorAll<HTMLElement>('.hero-name .char'));
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canUsePointerEffects = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!canvas || reducedMotion || !canUsePointerEffects) return;
 
-  // === RIPPLE CANVAS ===
-  (() => {
-    const canvas = document.getElementById('rippleCanvas') as HTMLCanvasElement;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    let W: number, H: number;
-    function resize() {
-      const hero = document.querySelector('.hero');
-      if (!hero) return;
-      W = canvas.width = hero.clientWidth;
-      H = canvas.height = hero.clientHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
+    const context = canvas.getContext('2d');
+    if (!context) return;
 
+    const controller = new AbortController();
+    const { signal } = controller;
     const ripples: Ripple[] = [];
-    class Ripple {
-      x: number; y: number; radius: number; maxRadius: number; speed: number; life: number; lineWidth: number;
-      constructor(x: number, y: number, maxRadius?: number, speed?: number, lineWidth?: number) {
-        this.x = x; this.y = y; this.radius = 0;
-        this.maxRadius = maxRadius || 250 + Math.random() * 150;
-        this.speed = speed || 1.2 + Math.random() * 0.8;
-        this.life = 1; this.lineWidth = lineWidth || 1.5;
-      }
-      update() { this.radius += this.speed; this.life = 1 - this.radius / this.maxRadius; return this.life > 0; }
-      draw(ctx: CanvasRenderingContext2D) {
-        if (this.life <= 0) return;
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(196, 113, 11, ${this.life * 0.12})`;
-        ctx.lineWidth = this.lineWidth * this.life; ctx.stroke();
-        if (this.radius > 20) {
-          ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 0.65, 0, Math.PI * 2);
-          ctx.strokeStyle = `rgba(196, 113, 11, ${this.life * 0.06})`;
-          ctx.lineWidth = this.lineWidth * this.life * 0.5; ctx.stroke();
-        }
-      }
-    }
-
+    const repulseRadius = 150;
+    const repulseStrength = 60;
+    let width = 0;
+    let height = 0;
+    let rippleFrame = 0;
+    let repulseFrame = 0;
     let lastRippleTime = 0;
-    document.addEventListener('mousemove', (e) => {
-      const now = Date.now();
-      if (now - lastRippleTime > 100) {
-        const rect = canvas.getBoundingClientRect();
-        ripples.push(new Ripple(e.clientX - rect.left, e.clientY - rect.top));
-        lastRippleTime = now;
+    let isVisible = true;
+    let pointer = { x: 0, y: 0 };
+
+    class Ripple {
+      radius = 0;
+      life = 1;
+
+      constructor(
+        readonly x: number,
+        readonly y: number,
+        readonly maxRadius = 250 + Math.random() * 150,
+        readonly speed = 1.2 + Math.random() * 0.8,
+        readonly lineWidth = 1.5,
+      ) {}
+
+      update() {
+        this.radius += this.speed;
+        this.life = 1 - this.radius / this.maxRadius;
+        return this.life > 0;
       }
-    });
-    document.addEventListener('click', (e) => {
+
+      draw(drawingContext: CanvasRenderingContext2D) {
+        if (this.life <= 0) return;
+        drawingContext.beginPath();
+        drawingContext.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        drawingContext.strokeStyle = `rgba(196, 113, 11, ${this.life * 0.12})`;
+        drawingContext.lineWidth = this.lineWidth * this.life;
+        drawingContext.stroke();
+
+        if (this.radius <= 20) return;
+        drawingContext.beginPath();
+        drawingContext.arc(this.x, this.y, this.radius * 0.65, 0, Math.PI * 2);
+        drawingContext.strokeStyle = `rgba(196, 113, 11, ${this.life * 0.06})`;
+        drawingContext.lineWidth = this.lineWidth * this.life * 0.5;
+        drawingContext.stroke();
+      }
+    }
+
+    const resizeCanvas = () => {
+      const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+      width = root.clientWidth;
+      height = root.clientHeight;
+      canvas.width = Math.round(width * pixelRatio);
+      canvas.height = Math.round(height * pixelRatio);
+      context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    };
+
+    const resetCharacters = () => {
+      if (repulseFrame) cancelAnimationFrame(repulseFrame);
+      repulseFrame = 0;
+      nameCharacters.forEach((character) => {
+        character.classList.add('repulse-return');
+        character.style.transform = 'translate(0px, 0px)';
+      });
+    };
+
+    const updateRepulsion = () => {
+      repulseFrame = 0;
+      nameCharacters.forEach((character) => {
+        const rect = character.getBoundingClientRect();
+        const deltaX = pointer.x - (rect.left + rect.width / 2);
+        const deltaY = pointer.y - (rect.top + rect.height / 2);
+        const distance = Math.hypot(deltaX, deltaY);
+
+        if (distance >= repulseRadius || distance === 0) {
+          character.classList.add('repulse-return');
+          character.style.transform = 'translate(0px, 0px)';
+          return;
+        }
+
+        const force = (1 - distance / repulseRadius) * repulseStrength;
+        const angle = Math.atan2(deltaY, deltaX);
+        character.classList.remove('repulse-return');
+        character.style.transform = `translate(${-Math.cos(angle) * force}px, ${-Math.sin(angle) * force}px)`;
+      });
+    };
+
+    const animateRipples = () => {
+      rippleFrame = 0;
+      context.clearRect(0, 0, width, height);
+      for (let index = ripples.length - 1; index >= 0; index -= 1) {
+        const ripple = ripples[index];
+        if (!ripple.update()) ripples.splice(index, 1);
+        else ripple.draw(context);
+      }
+      if (ripples.length > 0 && !document.hidden) {
+        rippleFrame = requestAnimationFrame(animateRipples);
+      }
+    };
+
+    const startRippleAnimation = () => {
+      if (!rippleFrame && isVisible && !document.hidden) rippleFrame = requestAnimationFrame(animateRipples);
+    };
+
+    const stopRippleAnimation = () => {
+      ripples.length = 0;
+      context.clearRect(0, 0, width, height);
+      if (rippleFrame) cancelAnimationFrame(rippleFrame);
+      rippleFrame = 0;
+    };
+
+    root.addEventListener('pointermove', (event) => {
+      pointer = { x: event.clientX, y: event.clientY };
+      if (!repulseFrame) repulseFrame = requestAnimationFrame(updateRepulsion);
+
+      const now = performance.now();
+      if (now - lastRippleTime < 100) return;
       const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      for (let i = 0; i < 3; i++) ripples.push(new Ripple(x, y, 350 + i * 120, 1.8 + i * 0.4, 2.5 - i * 0.5));
+      ripples.push(new Ripple(event.clientX - rect.left, event.clientY - rect.top));
+      lastRippleTime = now;
+      startRippleAnimation();
+    }, { passive: true, signal });
+
+    root.addEventListener('pointerleave', resetCharacters, { signal });
+    root.addEventListener('click', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      for (let index = 0; index < 3; index += 1) {
+        ripples.push(new Ripple(x, y, 350 + index * 120, 1.8 + index * 0.4, 2.5 - index * 0.5));
+      }
+      startRippleAnimation();
+    }, { signal });
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) return;
+      stopRippleAnimation();
+      if (repulseFrame) cancelAnimationFrame(repulseFrame);
+      repulseFrame = 0;
+      resetCharacters();
+    }, { signal });
+
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      isVisible = entries.some((entry) => entry.isIntersecting);
+      if (!isVisible) {
+        stopRippleAnimation();
+        resetCharacters();
+      }
     });
+    visibilityObserver.observe(root);
 
-    const waves = Array.from({ length: 4 }, () => ({
-      x: Math.random() * 1200, y: Math.random() * 800,
-      vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2,
-      size: 150 + Math.random() * 200, phase: Math.random() * Math.PI * 2
-    }));
-    let time = 0;
+    const resizeObserver = new ResizeObserver(resizeCanvas);
+    resizeObserver.observe(root);
+    resizeCanvas();
 
-    function animate() {
-      ctx!.clearRect(0, 0, W, H);
-      time += 0.004;
-      for (const w of waves) {
-        w.x += w.vx; w.y += w.vy;
-        if (w.x < -w.size) w.x = W + w.size;
-        if (w.x > W + w.size) w.x = -w.size;
-        if (w.y < -w.size) w.y = H + w.size;
-        if (w.y > H + w.size) w.y = -w.size;
-        const pulse = 0.5 + 0.5 * Math.sin(time + w.phase);
-        const grad = ctx!.createRadialGradient(w.x, w.y, 0, w.x, w.y, w.size);
-        grad.addColorStop(0, `rgba(196, 113, 11, ${0.025 * pulse})`);
-        grad.addColorStop(0.5, `rgba(196, 113, 11, ${0.012 * pulse})`);
-        grad.addColorStop(1, 'rgba(196, 113, 11, 0)');
-        ctx!.fillStyle = grad;
-        ctx!.fillRect(0, 0, W, H);
-      }
-      for (let i = ripples.length - 1; i >= 0; i--) {
-        if (!ripples[i].update()) ripples.splice(i, 1);
-        else ripples[i].draw(ctx!);
-      }
-      requestAnimationFrame(animate);
-    }
-    animate();
-  })();
-
-  // === SCROLL REVEAL ===
-  const els = document.querySelectorAll('[data-reveal]');
-  const io = new IntersectionObserver((entries) => {
-    for (const e of entries) {
-      if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
-    }
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
-  els.forEach(el => io.observe(el));
+    document.addEventListener('astro:before-swap', () => {
+      controller.abort();
+      resizeObserver.disconnect();
+      visibilityObserver.disconnect();
+      if (rippleFrame) cancelAnimationFrame(rippleFrame);
+      if (repulseFrame) cancelAnimationFrame(repulseFrame);
+    }, { once: true, signal });
+  });
 </script>

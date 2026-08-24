@@ -1,55 +1,351 @@
 ---
-// Nav component — shared across all pages
----
-<nav class="nav" id="nav">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo">何必</a>
-    <div class="nav-links">
-      <a href="/about">about</a>
-      <a href="/projects">work</a>
-      <a href="/essays">essays</a>
-      <a href="/notes">notes</a>
-      <a href="/likes">likes</a>
-      <a href="https://github.com/hebi-Chinese" target="_blank">github</a>
-    </div>
-    <button class="nav-burger" id="navBurger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
+import { navigationItems } from '../data/site';
 
-<div class="nav-mobile" id="navMobile">
-  <a href="/about" class="nav-mobile-link">about</a>
-  <a href="/projects" class="nav-mobile-link">work</a>
-  <a href="/essays" class="nav-mobile-link">essays</a>
-  <a href="/notes" class="nav-mobile-link">notes</a>
-  <a href="/likes" class="nav-mobile-link">likes</a>
-  <a href="https://github.com/hebi-Chinese" target="_blank" class="nav-mobile-link">github</a>
-  <a href="mailto:3521739097@qq.com" class="nav-mobile-link">contact</a>
-</div>
+const desktopItems = navigationItems.filter((item) => item.placements.includes('desktop'));
+const mobileItems = navigationItems.filter((item) => item.placements.includes('mobile'));
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\/$/, '') || '/') === currentPath;
+---
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    padding: 0 clamp(1.5rem, 4vw, 3rem);
+    transition:
+      background var(--duration-normal) var(--ease-out-expo),
+      box-shadow var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .nav.is-scrolled {
+    background: rgba(250, 248, 244, 0.88);
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 72rem;
+    height: 3.25rem;
+    margin: 0 auto;
+  }
+
+  .nav-logo {
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    transition: color var(--duration-fast);
+  }
+
+  .nav-logo:hover,
+  .nav-logo:focus-visible {
+    color: var(--accent);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav-links a {
+    position: relative;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: lowercase;
+    transition: color var(--duration-fast);
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus-visible,
+  .nav-links a[aria-current='page'] {
+    color: var(--text-primary);
+  }
+
+  .nav-links a:hover::after,
+  .nav-links a:focus-visible::after,
+  .nav-links a[aria-current='page']::after {
+    width: 100%;
+  }
+
+  .nav-burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: var(--space-2);
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .nav-burger span {
+    width: 20px;
+    height: 1.5px;
+    background: var(--text-secondary);
+    transition: opacity 300ms ease, transform 300ms ease;
+  }
+
+  .nav-burger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(4px, 4px);
+  }
+
+  .nav-burger.open span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .nav-burger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  .nav-mobile {
+    position: fixed;
+    inset: 0;
+    z-index: 99;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-8);
+    background: rgba(250, 248, 244, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .nav-mobile.open {
+    display: flex;
+  }
+
+  .nav-mobile a {
+    color: var(--text-primary);
+    font-family: 'Instrument Serif', serif;
+    font-size: 2rem;
+    transition: color var(--duration-fast);
+  }
+
+  .nav-mobile a:hover,
+  .nav-mobile a:focus-visible,
+  .nav-mobile a[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .nav-link-text {
+    display: inline-flex;
+    overflow: hidden;
+    padding-block: 0.2em;
+    margin-block: -0.2em;
+  }
+
+  .nav-link-char {
+    display: inline-block;
+    transition:
+      color var(--duration-fast),
+      transform 360ms var(--ease-out-expo);
+    transition-delay: calc(var(--char-index) * 24ms);
+  }
+
+  .nav-links a:hover .nav-link-char,
+  .nav-links a:focus-visible .nav-link-char {
+    color: var(--text-primary);
+    transform: translateY(-0.28em);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-link-char {
+      transition: color var(--duration-fast);
+    }
+
+    .nav-links a:hover .nav-link-char,
+    .nav-links a:focus-visible .nav-link-char {
+      transform: none;
+    }
+
+    .nav,
+    .nav-burger span,
+    .nav-mobile a {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .nav-links {
+      display: none;
+    }
+
+    .nav-burger {
+      display: flex;
+    }
+  }
+
+  :global(body.is-navigation-open) {
+    overflow: hidden;
+  }
+</style>
+
+<header data-navigation>
+  <nav class="nav" data-navigation-bar aria-label="主导航">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo" aria-current={currentPath === '/' ? 'page' : undefined}>何必</a>
+      <div class="nav-links">
+        {desktopItems.map((item) => (
+          <a
+            href={item.href}
+            target={item.openInNewTab ? '_blank' : undefined}
+            rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+            aria-label={item.label}
+            aria-current={isCurrentPage(item.href) ? 'page' : undefined}
+          >
+            <span class="nav-link-text" aria-hidden="true">
+              {item.label.split('').map((char, index) => (
+                <span class="nav-link-char" style={`--char-index: ${index}`}>{char}</span>
+              ))}
+            </span>
+          </a>
+        ))}
+      </div>
+      <button
+        class="nav-burger"
+        type="button"
+        data-navigation-toggle
+        aria-label="打开导航"
+        aria-expanded="false"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="nav-mobile" data-navigation-menu aria-hidden="true">
+    {mobileItems.map((item) => (
+      <a
+        href={item.href}
+        target={item.openInNewTab ? '_blank' : undefined}
+        rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+        class="nav-mobile-link"
+        aria-current={isCurrentPage(item.href) ? 'page' : undefined}
+      >
+        {item.label}
+      </a>
+    ))}
+  </div>
+</header>
 
 <script>
-  // Nav scroll
-  const nav = document.getElementById('nav');
-  window.addEventListener('scroll', () => {
-    nav?.classList.toggle('is-scrolled', window.scrollY > 40);
-  }, { passive: true });
+  const navigationRoots = document.querySelectorAll<HTMLElement>('[data-navigation]');
+  let openMenuCount = 0;
 
-  // Hamburger menu
-  const burger = document.getElementById('navBurger');
-  const mobileNav = document.getElementById('navMobile');
-  if (burger && mobileNav) {
-    burger.addEventListener('click', () => {
-      burger.classList.toggle('open');
-      mobileNav.classList.toggle('open');
-      document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  navigationRoots.forEach((root, index) => {
+    if (root.dataset.navigationReady === 'true') return;
+    root.dataset.navigationReady = 'true';
+
+    const navigationBar = root.querySelector<HTMLElement>('[data-navigation-bar]');
+    const menuButton = root.querySelector<HTMLButtonElement>('[data-navigation-toggle]');
+    const mobileMenu = root.querySelector<HTMLElement>('[data-navigation-menu]');
+    if (!navigationBar || !menuButton || !mobileMenu) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    const menuId = `site-navigation-menu-${index + 1}`;
+    const links = Array.from(mobileMenu.querySelectorAll<HTMLAnchorElement>('a'));
+    let isOpen = false;
+    let focusFrame = 0;
+
+    mobileMenu.id = menuId;
+    menuButton.setAttribute('aria-controls', menuId);
+
+    const updateBodyLock = () => {
+      document.body.classList.toggle('is-navigation-open', openMenuCount > 0);
+    };
+
+    const setMenuOpen = (nextIsOpen: boolean, restoreFocus = true) => {
+      if (isOpen === nextIsOpen) return;
+      isOpen = nextIsOpen;
+      openMenuCount += nextIsOpen ? 1 : -1;
+      root.classList.toggle('is-open', nextIsOpen);
+      menuButton.classList.toggle('open', nextIsOpen);
+      mobileMenu.classList.toggle('open', nextIsOpen);
+      menuButton.setAttribute('aria-expanded', String(nextIsOpen));
+      menuButton.setAttribute('aria-label', nextIsOpen ? '关闭导航' : '打开导航');
+      mobileMenu.setAttribute('aria-hidden', String(!nextIsOpen));
+      updateBodyLock();
+
+      if (focusFrame) cancelAnimationFrame(focusFrame);
+      focusFrame = 0;
+
+      if (nextIsOpen) {
+        focusFrame = requestAnimationFrame(() => {
+          focusFrame = 0;
+          if (isOpen) links[0]?.focus();
+        });
+      } else if (restoreFocus) {
+        menuButton.focus();
+      }
+    };
+
+    menuButton.addEventListener('click', () => setMenuOpen(!isOpen), { signal });
+
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        const shouldRestoreFocus = link.target === '_blank' || link.protocol === 'mailto:';
+        setMenuOpen(false, shouldRestoreFocus);
+      }, { signal });
     });
-    mobileNav.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        burger.classList.remove('open');
-        mobileNav.classList.remove('open');
-        document.body.style.overflow = '';
-      });
-    });
-  }
+
+    root.addEventListener('keydown', (event) => {
+      if (!isOpen) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setMenuOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab' || links.length === 0) return;
+
+      const firstLink = links[0];
+      const lastLink = links.at(-1);
+      if (event.shiftKey && document.activeElement === firstLink) {
+        event.preventDefault();
+        lastLink?.focus();
+      } else if (!event.shiftKey && document.activeElement === lastLink) {
+        event.preventDefault();
+        firstLink.focus();
+      }
+    }, { signal });
+
+    const updateScrolledState = () => navigationBar.classList.toggle('is-scrolled', window.scrollY > 40);
+    updateScrolledState();
+    window.addEventListener('scroll', updateScrolledState, { passive: true, signal });
+
+    const desktopMedia = window.matchMedia('(min-width: 769px)');
+    desktopMedia.addEventListener('change', (event) => {
+      if (event.matches) setMenuOpen(false, false);
+    }, { signal });
+
+    document.addEventListener('astro:before-swap', () => {
+      if (isOpen) {
+        openMenuCount -= 1;
+        updateBodyLock();
+      }
+      if (focusFrame) cancelAnimationFrame(focusFrame);
+      controller.abort();
+    }, { once: true, signal });
+  });
 </script>

@@ -2,12 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Nav from '../../components/Nav.astro';
 import { getCollection, render } from 'astro:content';
+import { formatContentDate, toContentDate } from '../../utils/content-date';
 import '../../styles/global.css';
 
 export async function getStaticPaths() {
   const essays = await getCollection('essays', ({ data }) => !data.draft);
   return essays.map(essay => ({
-    params: { slug: essay.slug },
+    params: { slug: essay.id },
     props: { essay },
   }));
 }
@@ -19,7 +20,7 @@ const { Content } = await render(essay);
 const rawTitle = essay.data.title;
 const colonIdx = (() => {
   const a = rawTitle.indexOf(':');
-  const b = rawTitle.indexOf(':');
+  const b = rawTitle.indexOf('：');
   if (a < 0) return b;
   if (b < 0) return a;
   return Math.min(a, b);
@@ -27,14 +28,14 @@ const colonIdx = (() => {
 const titleMain = colonIdx >= 0 ? rawTitle.slice(0, colonIdx + 1) : rawTitle;
 const titleSub = colonIdx >= 0 ? rawTitle.slice(colonIdx + 1).trim() : '';
 ---
-<BaseLayout title={`${rawTitle} / 何必`}>
+<BaseLayout title={`${rawTitle} / 何必`} description={essay.data.description}>
   <Nav />
-  <main style="padding-top: 6rem; min-height: 100vh;">
+  <main class="page-main">
     <div class="essay-shell">
-      <a href="/essays" class="essay-back">← essays</a>
+      <a href="/essays" class="article-back">← essays</a>
       <header class="essay-head">
-        <time datetime={essay.data.date.toISOString()}>
-          {essay.data.date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' })}
+        <time datetime={toContentDate(essay.data.date)}>
+          {formatContentDate(essay.data.date)}
         </time>
         <h1>
           <span class="title-main">{titleMain}</span>
@@ -54,15 +55,6 @@ const titleSub = colonIdx >= 0 ? rawTitle.slice(colonIdx + 1).trim() : '';
     max-width: 60rem;
     margin: 0 auto;
     padding: 0 1.5rem;
-  }
-  .essay-back {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-    margin-bottom: 2rem;
-    display: inline-block;
-    text-decoration: none;
   }
   .essay-head {
     max-width: 38rem;

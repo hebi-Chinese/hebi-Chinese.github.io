@@ -7,6 +7,12 @@ dist/
 # dependencies
 node_modules/
 
+# browser test output
+.playwright/
+.playwright-cli/
+playwright-report/
+test-results/
+
 # logs
 npm-debug.log*
 yarn-debug.log*

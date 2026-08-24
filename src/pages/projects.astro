@@ -2,13 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import ProjectsWheel from '../components/ProjectsWheel.astro';
-import ScrollReveal from '../components/ScrollReveal.astro';
 import '../styles/global.css';
 ---
 <BaseLayout title="何必 / projects">
   <Nav />
-  <main style="padding-top: 3.25rem;">
-    <ProjectsWheel />
+  <main class="page-main page-main--projects">
+    <ProjectsWheel headingLevel="h1" />
   </main>
-  <ScrollReveal />
 </BaseLayout>

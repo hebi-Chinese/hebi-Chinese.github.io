@@ -1,0 +1,399 @@
+---
+import { getProjectDisplayNumber, projects } from '../data/site';
+
+const projectSignals = projects.flatMap((project, index) => project.heroSignal ? [{
+  id: getProjectDisplayNumber(index),
+  name: project.heroSignal.label,
+  meta: project.heroSignal.meta,
+  x: project.heroSignal.x,
+  y: project.heroSignal.y,
+}] : []);
+---
+
+<style>
+  .hero-blueprint {
+    --blueprint-ink: rgba(26, 22, 18, 0.075);
+    --blueprint-faint: rgba(26, 22, 18, 0.032);
+    --pointer-x: 50%;
+    --pointer-y: 30%;
+    position: absolute;
+    inset: 3.25rem 0 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .hero-blueprint-grid {
+    position: absolute;
+    inset: clamp(1.5rem, 4vw, 3rem);
+    background-image:
+      linear-gradient(to right, var(--blueprint-faint) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--blueprint-faint) 1px, transparent 1px),
+      linear-gradient(to right, rgba(196, 113, 11, 0.045) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(196, 113, 11, 0.045) 1px, transparent 1px);
+    background-size: 72px 72px, 72px 72px, 288px 288px, 288px 288px;
+    mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 78%, transparent 98%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 10%, #000 78%, transparent 98%);
+    animation: blueprintEnter 1.2s var(--ease-out-expo) both;
+  }
+
+  .hero-blueprint-grid::before,
+  .hero-blueprint-grid::after {
+    content: '';
+    position: absolute;
+    background: rgba(196, 113, 11, 0.075);
+  }
+
+  .hero-blueprint-grid::before {
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+  }
+
+  .hero-blueprint-grid::after {
+    top: 44%;
+    right: 0;
+    left: 0;
+    height: 1px;
+  }
+
+  .hero-wordmark {
+    position: absolute;
+    top: clamp(4rem, 12vh, 11rem);
+    left: 50%;
+    width: min(94vw, 96rem);
+    transform: translateX(-50%);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(7rem, 22vw, 22rem);
+    font-weight: 600;
+    line-height: 0.78;
+    letter-spacing: -0.085em;
+    text-align: center;
+    white-space: nowrap;
+    animation: wordmarkEnter 1.35s 80ms var(--ease-out-expo) both;
+  }
+
+  .hero-wordmark-outline,
+  .hero-wordmark-reveal {
+    display: block;
+  }
+
+  .hero-wordmark-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--blueprint-ink);
+    text-stroke: 1px var(--blueprint-ink);
+  }
+
+  .hero-wordmark-reveal {
+    position: absolute;
+    inset: 0;
+    color: rgba(196, 113, 11, 0.16);
+    clip-path: circle(0 at 50% 50%);
+    transition: clip-path 140ms ease-out;
+  }
+
+  .hero-blueprint-node {
+    position: absolute;
+    top: calc(var(--node-y) * 1%);
+    left: calc(var(--node-x) * 1%);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgba(107, 93, 79, 0.42);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.48rem;
+    letter-spacing: 0.14em;
+    transition: color var(--duration-normal), opacity var(--duration-normal);
+  }
+
+  .hero-blueprint-node::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border: 1px solid rgba(196, 113, 11, 0.22);
+    transform: rotate(45deg);
+  }
+
+  .hero-blueprint-node.is-current {
+    color: rgba(196, 113, 11, 0.72);
+  }
+
+  .hero-crosshair {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    transform: translate3d(var(--pointer-x), var(--pointer-y), 0);
+    transition: opacity var(--duration-fast);
+  }
+
+  .hero-blueprint.is-active .hero-crosshair {
+    opacity: 1;
+  }
+
+  .hero-crosshair::before,
+  .hero-crosshair::after {
+    content: '';
+    position: absolute;
+    background: rgba(196, 113, 11, 0.24);
+  }
+
+  .hero-crosshair::before {
+    top: -54px;
+    left: 0;
+    width: 1px;
+    height: 108px;
+  }
+
+  .hero-crosshair::after {
+    top: 0;
+    left: -54px;
+    width: 108px;
+    height: 1px;
+  }
+
+  .hero-crosshair-dot {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 7px;
+    height: 7px;
+    border: 1px solid rgba(196, 113, 11, 0.58);
+    background: rgba(250, 248, 244, 0.82);
+  }
+
+  .hero-coordinate,
+  .hero-signal {
+    position: absolute;
+    left: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .hero-coordinate {
+    top: 12px;
+    color: rgba(107, 93, 79, 0.62);
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-signal {
+    top: 29px;
+    min-width: 12rem;
+    padding: 0.48rem 0.65rem;
+    border-left: 1px solid rgba(196, 113, 11, 0.42);
+    background: rgba(250, 248, 244, 0.72);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+  }
+
+  .hero-signal-name,
+  .hero-signal-meta {
+    display: block;
+  }
+
+  .hero-signal-name {
+    margin-bottom: 0.15rem;
+    color: rgba(26, 22, 18, 0.78);
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-signal-meta {
+    color: rgba(107, 93, 79, 0.58);
+    font-size: 0.46rem;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-blueprint.is-right .hero-coordinate,
+  .hero-blueprint.is-right .hero-signal {
+    right: 14px;
+    left: auto;
+    text-align: right;
+  }
+
+  .hero-blueprint.is-right .hero-signal {
+    border-right: 1px solid rgba(196, 113, 11, 0.42);
+    border-left: 0;
+  }
+
+  .hero-blueprint.is-bottom .hero-coordinate {
+    top: auto;
+    bottom: 12px;
+  }
+
+  .hero-blueprint.is-bottom .hero-signal {
+    top: auto;
+    bottom: 29px;
+  }
+
+  @keyframes blueprintEnter {
+    from { opacity: 0; transform: scale(0.985); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes wordmarkEnter {
+    from { opacity: 0; transform: translateX(-50%) translateY(1.5rem); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  @media (max-width: 1024px) {
+    .hero-wordmark {
+      top: clamp(5rem, 16vh, 8rem);
+      font-size: clamp(7rem, 25vw, 15rem);
+    }
+
+    .hero-blueprint-node { opacity: 0.55; }
+  }
+
+  @media (max-width: 768px) {
+    .hero-blueprint-grid {
+      inset: 1.25rem;
+      background-size: 48px 48px, 48px 48px, 192px 192px, 192px 192px;
+    }
+
+    .hero-wordmark {
+      top: 20%;
+      font-size: clamp(6rem, 34vw, 10rem);
+    }
+
+    .hero-wordmark-outline {
+      -webkit-text-stroke-color: rgba(26, 22, 18, 0.045);
+    }
+
+    .hero-blueprint-node,
+    .hero-crosshair,
+    .hero-wordmark-reveal {
+      display: none;
+    }
+  }
+
+  @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
+    .hero-crosshair,
+    .hero-wordmark-reveal {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-blueprint-grid,
+    .hero-wordmark {
+      animation: none;
+    }
+  }
+</style>
+
+<div class="hero-blueprint" data-hero-blueprint aria-hidden="true">
+  <div class="hero-blueprint-grid"></div>
+  <div class="hero-wordmark" data-hero-wordmark>
+    <span class="hero-wordmark-outline">HEBI</span>
+    <span class="hero-wordmark-reveal" data-hero-wordmark-reveal>HEBI</span>
+  </div>
+  {projectSignals.map((signal) => (
+    <span
+      class="hero-blueprint-node"
+      data-hero-signal-source
+      data-name={signal.name}
+      data-meta={signal.meta}
+      style={`--node-x: ${signal.x}; --node-y: ${signal.y}`}
+    >
+      {signal.id}
+    </span>
+  ))}
+  <div class="hero-crosshair">
+    <span class="hero-crosshair-dot"></span>
+    <span class="hero-coordinate" data-hero-coordinate>X 0000 / Y 0000</span>
+    <span class="hero-signal">
+      <span class="hero-signal-name" data-hero-signal-name>{projectSignals[0]?.name ?? ''}</span>
+      <span class="hero-signal-meta" data-hero-signal-meta>{projectSignals[0]?.meta ?? ''}</span>
+    </span>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-hero-blueprint]').forEach((root) => {
+    if (root.dataset.heroBlueprintReady === 'true') return;
+    root.dataset.heroBlueprintReady = 'true';
+
+    const hero = root.closest<HTMLElement>('[data-hero]');
+    const wordmark = root.querySelector<HTMLElement>('[data-hero-wordmark]');
+    const reveal = root.querySelector<HTMLElement>('[data-hero-wordmark-reveal]');
+    const coordinate = root.querySelector<HTMLElement>('[data-hero-coordinate]');
+    const signalName = root.querySelector<HTMLElement>('[data-hero-signal-name]');
+    const signalMeta = root.querySelector<HTMLElement>('[data-hero-signal-meta]');
+    const sources = Array.from(root.querySelectorAll<HTMLElement>('[data-hero-signal-source]'));
+    if (!hero || !wordmark || !reveal || !coordinate || !signalName || !signalMeta || sources.length === 0) return;
+
+    const canTrackPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+      && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!canTrackPointer) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let pointerFrame = 0;
+    let pendingPointer: { clientX: number; clientY: number } | null = null;
+    let activeSignalIndex = -1;
+
+    const setActiveSignal = (index: number) => {
+      if (index === activeSignalIndex) return;
+      activeSignalIndex = index;
+      const source = sources[index];
+      sources.forEach((item, itemIndex) => item.classList.toggle('is-current', itemIndex === index));
+      signalName.textContent = source.dataset.name ?? '';
+      signalMeta.textContent = source.dataset.meta ?? '';
+    };
+
+    const updatePointer = () => {
+      pointerFrame = 0;
+      const pointer = pendingPointer;
+      pendingPointer = null;
+      if (!pointer) return;
+
+      const heroRect = hero.getBoundingClientRect();
+      const rootRect = root.getBoundingClientRect();
+      const heroX = Math.max(0, Math.min(pointer.clientX - heroRect.left, heroRect.width));
+      const heroY = Math.max(0, Math.min(pointer.clientY - heroRect.top, heroRect.height));
+      const rootX = Math.max(0, Math.min(pointer.clientX - rootRect.left, rootRect.width));
+      const rootY = Math.max(0, Math.min(pointer.clientY - rootRect.top, rootRect.height));
+      root.style.setProperty('--pointer-x', `${rootX}px`);
+      root.style.setProperty('--pointer-y', `${rootY}px`);
+      root.classList.add('is-active');
+      root.classList.toggle('is-right', rootX > rootRect.width * 0.72);
+      root.classList.toggle('is-bottom', rootY > rootRect.height * 0.76);
+
+      const wordmarkRect = wordmark.getBoundingClientRect();
+      const revealRadius = Math.min(150, wordmarkRect.width * 0.11);
+      reveal.style.clipPath = `circle(${revealRadius}px at ${pointer.clientX - wordmarkRect.left}px ${pointer.clientY - wordmarkRect.top}px)`;
+      coordinate.textContent = `X ${String(Math.round(heroX)).padStart(4, '0')} / Y ${String(Math.round(heroY)).padStart(4, '0')}`;
+      setActiveSignal(Math.min(sources.length - 1, Math.floor((heroX / heroRect.width) * sources.length)));
+    };
+
+    const schedulePointer = (event: PointerEvent) => {
+      pendingPointer = { clientX: event.clientX, clientY: event.clientY };
+      if (pointerFrame) return;
+      pointerFrame = requestAnimationFrame(updatePointer);
+    };
+
+    const clearPointer = () => {
+      pendingPointer = null;
+      if (pointerFrame) cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+      root.classList.remove('is-active', 'is-right', 'is-bottom');
+      reveal.style.clipPath = 'circle(0 at 50% 50%)';
+      sources.forEach(item => item.classList.remove('is-current'));
+      activeSignalIndex = -1;
+    };
+
+    hero.addEventListener('pointermove', schedulePointer, { passive: true, signal });
+    hero.addEventListener('pointerleave', clearPointer, { signal });
+    window.addEventListener('blur', clearPointer, { signal });
+    document.addEventListener('astro:before-swap', () => {
+      clearPointer();
+      controller.abort();
+    }, { once: true, signal });
+  });
+</script>
