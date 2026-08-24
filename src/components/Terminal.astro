@@ -1,5 +1,7 @@
 ---
-// Terminal card — fun profile display
+import { projects, siteProfile } from '../data/site';
+
+const projectNames = projects.map((project) => project.title).join(', ');
 ---
 <style>
   .terminal-section { padding: var(--section-dense) 0; }
@@ -45,14 +47,14 @@
   .dot-y { background: #febc2e; }
   .dot-g { background: #28c840; }
   .line { padding: 0.3rem 1.2rem; line-height: 1.8; white-space: pre-wrap; }
-  .prompt { color: var(--accent); }
+  .prompt { color: var(--accent-bright); }
   .cmd { color: var(--surface-2); }
   .output { color: #a89880; }
-  .highlight { color: var(--accent); }
+  .highlight { color: var(--accent-bright); }
   .cursor-blink {
     display: inline-block;
     width: 6px; height: 1em;
-    background: var(--accent);
+    background: var(--accent-bright);
     vertical-align: text-bottom;
     animation: termBlink 1s step-end infinite;
   }
@@ -82,29 +84,33 @@
       content: none;
       animation: none;
     }
+
+    .cursor-blink {
+      animation: none;
+    }
   }
   @media (max-width: 480px) { .terminal-card { font-size: 0.62rem; padding: var(--space-4); } }
 </style>
 
-<section class="terminal-section">
+<div class="terminal-section">
   <div class="wrap">
     <div class="terminal-reveal" data-reveal data-pixel-reveal>
       <div class="terminal-card">
-        <div class="dots">
+        <div class="dots" aria-hidden="true">
           <span class="dot dot-r"></span>
           <span class="dot dot-y"></span>
           <span class="dot dot-g"></span>
         </div>
         <div class="line"><span class="prompt">~ $</span> <span class="cmd">cat /etc/hebi/profile</span></div>
-        <div class="line"><span class="output">name: 何必</span></div>
+        <div class="line"><span class="output">name: {siteProfile.name}</span></div>
         <div class="line"><span class="output">doing: 毕业 + 等副本开启</span></div>
-        <div class="line"><span class="output">stack: <span class="highlight">Python, Zig, C#, LangGraph, PyTorch</span></span></div>
-        <div class="line"><span class="output">projects: Euterpe, Euterpe.Bot, MHW-Assistant, CC-MCP-MiMo-Bridge</span></div>
-        <div class="line"><span class="output">hobbies: <span class="highlight">游戏, 番剧, 健身房</span></span></div>
+        <div class="line"><span class="output">stack: <span class="highlight">{siteProfile.stack.join(', ')}</span></span></div>
+        <div class="line"><span class="output">projects: {projectNames}</span></div>
+        <div class="line"><span class="output">hobbies: <span class="highlight">{siteProfile.hobbies.join(', ')}</span></span></div>
         <div class="line"><span class="output">now: <span class="highlight">在毕业, 在等下一关</span></span></div>
         <div class="line"><span class="output">status: <span class="highlight">主线进行中</span></span></div>
-        <div class="line"><span class="prompt">~ $</span> <span class="cursor-blink"></span></div>
+        <div class="line"><span class="prompt">~ $</span> <span class="cursor-blink" aria-hidden="true"></span></div>
       </div>
     </div>
   </div>
-</section>
+</div>

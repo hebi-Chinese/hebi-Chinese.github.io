@@ -1,33 +1,30 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
-import Hero from '../components/Hero.astro';
-import About from '../components/About.astro';
+import HeroAboutFlow from '../components/HeroAboutFlow.astro';
 import Terminal from '../components/Terminal.astro';
 import Skills from '../components/Skills.astro';
 import ProjectsWheel from '../components/ProjectsWheel.astro';
 import Blog from '../components/Blog.astro';
 import Contact from '../components/Contact.astro';
-import ScrollReveal from '../components/ScrollReveal.astro';
 import '../styles/global.css';
 ---
 <BaseLayout>
   <Nav />
-  <Hero />
-  <div class="divider"></div>
-  <About />
-  <Terminal />
-  <Skills />
-  <div class="divider"></div>
-  <ProjectsWheel />
-  <Blog />
-  <Contact />
-  <footer style="padding: 2rem 0; text-align: center;">
+  <main>
+    <HeroAboutFlow />
+    <Terminal />
+    <Skills />
+    <div class="divider"></div>
+    <ProjectsWheel />
+    <Blog />
+    <Contact />
+  </main>
+  <footer class="site-footer">
     <div class="wrap">
-      <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.08em;">
+      <p>
         2025 – 2026 &copy; 何必 · built from scratch
       </p>
     </div>
   </footer>
-  <ScrollReveal />
 </BaseLayout>

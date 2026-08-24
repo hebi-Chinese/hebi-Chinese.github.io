@@ -1,12 +1,13 @@
 ---
-// Projects — 3D card wheel
-const projects = [
-  { num: '01', title: 'Euterpe', brief: 'Muse Dash 社区反作弊系统 · 服务社区 20k+', tags: ['Zig', 'C#', 'Win32 API', 'IL2CPP'], backTitle: 'Euterpe 反作弊系统', backDesc: '双栈分离架构（Zig sentinel + C# Mod），DLC 三层蜜罐检测，覆盖 5 类作弊场景。独立设计与实现，社区主理人授权架构决策。', link: 'https://github.com/Euterpe-org', linkText: 'GitHub →' },
-  { num: '02', title: 'Euterpe.Bot', brief: '多 Agent 智能助手 · 零指令交互', tags: ['LangGraph', 'Python', 'PostgreSQL', 'Docker'], backTitle: 'Euterpe.Bot 多 Agent 系统', backDesc: 'Worker-Writer-Supervisor 三元解耦，三级漏斗触发，PendingIntent 状态机。跨 QQ/Discord 双平台。', link: 'https://github.com/Euterpe-org', linkText: 'GitHub →' },
-  { num: '03', title: 'MHW 复盘助手', brief: 'Qwen2.5-7B 领域微调 · 端到端验证', tags: ['QLoRA', 'PyTorch', 'Unsloth'], backTitle: 'MHW 复盘助手', backDesc: '端到端微调 pipeline：CPT 71 万 tokens + SFT 2421 条。消费级硬件验证小资源场景下 LLM 微调可行性。', link: '#', linkText: '查看详情 →' },
-  { num: '04', title: 'CC-MCP-MiMo-Bridge', brief: '双模型协作 MCP 管线 · MIT 开源', tags: ['Python', 'FastMCP', 'Anthropic SDK'], backTitle: 'CC-MCP-MiMo-Bridge', backDesc: 'Claude（决策+review）+ MiMo（执行）双模型协作，单 turn 闭环。3 个 MCP 工具，trace 全程可审计。', link: 'https://github.com/hebi-Chinese/CC-mcp-mimo-bridge', linkText: 'GitHub →' },
-  { num: '05', title: 'LT-Sentinel', brief: 'LLM 多 agent 长期攻击防御层 · Lablab Hackathon 参赛作品', tags: ['LangGraph', 'Python', 'Go', 'Agent Security'], backTitle: 'LT-Sentinel — 长期攻击防御层', backDesc: '盖在 Veea Lobster Trap 上的状态层，补 LT「每条请求独立检查」的无状态盲区：慢速注入、渐进试探、跨 session 切换、信任养成后突袭、慢渗透工具污染。范式级方案，医疗 / 金融 / 客服多 agent 场景可换皮直接套。', link: 'https://github.com/hebi-Chinese/lobstertrap-sentinel', linkText: 'GitHub →' },
-];
+import { getProjectDisplayNumber, projects } from '../data/site';
+
+interface Props {
+  headingLevel?: 'h1' | 'h2';
+}
+
+const { headingLevel = 'h2' } = Astro.props;
+const HeadingTag = headingLevel;
+const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 ---
 <style>
   .projects { padding: var(--section-sparse) 0; overflow: hidden; }
@@ -18,16 +19,18 @@ const projects = [
     perspective: 1000px; cursor: grab;
     user-select: none; -webkit-user-select: none;
     display: flex; align-items: center; justify-content: center; overflow: visible;
+    touch-action: pan-y;
   }
   .wheel-stage:active { cursor: grabbing; }
-  .wheel-group { position: relative; width: 0; height: 0; transform-style: preserve-3d; will-change: transform; }
+  .wheel-group { position: relative; width: 0; height: 0; transform-style: preserve-3d; }
 
   .wheel-card {
     position: absolute;
     width: clamp(280px, 30vw, 380px); height: clamp(200px, 22vw, 260px);
-    transform-style: preserve-3d; cursor: pointer; transition: filter 0.3s;
+    transform-style: preserve-3d; transition: filter 0.3s;
     left: 50%; top: 50%; transform-origin: center center;
   }
+  .wheel-stage.is-moving .wheel-card { will-change: transform; }
   .wheel-card-tilt {
     width: 100%; height: 100%;
     transform-style: preserve-3d;
@@ -40,6 +43,29 @@ const projects = [
     transition: transform 0.6s var(--ease-out-expo);
   }
   .wheel-card.is-flipped .wheel-card-inner { transform: rotateY(180deg); }
+  .wheel-card-toggle {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    z-index: 4;
+    min-width: 3rem;
+    min-height: 2rem;
+    padding: 0.35rem 0.65rem;
+    border: 1px solid rgba(26, 22, 18, 0.14);
+    border-radius: 100px;
+    background: rgba(250, 248, 244, 0.9);
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: color var(--duration-fast), border-color var(--duration-fast);
+  }
+  .wheel-card-toggle:hover,
+  .wheel-card-toggle:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
   .wheel-card.is-hovered .wheel-card-tilt {
     transform:
       translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 16px)
@@ -78,9 +104,9 @@ const projects = [
   .wheel-card:hover .wheel-card-front::after { opacity: 1; }
   @keyframes borderShimmer { 0% { background-position: 100% 100%; } 50% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
 
-  .wheel-card-back { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.08); transform: rotateY(180deg); }
+  .wheel-card-back { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.08); transform: rotateY(180deg); overflow-y: auto; }
 
-  .wheel-card-num { font-family: 'Instrument Serif', serif; font-size: 3rem; font-weight: 400; color: var(--surface-3); line-height: 1; margin-bottom: 0.8rem; transition: color var(--duration-normal); }
+  .wheel-card-num { font-family: 'Instrument Serif', serif; font-size: 3rem; font-weight: 400; color: var(--text-muted); line-height: 1; margin-bottom: 0.8rem; transition: color var(--duration-normal); }
   .wheel-card:hover .wheel-card-num { color: rgba(232, 168, 76, 0.15); }
   .wheel-card-title { font-family: 'Space Grotesk', sans-serif; font-size: var(--text-h2); font-weight: var(--text-h2-w); margin-bottom: var(--space-2); }
   .wheel-card-title a { color: var(--text-primary); border-bottom: 1px solid transparent; transition: border-color var(--duration-fast), color var(--duration-fast); pointer-events: auto; position: relative; z-index: 2; }
@@ -94,6 +120,41 @@ const projects = [
   .wheel-card-back .back-link { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent); margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.3rem; }
 
   .wheel-hint { text-align: center; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; opacity: 0.6; }
+
+  .wheel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+  .wheel-control {
+    flex: 0 0 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--surface-3);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    font: 400 1rem/1 'JetBrains Mono', monospace;
+    cursor: pointer;
+    transition: border-color var(--duration-fast), color var(--duration-fast), transform var(--duration-fast);
+  }
+  .wheel-control:hover,
+  .wheel-control:focus-visible {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .wheel-status {
+    width: min(13rem, 50vw);
+    min-width: 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-caption);
+    letter-spacing: 0.06em;
+  }
 
   .wheel-pointer-label {
     position: absolute;
@@ -135,6 +196,12 @@ const projects = [
       opacity: 1;
       filter: none;
     }
+    .wheel-card-inner,
+    .wheel-control,
+    .wheel-card-front::after {
+      animation: none;
+      transition: none;
+    }
   }
 
   @media (max-width: 768px) {
@@ -142,67 +209,220 @@ const projects = [
     .wheel-stage { height: clamp(300px, 50vw, 400px); }
   }
   @media (max-width: 480px) {
-    .wheel-card { width: clamp(200px, 70vw, 280px); height: clamp(150px, 45vw, 200px); }
-    .wheel-stage { height: clamp(260px, 45vw, 350px); }
+    .wheel-card { width: clamp(220px, 72vw, 280px); height: clamp(240px, 68vw, 250px); }
+    .wheel-stage { height: clamp(330px, 92vw, 370px); }
+    .wheel-controls { gap: var(--space-3); }
   }
 </style>
 
-<section class="projects" id="projects">
+<section class="projects" data-projects-wheel>
   <div class="wrap">
     <div class="projects-header" data-reveal>
       <div class="section-label">Projects</div>
-      <h2 class="section-title">做过的、在做的、想做的</h2>
+      <HeadingTag class="section-title">做过的、在做的、想做的</HeadingTag>
     </div>
-    <div class="wheel-stage" id="wheelStage">
-      <div class="wheel-group" id="wheelGroup">
-        {projects.map(p => (
-          <div class="wheel-card">
+    <div class="wheel-stage" data-wheel-stage aria-label="3D 项目轮盘">
+      <div class="wheel-group">
+        {projects.map((project, index) => (
+          <article
+            class="wheel-card"
+            data-project-card
+            data-project-title={project.title}
+            data-active={index === 0 ? 'true' : 'false'}
+            aria-hidden={index === 0 ? 'false' : 'true'}
+            inert={index === 0 ? undefined : true}
+          >
             <div class="wheel-card-tilt">
               <div class="wheel-card-inner">
-                <div class="wheel-card-face wheel-card-front">
-                  <div class="wheel-card-num">{p.num}</div>
-                  <div class="wheel-card-title"><a href={p.link} target="_blank">{p.title}</a></div>
-                  <p class="wheel-card-brief">{p.brief}</p>
-                  <div class="wheel-card-tags">{p.tags.map(t => <span>{t}</span>)}</div>
+                <div class="wheel-card-face wheel-card-front" data-card-front aria-hidden="false">
+                  <div class="wheel-card-num">{getProjectDisplayNumber(index)}</div>
+                  <CardHeadingTag class="wheel-card-title">
+                    {project.href ? (
+                      <a href={project.href} target="_blank" rel="noopener noreferrer">{project.title}</a>
+                    ) : project.title}
+                  </CardHeadingTag>
+                  <p class="wheel-card-brief">{project.brief}</p>
+                  <div class="wheel-card-tags">{project.tags.map((tag) => <span>{tag}</span>)}</div>
                 </div>
-                <div class="wheel-card-face wheel-card-back">
-                  <div class="back-title">{p.backTitle}</div>
-                  <p class="back-desc">{p.backDesc}</p>
-                  <a href={p.link} target="_blank" class="back-link">{p.linkText}</a>
+                <div class="wheel-card-face wheel-card-back" data-card-back aria-hidden="true" inert>
+                  <CardHeadingTag class="back-title">{project.detailTitle}</CardHeadingTag>
+                  <p class="back-desc">{project.detail}</p>
+                  {project.href && project.linkText && (
+                    <a href={project.href} target="_blank" rel="noopener noreferrer" class="back-link">
+                      {project.linkText}
+                    </a>
+                  )}
                 </div>
               </div>
+              <button
+                class="wheel-card-toggle"
+                type="button"
+                data-card-toggle
+                aria-expanded="false"
+                aria-label={`查看 ${project.title} 详情`}
+              >
+                详情
+              </button>
             </div>
-          </div>
+          </article>
         ))}
       </div>
-      <div class="wheel-pointer-label" id="wheelPointerLabel" aria-hidden="true">查看</div>
+      <div class="wheel-pointer-label" data-wheel-pointer-label aria-hidden="true">查看</div>
     </div>
-    <p class="wheel-hint" data-reveal>左右拖拽旋转 · 点击翻转 · 标题可跳转</p>
+    <div class="wheel-controls" data-reveal>
+      <button class="wheel-control" type="button" data-project-previous aria-label="上一个项目">←</button>
+      <p class="wheel-status" role="status" aria-label="当前项目" aria-live="polite" data-wheel-status>
+        01 / {getProjectDisplayNumber(projects.length - 1)} · {projects[0].title}
+      </p>
+      <button class="wheel-control" type="button" data-project-next aria-label="下一个项目">→</button>
+    </div>
+    <p class="wheel-hint" data-reveal>左右拖拽旋转 · 方向按钮切换 · 详情按钮翻面</p>
   </div>
 </section>
 
 <script>
-  (() => {
-    const stage = document.getElementById('wheelStage');
-    const cards = document.querySelectorAll('.wheel-card');
-    const pointerLabel = document.getElementById('wheelPointerLabel');
+  document.querySelectorAll<HTMLElement>('[data-projects-wheel]').forEach((root) => {
+    if (root.dataset.projectsWheelReady === 'true') return;
+    root.dataset.projectsWheelReady = 'true';
+
+    const stage = root.querySelector<HTMLElement>('[data-wheel-stage]');
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-project-card]'));
+    const pointerLabel = root.querySelector<HTMLElement>('[data-wheel-pointer-label]');
+    const previousButton = root.querySelector<HTMLButtonElement>('[data-project-previous]');
+    const nextButton = root.querySelector<HTMLButtonElement>('[data-project-next]');
+    const status = root.querySelector<HTMLElement>('[data-wheel-status]');
     const count = cards.length;
-    if (!stage || count === 0) return;
+    if (!stage || !previousButton || !nextButton || !status || count === 0) return;
 
-    const radius = Math.min(window.innerWidth * 0.38, 440);
     const angleStep = (2 * Math.PI) / count;
-    cards.forEach((card, i) => { (card as any)._angle = i * angleStep; });
+    const cardAngles = cards.map((_, index) => index * angleStep);
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const controller = new AbortController();
+    const { signal } = controller;
 
-    let rotation = 0, velocity = 0;
-    const friction = 0.94, dragSensitivity = 0.003;
-    let isDragging = false, lastMoveTime = 0, lastMouseX = 0;
-    let focusedCard: Element | null = null;
+    let radius = 0;
+    let rotation = 0;
+    let velocity = 0;
+    let targetRotation: number | null = null;
+    let renderFrame = 0;
+    let isDragging = false;
+    let isWheelVisible = true;
+    let activeIndex = 0;
+    let lastMoveTime = 0;
+    let lastPointerX = 0;
+    const friction = 0.94;
+    const dragSensitivity = 0.003;
+
+    let focusedCard: HTMLElement | null = null;
     let pointerFrame = 0;
     let pendingPointer: { clientX: number; clientY: number; target: HTMLElement } | null = null;
     const canUsePointerEffects = window.matchMedia('(hover: hover) and (pointer: fine)').matches
-      && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      && !motionQuery.matches;
 
-    const resetCardTilt = (card: Element) => {
+    const setFaceAccessibility = (card: HTMLElement, isActive: boolean) => {
+      const isFlipped = card.classList.contains('is-flipped');
+      const front = card.querySelector<HTMLElement>('[data-card-front]');
+      const back = card.querySelector<HTMLElement>('[data-card-back]');
+      const toggle = card.querySelector<HTMLButtonElement>('[data-card-toggle]');
+      if (!front || !back || !toggle) return;
+
+      card.toggleAttribute('inert', !isActive);
+      card.setAttribute('aria-hidden', String(!isActive));
+      front.toggleAttribute('inert', !isActive || isFlipped);
+      front.setAttribute('aria-hidden', String(!isActive || isFlipped));
+      back.toggleAttribute('inert', !isActive || !isFlipped);
+      back.setAttribute('aria-hidden', String(!isActive || !isFlipped));
+      toggle.setAttribute('aria-expanded', String(isFlipped));
+      toggle.setAttribute('aria-label', isFlipped
+        ? `返回 ${card.dataset.projectTitle ?? ''} 摘要`
+        : `查看 ${card.dataset.projectTitle ?? ''} 详情`);
+      toggle.textContent = isFlipped ? '摘要' : '详情';
+    };
+
+    const setActiveCard = (nextIndex: number) => {
+      if (activeIndex === nextIndex && cards[nextIndex].dataset.active === 'true') return;
+      activeIndex = nextIndex;
+      cards.forEach((card, index) => {
+        const isActive = index === activeIndex;
+        card.dataset.active = String(isActive);
+        setFaceAccessibility(card, isActive);
+      });
+      status.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(count).padStart(2, '0')} · ${cards[activeIndex].dataset.projectTitle ?? ''}`;
+    };
+
+    const findFrontCardIndex = () => {
+      let frontIndex = 0;
+      let frontDepth = Number.NEGATIVE_INFINITY;
+      cardAngles.forEach((angle, index) => {
+        const depth = Math.cos(angle + rotation);
+        if (depth > frontDepth) {
+          frontDepth = depth;
+          frontIndex = index;
+        }
+      });
+      return frontIndex;
+    };
+
+    const renderCards = () => {
+      cards.forEach((card, index) => {
+        const angle = cardAngles[index] + rotation;
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius;
+        const depth = (z + radius) / (2 * radius || 1);
+        const scale = 0.55 + depth * 0.45;
+        const opacity = 0.15 + depth * 0.85;
+        const blur = depth < 0.25 ? (1 - depth / 0.25) * 3 : 0;
+        card.style.transform = `translate(-50%, -50%) translate3d(${x}px, 0, ${z}px) scale(${scale})`;
+        card.style.opacity = String(opacity);
+        card.style.zIndex = String(Math.round(depth * 100));
+        card.style.filter = blur > 0 ? `blur(${blur}px)` : 'none';
+      });
+      setActiveCard(findFrontCardIndex());
+    };
+
+    const scheduleRender = () => {
+      if (renderFrame) return;
+      renderFrame = requestAnimationFrame(updateMotion);
+    };
+
+    const updateMotion = () => {
+      renderFrame = 0;
+      if (!isWheelVisible) return;
+      let shouldContinue = false;
+
+      if (targetRotation !== null) {
+        const distance = targetRotation - rotation;
+        if (motionQuery.matches || Math.abs(distance) < 0.001) {
+          rotation = targetRotation;
+          targetRotation = null;
+        } else {
+          rotation += distance * 0.18;
+          shouldContinue = true;
+        }
+      } else if (!isDragging && Math.abs(velocity) >= 0.00005 && !motionQuery.matches) {
+        velocity *= friction;
+        rotation += velocity;
+        shouldContinue = Math.abs(velocity) >= 0.00005;
+        if (!shouldContinue) velocity = 0;
+      }
+
+      stage.classList.toggle('is-moving', shouldContinue || isDragging);
+      renderCards();
+      if (shouldContinue) scheduleRender();
+    };
+
+    const selectProject = (index: number) => {
+      clearPointerEffects();
+      const nextIndex = (index + count) % count;
+      const baseTarget = -cardAngles[nextIndex];
+      const turns = Math.round((rotation - baseTarget) / (2 * Math.PI));
+      targetRotation = baseTarget + turns * 2 * Math.PI;
+      velocity = 0;
+      stage.classList.add('is-moving');
+      scheduleRender();
+    };
+
+    const resetCardTilt = (card: HTMLElement) => {
       const tilt = card.querySelector('.wheel-card-tilt') as HTMLElement | null;
       if (!tilt) return;
       tilt.style.removeProperty('--tilt-x');
@@ -211,12 +431,12 @@ const projects = [
       tilt.style.removeProperty('--shift-y');
     };
 
-    const setFocusedCard = (activeCard: Element | null, showPointerLabel = false) => {
+    const setFocusedCard = (activeCard: HTMLElement | null, showPointerLabel = false) => {
       if (focusedCard !== activeCard) {
         if (focusedCard) resetCardTilt(focusedCard);
         focusedCard = activeCard;
         stage.classList.toggle('has-hovered-card', Boolean(activeCard));
-        cards.forEach(card => card.classList.toggle('is-hovered', card === activeCard));
+        cards.forEach((card) => card.classList.toggle('is-hovered', card === activeCard));
       }
       pointerLabel?.classList.toggle('is-visible', Boolean(activeCard) && showPointerLabel);
     };
@@ -234,13 +454,13 @@ const projects = [
       pendingPointer = null;
       if (!pointer || isDragging) return;
       const { clientX, clientY, target } = pointer;
-      const card = target.closest('.wheel-card') as HTMLElement | null;
-      if (!card || card.style.pointerEvents === 'none') {
+      const card = target.closest<HTMLElement>('[data-project-card]');
+      if (!card || card.dataset.active !== 'true') {
         setFocusedCard(null);
         return;
       }
 
-      setFocusedCard(card, true);
+      setFocusedCard(card, !target.closest('a, button'));
       const cardRect = card.getBoundingClientRect();
       const normalizedX = ((clientX - cardRect.left) / cardRect.width - 0.5) * 2;
       const normalizedY = ((clientY - cardRect.top) / cardRect.height - 0.5) * 2;
@@ -261,65 +481,90 @@ const projects = [
       pointerFrame = requestAnimationFrame(updateCardPointerEffects);
     };
 
-    const onPointerDown = (e: MouseEvent | TouchEvent) => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0 || (event.target as HTMLElement).closest('a, button')) return;
       isDragging = true;
+      targetRotation = null;
       clearPointerEffects();
-      const clientX = (e as MouseEvent).clientX ?? (e as TouchEvent).touches?.[0]?.clientX ?? 0;
-      lastMouseX = clientX; lastMoveTime = Date.now(); velocity = 0;
+      lastPointerX = event.clientX;
+      lastMoveTime = performance.now();
+      velocity = 0;
       stage.style.cursor = 'grabbing';
+      stage.setPointerCapture(event.pointerId);
     };
-    const onPointerMove = (e: MouseEvent | TouchEvent) => {
+    const onPointerMove = (event: PointerEvent) => {
       if (!isDragging) return;
-      const clientX = (e as MouseEvent).clientX ?? (e as TouchEvent).touches?.[0]?.clientX ?? 0;
-      const dx = clientX - lastMouseX;
-      const now = Date.now(); const dt = Math.max(now - lastMoveTime, 1);
+      const dx = event.clientX - lastPointerX;
+      const now = performance.now();
+      const dt = Math.max(now - lastMoveTime, 1);
       velocity = (dx * dragSensitivity) / (dt / 16);
       rotation += dx * dragSensitivity;
-      lastMouseX = clientX; lastMoveTime = now;
+      lastPointerX = event.clientX;
+      lastMoveTime = now;
+      stage.classList.add('is-moving');
+      scheduleRender();
     };
-    const onPointerUp = () => { isDragging = false; stage.style.cursor = 'grab'; };
+    const onPointerUp = (event: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      stage.style.cursor = 'grab';
+      if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
+      if (motionQuery.matches) velocity = 0;
+      scheduleRender();
+    };
 
-    stage.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('mousemove', onPointerMove);
-    window.addEventListener('mouseup', onPointerUp);
-    stage.addEventListener('touchstart', onPointerDown, { passive: true });
-    window.addEventListener('touchmove', onPointerMove, { passive: true });
-    window.addEventListener('touchend', onPointerUp);
+    stage.addEventListener('pointerdown', onPointerDown, { signal });
+    stage.addEventListener('pointermove', onPointerMove, { signal });
+    stage.addEventListener('pointerup', onPointerUp, { signal });
+    stage.addEventListener('pointercancel', onPointerUp, { signal });
     if (canUsePointerEffects) {
-      stage.addEventListener('mousemove', scheduleCardPointerEffects);
-      stage.addEventListener('mouseleave', clearPointerEffects);
+      stage.addEventListener('mousemove', scheduleCardPointerEffects, { signal });
+      stage.addEventListener('mouseleave', clearPointerEffects, { signal });
     }
 
-    cards.forEach(card => {
-      card.addEventListener('click', (e) => {
-        if ((e.target as HTMLElement).closest('a')) return;
+    cards.forEach((card) => {
+      const toggle = card.querySelector<HTMLButtonElement>('[data-card-toggle]');
+      toggle?.addEventListener('click', () => {
         card.classList.toggle('is-flipped');
-      });
+        setFaceAccessibility(card, card.dataset.active === 'true');
+      }, { signal });
     });
 
-    function render() {
-      if (!isDragging) {
-        velocity *= friction;
-        if (Math.abs(velocity) < 0.00005) velocity = 0;
-        rotation += velocity;
+    previousButton.addEventListener('click', () => selectProject(activeIndex - 1), { signal });
+    nextButton.addEventListener('click', () => selectProject(activeIndex + 1), { signal });
+
+    const resizeObserver = new ResizeObserver(() => {
+      radius = Math.min(stage.clientWidth * 0.38, 440);
+      scheduleRender();
+    });
+    resizeObserver.observe(stage);
+
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      isWheelVisible = entries.some((entry) => entry.isIntersecting);
+      if (isWheelVisible) {
+        renderCards();
+        return;
       }
-      cards.forEach(card => {
-        const angle = (card as any)._angle + rotation;
-        const x = Math.sin(angle) * radius;
-        const z = Math.cos(angle) * radius;
-        const depthNorm = (z + radius) / (2 * radius);
-        const scale = 0.55 + depthNorm * 0.45;
-        const opacity = 0.15 + depthNorm * 0.85;
-        const zIndex = Math.round(depthNorm * 100);
-        const blur = depthNorm < 0.25 ? (1 - depthNorm / 0.25) * 3 : 0;
-        (card as HTMLElement).style.transform = `translate(-50%, -50%) translate3d(${x}px, 0, ${z}px) scale(${scale})`;
-        (card as HTMLElement).style.opacity = String(opacity);
-        (card as HTMLElement).style.zIndex = String(zIndex);
-        (card as HTMLElement).style.filter = blur > 0 ? `blur(${blur}px)` : 'none';
-        (card as HTMLElement).style.pointerEvents = depthNorm < 0.3 ? 'none' : 'auto';
-      });
-      requestAnimationFrame(render);
-    }
-    render();
-  })();
+
+      targetRotation = null;
+      velocity = 0;
+      stage.classList.remove('is-moving');
+      if (renderFrame) cancelAnimationFrame(renderFrame);
+      renderFrame = 0;
+      clearPointerEffects();
+    });
+    visibilityObserver.observe(stage);
+
+    cards.forEach((card, index) => setFaceAccessibility(card, index === 0));
+    radius = Math.min(stage.clientWidth * 0.38, 440);
+    renderCards();
+
+    document.addEventListener('astro:before-swap', () => {
+      controller.abort();
+      resizeObserver.disconnect();
+      visibilityObserver.disconnect();
+      if (renderFrame) cancelAnimationFrame(renderFrame);
+      if (pointerFrame) cancelAnimationFrame(pointerFrame);
+    }, { once: true, signal });
+  });
 </script>

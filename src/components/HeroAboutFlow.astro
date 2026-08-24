@@ -1,0 +1,141 @@
+---
+import Hero from './Hero.astro';
+import About from './About.astro';
+---
+
+<style>
+  .hero-about-flow {
+    position: relative;
+    background: var(--surface-0);
+    overflow-x: clip;
+  }
+
+  /* The positive X rotation brings the panel's lower half toward the viewer.
+     Source: https://www.w3.org/TR/css-transforms-2/#perspective-property */
+  .about-flow-stage {
+    --about-angle: 64deg;
+    --about-scale: 0.94;
+    position: relative;
+    z-index: 2;
+    margin-top: -24vh;
+    perspective: 1600px;
+    perspective-origin: 50% 0;
+    pointer-events: none;
+  }
+
+  .about-flow-panel {
+    position: relative;
+    width: 100%;
+    background: var(--surface-0);
+    border-top: 1px solid rgba(216, 208, 196, 0.82);
+    box-shadow: 0 -12px 36px rgba(26, 22, 18, 0.055);
+    transform:
+      translateZ(0)
+      rotateX(var(--about-angle))
+      scale(var(--about-scale));
+    transform-origin: 50% 0;
+    backface-visibility: hidden;
+  }
+
+  .about-flow-stage.is-transforming .about-flow-panel {
+    will-change: transform;
+  }
+
+  :global(.about-flow-panel [data-reveal]) {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .about-flow-stage.is-readable {
+    pointer-events: auto;
+  }
+
+  @media (max-width: 768px) {
+    .about-flow-stage {
+      --about-angle: 48deg;
+      --about-scale: 0.97;
+      margin-top: -14vh;
+      perspective: 1200px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about-flow-stage {
+      margin-top: 0;
+      perspective: none;
+      pointer-events: auto;
+    }
+
+    .about-flow-panel {
+      box-shadow: none;
+      transform: none;
+    }
+  }
+</style>
+
+<div class="hero-about-flow" data-hero-about-flow>
+  <Hero />
+  <div class="about-flow-stage" data-about-flow-stage>
+    <div class="about-flow-panel">
+      <About />
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-hero-about-flow]').forEach((root) => {
+    if (root.dataset.heroAboutFlowReady === 'true') return;
+    root.dataset.heroAboutFlowReady = 'true';
+
+    const stage = root.querySelector<HTMLElement>('[data-about-flow-stage]');
+    const panel = stage?.querySelector<HTMLElement>('.about-flow-panel');
+    if (!stage || !panel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let animationFrame = 0;
+    let isNearViewport = false;
+
+    const updateFlow = () => {
+      animationFrame = 0;
+      if (!isNearViewport) return;
+      const rect = stage.getBoundingClientRect();
+      const start = window.innerHeight * 0.9;
+      const end = window.innerHeight * 0.1;
+      const progress = Math.max(0, Math.min((start - rect.top) / (start - end), 1));
+      const stageStyles = getComputedStyle(stage);
+      const initialAngle = Number.parseFloat(stageStyles.getPropertyValue('--about-angle')) || 0;
+      const initialScale = Number.parseFloat(stageStyles.getPropertyValue('--about-scale')) || 1;
+      const angle = initialAngle * (1 - progress);
+      const scale = initialScale + progress * (1 - initialScale);
+
+      panel.style.transform = `translateZ(0) rotateX(${angle.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
+      stage.classList.toggle('is-transforming', progress > 0 && progress < 1);
+      stage.classList.toggle('is-readable', progress > 0.65);
+    };
+
+    const scheduleFlowUpdate = () => {
+      if (!isNearViewport || animationFrame) return;
+      animationFrame = requestAnimationFrame(updateFlow);
+    };
+
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      isNearViewport = entries.some((entry) => entry.isIntersecting);
+      if (isNearViewport) scheduleFlowUpdate();
+      else if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
+    }, { rootMargin: '100% 0px' });
+
+    visibilityObserver.observe(stage);
+    window.addEventListener('scroll', scheduleFlowUpdate, { passive: true, signal });
+    window.addEventListener('resize', scheduleFlowUpdate, { signal });
+    document.addEventListener('astro:before-swap', () => {
+      controller.abort();
+      visibilityObserver.disconnect();
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+    }, { once: true, signal });
+  });
+</script>

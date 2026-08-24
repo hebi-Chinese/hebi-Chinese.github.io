@@ -1,7 +1,20 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
+
+const generateContentId = ({ entry }: { entry: string }) => {
+  const pathWithoutExtension = entry.replace(/\.(md|mdx)$/, '');
+  return pathWithoutExtension.endsWith('/index')
+    ? pathWithoutExtension.slice(0, -'/index'.length)
+    : pathWithoutExtension;
+};
 
 const notes = defineCollection({
-  type: 'content',
+  loader: glob({
+    base: './src/content/notes',
+    pattern: '**/*.{md,mdx}',
+    generateId: generateContentId,
+  }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),
@@ -11,7 +24,11 @@ const notes = defineCollection({
 });
 
 const essays = defineCollection({
-  type: 'content',
+  loader: glob({
+    base: './src/content/essays',
+    pattern: '**/*.{md,mdx}',
+    generateId: generateContentId,
+  }),
   schema: z.object({
     title: z.string(),
     date: z.coerce.date(),

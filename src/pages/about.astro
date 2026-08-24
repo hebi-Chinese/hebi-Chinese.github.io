@@ -2,13 +2,11 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import About from '../components/About.astro';
-import ScrollReveal from '../components/ScrollReveal.astro';
 import '../styles/global.css';
 ---
 <BaseLayout title="何必 / about">
   <Nav />
-  <main style="padding-top: 6rem; min-height: 100vh;">
-    <About />
+  <main class="page-main">
+    <About headingLevel="h1" />
   </main>
-  <ScrollReveal />
 </BaseLayout>

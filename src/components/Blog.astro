@@ -42,9 +42,10 @@ const fmtDate = (d: Date) =>
     padding: 1.6rem 0;
     text-decoration: none;
     color: inherit;
-    transition: padding-left var(--duration-normal, 300ms) var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1));
+    transition: transform var(--duration-normal, 300ms) var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1));
   }
-  .blog-item a:hover { padding-left: 0.6rem; }
+  .blog-item a:hover,
+  .blog-item a:focus-visible { transform: translateX(0.6rem); }
 
   .blog-item h3 {
     font-family: 'Instrument Serif', serif;
@@ -96,9 +97,14 @@ const fmtDate = (d: Date) =>
     }
     .blog-item time { order: -1; }
   }
+  @media (prefers-reduced-motion: reduce) {
+    .blog-item a { transition: none; }
+    .blog-item a:hover,
+    .blog-item a:focus-visible { transform: none; }
+  }
 </style>
 
-<section class="blog" id="blog">
+<section class="blog">
   <div class="wrap">
     <div class="blog-header" data-reveal>
       <div class="section-label">Blog</div>
@@ -114,7 +120,7 @@ const fmtDate = (d: Date) =>
         <ul class="blog-list" data-reveal>
           {essays.map(essay => (
             <li class="blog-item">
-              <a href={`/essays/${essay.slug}/`}>
+              <a href={`/essays/${essay.id}/`}>
                 <div>
                   <h3>{essay.data.title}</h3>
                   {essay.data.description && <p>{essay.data.description}</p>}
