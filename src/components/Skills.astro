@@ -1,42 +1,132 @@
 ---
-// Skills pills — horizontal scroll track
+const skills = [
+  'Python',
+  'C#',
+  'Zig',
+  'C',
+  'SQL',
+  'LangGraph',
+  'LangChain',
+  'QLoRA',
+  'PyTorch',
+  'Unsloth',
+  'MCP',
+  'OpenRouter',
+  'FastAPI',
+  'Docker',
+  'PostgreSQL',
+  'Redis',
+  'Win32 API',
+  'IL2CPP',
+  'Git',
+  'Claude Code',
+] as const;
 ---
+
 <style>
-  .skills-section { padding: var(--section-dense) 0; }
-  .skills-track {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    justify-content: center;
+  .skills-section { padding: var(--section-dense) 0 var(--section-normal); }
+  .skills-header {
+    display: grid;
+    grid-template-columns: minmax(10rem, 0.7fr) minmax(0, 1.3fr);
+    align-items: end;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
   }
-  .skill-pill {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
+  .skills-title {
+    max-width: 32rem;
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2rem, 1.3rem + 2.2vw, 3.5rem);
     font-weight: 400;
-    color: var(--text-muted);
-    padding: 0.35rem 0.8rem;
-    border: 1px solid var(--surface-2);
-    border-radius: 100px;
+    line-height: 1;
+  }
+  .skills-note {
+    max-width: 31rem;
+    justify-self: end;
+    color: var(--text-secondary);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+  .skills-index {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    list-style: none;
+    border-top: 1px solid var(--surface-3);
+  }
+  .skill-item {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    min-width: 0;
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 1px solid var(--surface-2);
+    color: var(--text-secondary);
+    transition: color var(--duration-fast), transform var(--duration-normal) var(--ease-out-expo);
+  }
+  .skill-item:not(:nth-child(4n + 1)) {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--surface-2);
+  }
+  .skill-item:hover {
+    color: var(--text-primary);
+    transform: translateX(var(--space-1));
+  }
+  .skill-index,
+  .skill-name {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .skill-index {
+    color: var(--accent);
+    font-size: 0.48rem;
+    letter-spacing: 0.1em;
+  }
+  .skill-name {
+    overflow: hidden;
+    font-size: 0.62rem;
     letter-spacing: 0.04em;
-    transition:
-      background var(--duration-fast),
-      border-color var(--duration-fast),
-      color var(--duration-fast);
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .skill-pill:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-soft);
+
+  @media (max-width: 760px) {
+    .skills-header { grid-template-columns: 1fr; gap: var(--space-4); }
+    .skills-note { justify-self: start; }
+    .skills-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .skill-item:not(:nth-child(4n + 1)) {
+      padding-left: 0;
+      border-left: 0;
+    }
+    .skill-item:nth-child(even) {
+      padding-left: var(--space-4);
+      border-left: 1px solid var(--surface-2);
+    }
+  }
+  @media (max-width: 360px) {
+    .skill-item { grid-template-columns: 1.8rem minmax(0, 1fr); }
+    .skill-item:nth-child(even) { padding-left: var(--space-3); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skill-item { transition: none; }
+    .skill-item:hover { transform: none; }
   }
 </style>
 
-<div class="skills-section">
+<section class="skills-section" aria-labelledby="skills-heading">
   <div class="wrap">
-    <div class="skills-track" data-reveal>
-      {['Python', 'C#', 'Zig', 'C', 'SQL', 'LangGraph', 'LangChain', 'QLoRA', 'PyTorch', 'Unsloth', 'MCP', 'OpenRouter', 'FastAPI', 'Docker', 'PostgreSQL', 'Redis', 'Win32 API', 'IL2CPP', 'Git', 'Claude Code'].map(skill => (
-        <span class="skill-pill">{skill}</span>
+    <header class="skills-header" data-reveal>
+      <div>
+        <div class="section-label">Toolbox</div>
+        <h2 class="skills-title" id="skills-heading">经常碰到的技术</h2>
+      </div>
+      <p class="skills-note">不是熟练度排行，只是一份此刻正在使用、研究或反复遇到的技术索引。</p>
+    </header>
+    <ul class="skills-index" data-reveal>
+      {skills.map((skill, index) => (
+        <li class="skill-item">
+          <span class="skill-index">{String(index + 1).padStart(2, '0')}</span>
+          <span class="skill-name">{skill}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   </div>
-</div>
+</section>

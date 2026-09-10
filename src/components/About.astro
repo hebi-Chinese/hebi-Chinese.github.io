@@ -1,5 +1,5 @@
 ---
-import ProfileMap from './ProfileMap.astro';
+import ProfileGlyphs from './ProfileGlyphs.astro';
 import { getProfileDisplayNumber, profileSections } from '../data/site';
 
 interface Props {
@@ -17,10 +17,6 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   }
 
   .about-intro {
-    display: grid;
-    grid-template-columns: minmax(0, 0.9fr) minmax(20rem, 1.1fr);
-    align-items: end;
-    gap: clamp(2rem, 6vw, 7rem);
     margin-bottom: clamp(4rem, 7vw, 7rem);
   }
 
@@ -28,7 +24,7 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     margin-top: var(--space-3);
     font-family: 'JetBrains Mono', monospace;
     font-size: var(--text-caption);
-    color: var(--text-muted);
+    color: var(--text-secondary);
     letter-spacing: 0.14em;
     text-transform: uppercase;
   }
@@ -36,30 +32,24 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   .about-title {
     margin-top: var(--space-6);
     font-family: 'Instrument Serif', serif;
-    font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
+    font-size: clamp(3.5rem, 2.15rem + 5vw, 6rem);
     font-weight: 400;
     line-height: 0.88;
     letter-spacing: -0.035em;
-  }
-
-  .about-lead {
-    max-width: 35rem;
-    justify-self: end;
-    font-size: clamp(1.15rem, 0.95rem + 0.8vw, 1.65rem);
-    color: var(--text-secondary);
-    line-height: 1.55;
+    white-space: nowrap;
   }
 
   .about-layout {
     display: grid;
     grid-template-columns: minmax(17rem, 0.8fr) minmax(0, 1.5fr);
-    align-items: start;
+    align-items: stretch;
     gap: clamp(3rem, 6vw, 7rem);
   }
 
   .about-visual-slot {
     position: relative;
-    min-height: clamp(19rem, 32vw, 29rem);
+    min-height: 0;
+    align-self: stretch;
     border-top: 1px solid var(--surface-3);
     border-bottom: 1px solid var(--surface-2);
     color: var(--text-muted);
@@ -95,7 +85,7 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   .profile-row {
     position: relative;
     display: grid;
-    grid-template-columns: 3.25rem minmax(8rem, 0.7fr) minmax(15rem, 1.3fr) auto;
+    grid-template-columns: 3.25rem minmax(8rem, 0.7fr) minmax(15rem, 1.3fr);
     align-items: center;
     gap: var(--space-6);
     min-height: 7rem;
@@ -120,8 +110,7 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     transform: scaleX(1);
   }
 
-  .profile-index,
-  .profile-status {
+  .profile-index {
     font-family: 'JetBrains Mono', monospace;
     font-size: var(--text-caption);
     letter-spacing: 0.1em;
@@ -129,10 +118,6 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 
   .profile-index {
     color: var(--accent);
-  }
-
-  .profile-status {
-    color: var(--text-secondary);
   }
 
   .profile-title {
@@ -159,13 +144,8 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   }
 
   @media (max-width: 900px) {
-    .about-intro,
     .about-layout {
       grid-template-columns: 1fr;
-    }
-
-    .about-lead {
-      justify-self: start;
     }
 
     .about-visual-slot {
@@ -173,9 +153,16 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     }
   }
 
+  @media (max-width: 360px) {
+    .about-title {
+      font-size: 3rem;
+      letter-spacing: -0.055em;
+    }
+  }
+
   @media (max-width: 640px) {
     .profile-row {
-      grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+      grid-template-columns: 2.25rem minmax(0, 1fr);
       gap: var(--space-3);
       padding: var(--space-6) 0;
     }
@@ -186,11 +173,6 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       max-width: 28rem;
     }
 
-    .profile-status {
-      grid-column: 3;
-      grid-row: 1;
-      justify-self: end;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -211,14 +193,11 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
         <p class="about-code">Profile / in progress</p>
         <HeadingTag class="about-title">关于这个人</HeadingTag>
       </div>
-      <p class="about-lead">
-        这不是一份履历。先从现在的方向、判断和生活开始；真实内容会在接下来的访谈里逐项补齐。
-      </p>
     </header>
 
     <div class="about-layout">
       <div class="about-visual-slot" aria-hidden="true">
-        <ProfileMap sections={profileSections} />
+        <ProfileGlyphs sections={profileSections} />
       </div>
 
       <div class="profile-list">
@@ -227,7 +206,6 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
             <span class="profile-index">{getProfileDisplayNumber(index)}</span>
             <ProfileHeadingTag class="profile-title">{item.title}</ProfileHeadingTag>
             <p class="profile-prompt">{item.prompt}</p>
-            <span class="profile-status">{item.status}</span>
           </article>
         ))}
       </div>
@@ -242,7 +220,7 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 
     const map = root.querySelector<HTMLElement>('[data-profile-map]');
     const rows = root.querySelectorAll<HTMLElement>('[data-profile-key]');
-    const nodes = map?.querySelectorAll<SVGGElement>('[data-profile-node]') ?? [];
+    const nodes = map?.querySelectorAll<HTMLElement>('[data-profile-node]') ?? [];
     if (!map || nodes.length === 0) return;
 
     const controller = new AbortController();

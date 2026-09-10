@@ -7,8 +7,14 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
   .slice(0, 3);
 ---
 <style>
-  .blog { padding: var(--section-normal) 0; }
-  .blog-header { margin-bottom: 3.5rem; }
+  .blog { padding: var(--section-sparse) 0; }
+  .blog-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-8);
+    margin-bottom: var(--space-12);
+  }
 
   .blog-empty {
     padding: 3rem 0;
@@ -27,52 +33,75 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
     list-style: none;
     margin: 0;
     padding: 0;
-    border-top: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+    border-top: 1px solid var(--surface-3);
   }
   .blog-item {
-    border-bottom: 1px solid var(--border-subtle, rgba(0,0,0,0.08));
+    border-bottom: 1px solid var(--surface-2);
   }
   .blog-item a {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 2rem;
-    align-items: baseline;
-    padding: 1.6rem 0;
+    grid-template-columns: 6rem minmax(0, 1fr) auto;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+    padding: clamp(2rem, 4vw, 3.5rem) 0;
     text-decoration: none;
     color: inherit;
-    transition: transform var(--duration-normal, 300ms) var(--ease-out-expo, cubic-bezier(0.16,1,0.3,1));
   }
-  .blog-item a:hover,
-  .blog-item a:focus-visible { transform: translateX(0.6rem); }
+  .blog-index {
+    padding-top: 0.4rem;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.16em;
+  }
 
   .blog-item h3 {
     font-family: 'Instrument Serif', serif;
-    font-size: 1.4rem;
+    font-size: clamp(1.8rem, 1.2rem + 2vw, 3.25rem);
     font-weight: 400;
-    line-height: 1.35;
-    margin: 0 0 0.4rem;
+    line-height: 1.08;
+    margin: 0 0 var(--space-4);
     color: var(--text-primary, var(--text-secondary));
+    text-wrap: balance;
+    transition: color var(--duration-fast);
   }
   .blog-item p {
-    font-size: 0.85rem;
+    max-width: 42rem;
+    font-size: var(--text-small);
     color: var(--text-muted);
-    line-height: 1.6;
+    line-height: var(--text-small-lh);
     margin: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  .blog-meta {
+    display: grid;
+    justify-items: end;
+    gap: var(--space-8);
+    min-width: 7rem;
+  }
   .blog-item time {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 0.58rem;
     color: var(--text-muted);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     white-space: nowrap;
   }
+  .blog-arrow {
+    color: var(--accent);
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2rem, 1.5rem + 1vw, 3rem);
+    line-height: 1;
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+  .blog-item a:hover h3,
+  .blog-item a:focus-visible h3 { color: var(--accent); }
+  .blog-item a:hover .blog-arrow,
+  .blog-item a:focus-visible .blog-arrow { transform: translate(0.35rem, -0.35rem); }
 
   .blog-more {
-    margin-top: 2.5rem;
     text-align: right;
   }
   .blog-more a {
@@ -87,26 +116,42 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
   }
   .blog-more a:hover { color: var(--text-primary, var(--text-secondary)); }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
+    .blog-header { grid-template-columns: 1fr; }
+    .blog-more { text-align: left; }
     .blog-item a {
-      grid-template-columns: 1fr;
-      gap: 0.4rem;
-      padding: 1.4rem 0;
+      grid-template-columns: 1fr auto;
+      gap: var(--space-4);
+      padding: var(--space-8) 0;
     }
-    .blog-item time { order: -1; }
+    .blog-index { grid-column: 1; }
+    .blog-copy { grid-column: 1 / -1; }
+    .blog-meta {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      gap: var(--space-3);
+    }
   }
   @media (prefers-reduced-motion: reduce) {
-    .blog-item a { transition: none; }
-    .blog-item a:hover,
-    .blog-item a:focus-visible { transform: none; }
+    .blog-arrow { transition: none; }
+    .blog-item a:hover .blog-arrow,
+    .blog-item a:focus-visible .blog-arrow { transform: none; }
   }
 </style>
 
 <section class="blog">
   <div class="wrap">
     <div class="blog-header" data-reveal>
-      <div class="section-label">Blog</div>
-      <h2 class="section-title">写下来的东西</h2>
+      <div>
+        <div class="section-label">Blog</div>
+        <h2 class="section-title">最近写下来的</h2>
+      </div>
+      {essays.length > 0 && (
+        <div class="blog-more">
+          <a href="/essays/">查看全部文章 →</a>
+        </div>
+      )}
     </div>
 
     {essays.length === 0 ? (
@@ -116,21 +161,22 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
     ) : (
       <>
         <ul class="blog-list" data-reveal>
-          {essays.map(essay => (
+          {essays.map((essay, index) => (
             <li class="blog-item">
               <a href={`/essays/${essay.id}/`}>
-                <div>
+                <span class="blog-index">READ / {String(index + 1).padStart(2, '0')}</span>
+                <div class="blog-copy">
                   <h3>{essay.data.title}</h3>
                   {essay.data.description && <p>{essay.data.description}</p>}
                 </div>
-                <time datetime={toContentDate(essay.data.date)}>{formatContentDate(essay.data.date)}</time>
+                <div class="blog-meta">
+                  <time datetime={toContentDate(essay.data.date)}>{formatContentDate(essay.data.date)}</time>
+                  <span class="blog-arrow" aria-hidden="true">↗</span>
+                </div>
               </a>
             </li>
           ))}
         </ul>
-        <div class="blog-more" data-reveal>
-          <a href="/essays/">view all →</a>
-        </div>
       </>
     )}
   </div>

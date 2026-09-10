@@ -1,3 +1,20 @@
+import dualInterface from '../assets/showcase/shuang-leng-jing.png';
+import aoaiInterface from '../assets/showcase/aoai.png';
+import type { ImageMetadata } from 'astro';
+
+export interface ShowcaseProduct {
+  key: 'dual' | 'aoai';
+  title: string;
+  description: string;
+  image: ImageMetadata;
+  alt: string;
+}
+
+export const showcaseProducts = [
+  { key: 'dual', title: '双棱镜', description: '把对话放回上下文，再想下一句怎么说。', image: dualInterface, alt: '双棱镜完整产品界面' },
+  { key: 'aoai', title: 'AOAI', description: '从声音到文字，保留已经确认的部分。', image: aoaiInterface, alt: 'AOAI 完整转写工作台界面' },
+] as const satisfies readonly ShowcaseProduct[];
+
 export const siteProfile = {
   name: '何必',
   description: '何必的个人作品站：技术项目、长文与学习记录。',
@@ -6,6 +23,34 @@ export const siteProfile = {
   stack: ['Python', 'Zig', 'C#', 'LangGraph', 'PyTorch'],
   hobbies: ['游戏', '番剧', '健身房'],
 } as const;
+
+export interface CurrentSignal {
+  key: string;
+  code: string;
+  title: string;
+  detail: string;
+}
+
+export const currentSignals = [
+  {
+    key: 'anti-cheat',
+    code: 'SYSTEMS / 01',
+    title: '反作弊',
+    detail: '把检测、对抗与社区规则，做成真正能长期运行的系统。',
+  },
+  {
+    key: 'agents',
+    code: 'AGENTS / 02',
+    title: '多 Agent',
+    detail: '研究模型怎样分工、交接、留下可审计的过程。',
+  },
+  {
+    key: 'models',
+    code: 'MODELS / 03',
+    title: '模型微调',
+    detail: '在有限算力里，把领域数据变成可验证的能力。',
+  },
+] as const satisfies readonly CurrentSignal[];
 
 export interface NavigationItem {
   key: string;
@@ -111,56 +156,49 @@ export const projects: readonly Project[] = [
 export const getProjectDisplayNumber = (index: number) => String(index + 1).padStart(2, '0');
 
 export type ProfileSectionKey =
-  | 'foundation'
-  | 'focus'
-  | 'judgment'
-  | 'anchors'
-  | 'recommendation'
-  | 'next-stage';
+  | 'future'
+  | 'seasons'
+  | 'badminton'
+  | 'budget'
+  | 'archive'
+  | 'now';
 
 export interface ProfileSection {
   key: ProfileSectionKey;
   title: string;
   prompt: string;
-  status: string;
 }
 
 export const profileSections = [
   {
-    key: 'foundation',
-    title: '当前底色',
-    prompt: '不从出身或履历开始；留给一句现在真正愿意认领的自我描述。',
-    status: '待补',
+    key: 'seasons',
+    title: '真爱换季',
+    prompt: '如果真爱有颜色的话，那是我每个季度都会换的颜色。',
   },
   {
-    key: 'focus',
-    title: '正在投入',
-    prompt: '此刻真正投入时间的主题、项目、能力，或者反复回到的问题。',
-    status: '待补',
+    key: 'badminton',
+    title: '拍定乾坤',
+    prompt: '两三个月没上场，球馆多少有些寂寞。何必登场，诸神退让。',
   },
   {
-    key: 'judgment',
-    title: '判断方式',
-    prompt: '面对技术、产品与生活选择时，哪些标准比流行答案更重要。',
-    status: '待补',
+    key: 'budget',
+    title: '预算拉满',
+    prompt: '我不算乱花钱，也不算特别省。预算之内，我会买我觉得最好的。',
   },
   {
-    key: 'anchors',
-    title: '生活里的锚点',
-    prompt: '让自己恢复能量、保持节奏，或者只是愿意反复做的事情。',
-    status: '待补',
+    key: 'future',
+    title: '未来筹码',
+    prompt: '目前还是想先多挣点钱。以后真碰到特别想做的事，至少不会先卡在钱上。',
   },
   {
-    key: 'recommendation',
-    title: '最近值得推荐',
-    prompt: '任何最近愿意反复分享给别人的东西；旧推荐也可以随时被替换。',
-    status: '待补',
+    key: 'archive',
+    title: '公开留痕',
+    prompt: '我维护个人网站，也发 QQ 动态，歌单偶尔更新。频率不一定高，想记的时候就记一点。',
   },
   {
-    key: 'next-stage',
-    title: '下一阶段',
-    prompt: '正在靠近什么，以及哪些部分仍然没有答案。',
-    status: '待补',
+    key: 'now',
+    title: '此刻坐标',
+    prompt: '现在在哪、在干什么，就写什么。以后变了再改，没必要一开始就写死。',
   },
 ] as const satisfies readonly ProfileSection[];
 

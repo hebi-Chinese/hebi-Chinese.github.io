@@ -1,0 +1,91 @@
+---
+interface Props {
+  kind: 'about' | 'projects' | 'essays' | 'notes' | 'likes' | 'now';
+  label?: string;
+}
+
+const { kind, label } = Astro.props;
+---
+
+<svg class="section-glyph" viewBox="0 0 160 160" role={label ? 'img' : undefined} aria-label={label} aria-hidden={label ? undefined : 'true'} focusable="false">
+  <circle class="section-glyph__field" cx="80" cy="80" r="69" />
+  <path class="section-glyph__register" d="M80 2v18M80 140v18M2 80h18M140 80h18" />
+
+  {kind === 'about' && (
+    <>
+      <circle class="section-glyph__soft" cx="80" cy="80" r="29" />
+      <path class="section-glyph__ink" d="M80 35v18M80 107v18M35 80h18M107 80h18M48 48l13 13M99 99l13 13M112 48 99 61M61 99l-13 13" />
+      <circle class="section-glyph__accent" cx="80" cy="80" r="8" />
+    </>
+  )}
+
+  {kind === 'projects' && (
+    <>
+      <rect class="section-glyph__soft" x="42" y="42" width="34" height="34" rx="5" />
+      <rect class="section-glyph__ink" x="84" y="42" width="34" height="34" rx="5" />
+      <rect class="section-glyph__ink" x="42" y="84" width="34" height="34" rx="5" />
+      <path class="section-glyph__accent-line" d="M84 84h34v34H84zM76 59h8M59 76v8M101 76v8M76 101h8" />
+      <circle class="section-glyph__accent" cx="101" cy="101" r="5" />
+    </>
+  )}
+
+  {kind === 'essays' && (
+    <>
+      <path class="section-glyph__soft" d="M43 31h57l17 17v81H43Z" />
+      <path class="section-glyph__ink" d="M100 31v18h17M57 66h46M57 80h46M57 94h35M57 108h26" />
+      <path class="section-glyph__accent-line" d="M111 103 96 118l-9 3 3-9 15-15Z" />
+    </>
+  )}
+
+  {kind === 'notes' && (
+    <>
+      <path class="section-glyph__soft" d="M37 44h70v70H37Z" />
+      <path class="section-glyph__ink" d="M52 59h40M52 73h31M52 87h38" />
+      <path class="section-glyph__accent-line" d="m91 29 30 30-12 12-30-30Z" />
+      <circle class="section-glyph__accent" cx="112" cy="38" r="5" />
+    </>
+  )}
+
+  {kind === 'likes' && (
+    <>
+      <path class="section-glyph__soft" d="M80 121S35 96 35 62c0-18 13-29 29-29 9 0 16 5 21 13 5-8 12-13 21-13 16 0 29 11 29 29 0 34-45 59-55 59Z" />
+      <path class="section-glyph__ink" d="M80 121S35 96 35 62c0-18 13-29 29-29 9 0 16 5 21 13 5-8 12-13 21-13 16 0 29 11 29 29 0 34-45 59-55 59Z" />
+      <path class="section-glyph__accent-line" d="M44 100c21 12 51 12 72 0M109 92l8 8-9 6" />
+    </>
+  )}
+
+  {kind === 'now' && (
+    <>
+      <circle class="section-glyph__soft" cx="80" cy="80" r="36" />
+      <circle class="section-glyph__ink" cx="80" cy="80" r="23" />
+      <path class="section-glyph__ink" d="M80 26v18M80 116v18M26 80h18M116 80h18" />
+      <path class="section-glyph__accent-line" d="m80 80 31-19M80 80 66 55" />
+      <circle class="section-glyph__accent" cx="80" cy="80" r="6" />
+    </>
+  )}
+</svg>
+
+<style>
+  .section-glyph {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    color: var(--text-secondary);
+  }
+  .section-glyph__field,
+  .section-glyph__register,
+  .section-glyph__ink,
+  .section-glyph__accent-line {
+    fill: none;
+    vector-effect: non-scaling-stroke;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .section-glyph__field { stroke: var(--surface-2); stroke-width: 1; stroke-dasharray: 2 7; }
+  .section-glyph__register { stroke: var(--surface-3); stroke-width: 1; }
+  .section-glyph__ink { stroke: currentColor; stroke-width: 1.7; }
+  .section-glyph__accent-line { stroke: var(--accent); stroke-width: 1.5; }
+  .section-glyph__soft { fill: var(--accent-soft); stroke: currentColor; stroke-width: 1.15; vector-effect: non-scaling-stroke; }
+  .section-glyph__accent { fill: var(--accent); }
+</style>

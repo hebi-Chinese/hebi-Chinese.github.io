@@ -1,5 +1,6 @@
 ---
 import HeroBlueprint from './HeroBlueprint.astro';
+import SiteIndex from './SiteIndex.astro';
 import { siteProfile } from '../data/site';
 ---
 <style>
@@ -35,7 +36,7 @@ import { siteProfile } from '../data/site';
     font-size: var(--text-display);
     font-weight: var(--text-display-w);
     line-height: var(--text-display-lh);
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
     letter-spacing: var(--text-display-ls);
   }
   .hero-name .char {
@@ -46,56 +47,92 @@ import { siteProfile } from '../data/site';
   .hero-name .char.repulse-return {
     transition: transform 0.8s cubic-bezier(0.25, 1.5, 0.5, 1), color 0.6s var(--ease-out-expo);
   }
-  .hero-sub {
+  .hero-intro {
+    max-width: 37rem;
+    margin-bottom: var(--space-8);
+    color: var(--text-secondary);
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.1rem, 0.9rem + 0.7vw, 1.55rem);
+    line-height: 1.5;
+    text-wrap: balance;
+  }
+  .hero-nowrap { white-space: nowrap; }
+  .hero-register {
+    display: grid;
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    max-width: 39rem;
+    margin-bottom: var(--space-8);
+    border-top: 1px solid var(--surface-3);
+    border-bottom: 1px solid var(--surface-2);
+  }
+  .hero-register__item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-3);
+    align-items: baseline;
+    padding: var(--space-3) 0;
+  }
+  .hero-register__item + .hero-register__item {
+    padding-left: var(--space-4);
+    border-left: 1px solid var(--surface-2);
+  }
+  .hero-register dt,
+  .hero-register dd {
+    margin: 0;
+  }
+  .hero-register dt {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.52rem;
+    letter-spacing: 0.16em;
+  }
+  .hero-register dd {
+    color: var(--text-secondary);
+    font-size: var(--text-small);
+  }
+  .hero-register__item:last-child dd { white-space: nowrap; }
+  .hero-cta {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-3);
-    margin-bottom: var(--space-12);
-  }
-  .hero-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: var(--text-caption);
-    font-weight: var(--text-caption-w);
-    color: var(--text-secondary);
-    padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--surface-3);
-    border-radius: 100px;
-    letter-spacing: var(--text-caption-ls);
-    transition: border-color var(--duration-fast), color var(--duration-fast);
-  }
-  .hero-tag:hover { border-color: var(--accent); color: var(--accent); }
-  .hero-cta {
-    margin-top: 3rem;
-    display: flex;
-    gap: 1rem;
+    gap: var(--space-8);
     align-items: center;
   }
-  .btn {
+  .hero-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid currentColor;
+    color: var(--text-primary);
     font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
+    font-size: var(--text-caption);
     font-weight: 400;
-    letter-spacing: 0.08em;
-    padding: 0.65rem 1.5rem;
-    border-radius: 100px;
-    cursor: pointer;
+    letter-spacing: 0.1em;
     transition:
-      background var(--duration-normal) var(--ease-out-expo),
-      border-color var(--duration-normal) var(--ease-out-expo),
-      box-shadow var(--duration-normal) var(--ease-out-expo),
       color var(--duration-normal) var(--ease-out-expo),
       transform var(--duration-normal) var(--ease-out-expo);
-    border: none;
   }
-  .btn-primary { background: var(--accent); color: var(--surface-0); }
-  .btn-primary:hover {
-    box-shadow: 0 0 30px var(--accent-glow), 0 4px 16px rgba(0,0,0,0.08);
+  .hero-link span {
+    color: var(--accent);
+    transition: transform var(--duration-normal) var(--ease-out-expo);
+  }
+  .hero-link:hover,
+  .hero-link:focus-visible {
+    color: var(--accent);
     transform: translateY(-2px);
   }
-  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--surface-3); }
-  .btn-ghost:hover { border-color: var(--text-secondary); color: var(--text-secondary); }
+  .hero-link:hover span,
+  .hero-link:focus-visible span { transform: translate(0.2rem, -0.2rem); }
 
   .ripple-canvas { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
   .hero > .wrap { position: relative; z-index: 2; }
+  .hero-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: clamp(2rem, 6vw, 7rem);
+  }
+  .hero-index { align-self: end; margin-bottom: 0.2rem; }
 
   @media (min-width: 1200px) and (min-height: 1000px) {
     .hero > .wrap { transform: translateY(-5vh); }
@@ -104,11 +141,26 @@ import { siteProfile } from '../data/site';
   @media (max-width: 768px) {
     .hero { min-height: 85vh; }
     .hero-eyebrow { font-size: 0.5rem; }
-    .hero-tag { font-size: 0.6rem; padding: 0.25rem 0.7rem; }
+    .hero-intro { max-width: 31rem; }
+  }
+  @media (max-width: 900px) {
+    .hero-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+    .hero-index { width: 100%; }
+  }
+  @media (max-width: 520px) {
+    .hero-register { grid-template-columns: 1fr; }
+    .hero-register__item + .hero-register__item {
+      padding-left: 0;
+      border-top: 1px solid var(--surface-2);
+      border-left: 0;
+    }
+    .hero-register__item:last-child dd { white-space: normal; }
   }
   @media (prefers-reduced-motion: reduce) {
     .ripple-canvas { display: none; }
     .hero-name .char { transition: color var(--duration-fast); }
+    .hero-link,
+    .hero-link span { transition: none; }
   }
 </style>
 
@@ -116,18 +168,31 @@ import { siteProfile } from '../data/site';
   <canvas class="ripple-canvas" data-ripple-canvas aria-hidden="true"></canvas>
   <HeroBlueprint />
   <div class="wrap">
-    <p class="hero-eyebrow" data-reveal>何必 / hebi</p>
-    <h1 class="hero-name" data-reveal>
-      <span class="char">何</span><span class="char">必</span>
-    </h1>
-    <div class="hero-sub" data-reveal>
-      <span class="hero-tag">主线：学习</span>
-      <span class="hero-tag">副本：???</span>
-      <span class="hero-tag">buff：晚10点的播客</span>
-    </div>
-    <div class="hero-cta" data-reveal>
-      <a href="/projects" class="btn btn-primary">看看做了什么</a>
-      <a href={`mailto:${siteProfile.email}`} class="btn btn-ghost">打个招呼</a>
+    <div class="hero-layout">
+      <div class="hero-copy">
+        <p class="hero-eyebrow" data-reveal>何必 / hebi</p>
+        <h1 class="hero-name" data-reveal>
+          <span class="char">何</span><span class="char">必</span>
+        </h1>
+        <p class="hero-intro" data-reveal>
+          在毕业，也在做反作弊、<span class="hero-nowrap">多 Agent</span> 和模型微调。这里放项目，也放一些还没想完的文字。
+        </p>
+        <dl class="hero-register" data-reveal>
+          <div class="hero-register__item">
+            <dt>NOW</dt>
+            <dd>毕业进行中</dd>
+          </div>
+          <div class="hero-register__item">
+            <dt>WORKING ON</dt>
+            <dd>Systems / Agents / Models</dd>
+          </div>
+        </dl>
+        <div class="hero-cta" data-reveal>
+          <a href="/projects" class="hero-link">查看项目 <span aria-hidden="true">↘</span></a>
+          <a href={`mailto:${siteProfile.email}`} class="hero-link">发封邮件 <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="hero-index"><SiteIndex /></div>
     </div>
   </div>
 </section>

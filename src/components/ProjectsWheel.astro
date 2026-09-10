@@ -3,15 +3,31 @@ import { getProjectDisplayNumber, projects } from '../data/site';
 
 interface Props {
   headingLevel?: 'h1' | 'h2';
+  immersive?: boolean;
 }
 
-const { headingLevel = 'h2' } = Astro.props;
+const { headingLevel = 'h2', immersive = false } = Astro.props;
 const HeadingTag = headingLevel;
 const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 ---
 <style>
   .projects { padding: var(--section-sparse) 0; overflow: hidden; }
   .projects-header { margin-bottom: 2rem; }
+  .projects-scene-note {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.52rem;
+    line-height: 1.8;
+    letter-spacing: 0.13em;
+    text-align: right;
+  }
+  .projects--immersive .projects-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+  }
 
   .wheel-stage {
     position: relative; width: 100%;
@@ -24,11 +40,60 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   .wheel-stage:active { cursor: grabbing; }
   .wheel-group { position: relative; width: 0; height: 0; transform-style: preserve-3d; }
 
+  .projects--immersive .wheel-stage {
+    height: clamp(440px, 47vw, 590px);
+    perspective: 920px;
+    perspective-origin: 50% 42%;
+    isolation: isolate;
+  }
+  .projects--immersive .wheel-stage::before,
+  .projects--immersive .wheel-stage::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .projects--immersive .wheel-stage::before {
+    right: 4%;
+    bottom: -5%;
+    left: 4%;
+    height: 48%;
+    background-image:
+      linear-gradient(to right, rgba(26, 22, 18, 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26, 22, 18, 0.055) 1px, transparent 1px),
+      linear-gradient(to right, rgba(152, 84, 10, 0.08) 1px, transparent 1px);
+    background-size: 54px 54px, 54px 54px, 216px 216px;
+    mask-image: radial-gradient(ellipse at 50% 15%, #000 0%, rgba(0,0,0,0.84) 34%, transparent 73%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 15%, #000 0%, rgba(0,0,0,0.84) 34%, transparent 73%);
+    opacity: 0.74;
+    transform: rotateX(68deg) translateZ(-84px);
+    transform-origin: 50% 100%;
+  }
+  .projects--immersive .wheel-stage::after {
+    right: 16%;
+    bottom: 12%;
+    left: 16%;
+    height: 5rem;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(26, 22, 18, 0.21), rgba(152, 84, 10, 0.08) 42%, transparent 72%);
+    filter: blur(18px);
+    opacity: 0.72;
+    transform: translateZ(-96px) rotateX(72deg);
+  }
+  .projects--immersive .wheel-group {
+    z-index: 1;
+    transform: translateZ(-250px);
+  }
+
   .wheel-card {
     position: absolute;
     width: clamp(280px, 30vw, 380px); height: clamp(200px, 22vw, 260px);
     transform-style: preserve-3d; transition: filter 0.3s;
     left: 50%; top: 50%; transform-origin: center center;
+  }
+  .projects--immersive .wheel-card {
+    width: clamp(300px, 34vw, 430px);
+    height: clamp(225px, 25vw, 300px);
   }
   .wheel-stage.is-moving .wheel-card { will-change: transform; }
   .wheel-card-tilt {
@@ -66,6 +131,17 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     border-color: var(--accent);
     color: var(--accent);
   }
+  .projects--immersive .wheel-card-toggle {
+    top: var(--space-6);
+    right: var(--space-6);
+    min-width: 0;
+    min-height: 0;
+    padding: 0 0 var(--space-1);
+    border: 0;
+    border-bottom: 1px solid currentColor;
+    border-radius: 0;
+    background: transparent;
+  }
   .wheel-card.is-hovered .wheel-card-tilt {
     transform:
       translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 16px)
@@ -88,7 +164,19 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       opacity var(--duration-normal) var(--ease-out-expo),
       filter var(--duration-normal) var(--ease-out-expo);
   }
+  .projects--immersive .wheel-card-face {
+    border-radius: var(--radius-md);
+    transform-style: preserve-3d;
+  }
   .wheel-card-front { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+  .projects--immersive .wheel-card-front {
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,244,0.94));
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 26px 65px rgba(26,22,18,0.14),
+      0 6px 18px rgba(152,84,10,0.07);
+  }
   .wheel-card-front::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
@@ -105,6 +193,10 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   @keyframes borderShimmer { 0% { background-position: 100% 100%; } 50% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
 
   .wheel-card-back { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.08); transform: rotateY(180deg); overflow-y: auto; }
+  .projects--immersive .wheel-card-back {
+    background: linear-gradient(145deg, #fff, #f5efe6);
+    box-shadow: 0 26px 65px rgba(26,22,18,0.16);
+  }
 
   .wheel-card-num { font-family: 'Instrument Serif', serif; font-size: 3rem; font-weight: 400; color: var(--text-muted); line-height: 1; margin-bottom: 0.8rem; transition: color var(--duration-normal); }
   .wheel-card:hover .wheel-card-num { color: rgba(232, 168, 76, 0.15); }
@@ -114,10 +206,30 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   .wheel-card-brief { font-size: var(--text-small); font-weight: var(--text-small-w); color: var(--text-secondary); line-height: var(--text-small-lh); flex: 1; }
   .wheel-card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.8rem; }
   .wheel-card-tags span { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 400; color: var(--text-muted); padding: 0.2rem 0.55rem; background: var(--surface-3); border-radius: 100px; letter-spacing: 0.04em; }
+  .projects--immersive .wheel-card-tags { gap: 0.65rem; }
+  .projects--immersive .wheel-card-tags span {
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+  .projects--immersive .wheel-card-tags span + span::before {
+    content: '+';
+    margin-right: 0.65rem;
+    color: var(--accent);
+  }
 
   .wheel-card-back .back-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 0.6rem; }
   .wheel-card-back .back-desc { font-size: 0.82rem; font-weight: 300; color: var(--text-secondary); line-height: 1.7; flex: 1; }
   .wheel-card-back .back-link { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent); margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+
+  .projects--immersive .wheel-card-num { transform: translateZ(28px); }
+  .projects--immersive .wheel-card-title { transform: translateZ(52px); }
+  .projects--immersive .wheel-card-brief { transform: translateZ(38px); }
+  .projects--immersive .wheel-card-tags { transform: translateZ(46px); }
+  .projects--immersive .wheel-card-toggle { transform: translateZ(64px); }
+  .projects--immersive .wheel-card-back .back-title,
+  .projects--immersive .wheel-card-back .back-desc,
+  .projects--immersive .wheel-card-back .back-link { transform: translateZ(36px); }
 
   .wheel-hint { text-align: center; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; opacity: 0.6; }
 
@@ -202,24 +314,50 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       animation: none;
       transition: none;
     }
+    .projects--immersive .wheel-card-num,
+    .projects--immersive .wheel-card-title,
+    .projects--immersive .wheel-card-brief,
+    .projects--immersive .wheel-card-tags,
+    .projects--immersive .wheel-card-toggle,
+    .projects--immersive .wheel-card-back .back-title,
+    .projects--immersive .wheel-card-back .back-desc,
+    .projects--immersive .wheel-card-back .back-link { transform: none; }
   }
 
   @media (max-width: 768px) {
     .wheel-card { width: clamp(220px, 55vw, 300px); height: clamp(160px, 40vw, 220px); }
     .wheel-stage { height: clamp(300px, 50vw, 400px); }
+    .projects--immersive .wheel-card { width: clamp(250px, 64vw, 330px); height: clamp(200px, 48vw, 245px); }
+    .projects--immersive .wheel-stage { height: clamp(390px, 74vw, 480px); perspective: 760px; }
+    .projects--immersive .wheel-group { transform: translateZ(-110px); }
   }
   @media (max-width: 480px) {
     .wheel-card { width: clamp(220px, 72vw, 280px); height: clamp(240px, 68vw, 250px); }
     .wheel-stage { height: clamp(330px, 92vw, 370px); }
     .wheel-controls { gap: var(--space-3); }
+    .projects--immersive .projects-header { grid-template-columns: 1fr; }
+    .projects--immersive .projects-scene-note { text-align: left; }
+    .projects--immersive .wheel-card { width: clamp(235px, 76vw, 285px); height: clamp(230px, 68vw, 255px); }
+    .projects--immersive .wheel-stage { height: clamp(370px, 112vw, 430px); }
+    .projects--immersive .wheel-group { transform: translateZ(-70px); }
+    .projects--immersive .wheel-stage::before { right: -16%; left: -16%; }
   }
 </style>
 
-<section class="projects" data-projects-wheel>
+<section
+  class:list={['projects', { 'projects--immersive': immersive }]}
+  data-projects-wheel
+  data-scene-depth={immersive ? 'immersive' : 'standard'}
+>
   <div class="wrap">
     <div class="projects-header" data-reveal>
-      <div class="section-label">Projects</div>
-      <HeadingTag class="section-title">做过的、在做的、想做的</HeadingTag>
+      <div>
+        <div class="section-label">Projects</div>
+        <HeadingTag class="section-title">做过的、在做的、想做的</HeadingTag>
+      </div>
+      {immersive && (
+        <p class="projects-scene-note">DEPTH INDEX / 05<br />拖动场景，沿 Z 轴查看</p>
+      )}
     </div>
     <div class="wheel-stage" data-wheel-stage aria-label="3D 项目轮盘">
       <div class="wheel-group">
@@ -292,6 +430,7 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     const nextButton = root.querySelector<HTMLButtonElement>('[data-project-next]');
     const status = root.querySelector<HTMLElement>('[data-wheel-status]');
     const count = cards.length;
+    const isImmersive = root.dataset.sceneDepth === 'immersive';
     if (!stage || !previousButton || !nextButton || !status || count === 0) return;
 
     const angleStep = (2 * Math.PI) / count;
@@ -366,13 +505,16 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     const renderCards = () => {
       cards.forEach((card, index) => {
         const angle = cardAngles[index] + rotation;
+        const wrappedAngle = Math.atan2(Math.sin(angle), Math.cos(angle));
         const x = Math.sin(angle) * radius;
         const z = Math.cos(angle) * radius;
         const depth = (z + radius) / (2 * radius || 1);
-        const scale = 0.55 + depth * 0.45;
-        const opacity = 0.15 + depth * 0.85;
+        const scale = (isImmersive ? 0.58 : 0.55) + depth * (isImmersive ? 0.42 : 0.45);
+        const opacity = (isImmersive ? 0.24 : 0.15) + depth * (isImmersive ? 0.76 : 0.85);
         const blur = depth < 0.25 ? (1 - depth / 0.25) * 3 : 0;
-        card.style.transform = `translate(-50%, -50%) translate3d(${x}px, 0, ${z}px) scale(${scale})`;
+        const y = isImmersive ? (1 - depth) * 34 : 0;
+        const yaw = isImmersive ? -wrappedAngle * (180 / Math.PI) * 0.68 : 0;
+        card.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px) rotateY(${yaw.toFixed(2)}deg) scale(${scale})`;
         card.style.opacity = String(opacity);
         card.style.zIndex = String(Math.round(depth * 100));
         card.style.filter = blur > 0 ? `blur(${blur}px)` : 'none';
@@ -465,10 +607,10 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       const normalizedX = ((clientX - cardRect.left) / cardRect.width - 0.5) * 2;
       const normalizedY = ((clientY - cardRect.top) / cardRect.height - 0.5) * 2;
       const tilt = card.querySelector('.wheel-card-tilt') as HTMLElement | null;
-      tilt?.style.setProperty('--tilt-x', `${(-normalizedY * 2.4).toFixed(2)}deg`);
-      tilt?.style.setProperty('--tilt-y', `${(normalizedX * 3.2).toFixed(2)}deg`);
-      tilt?.style.setProperty('--shift-x', `${(normalizedX * 3).toFixed(2)}px`);
-      tilt?.style.setProperty('--shift-y', `${(normalizedY * 2).toFixed(2)}px`);
+      tilt?.style.setProperty('--tilt-x', `${(-normalizedY * (isImmersive ? 4.8 : 2.4)).toFixed(2)}deg`);
+      tilt?.style.setProperty('--tilt-y', `${(normalizedX * (isImmersive ? 6.4 : 3.2)).toFixed(2)}deg`);
+      tilt?.style.setProperty('--shift-x', `${(normalizedX * (isImmersive ? 5 : 3)).toFixed(2)}px`);
+      tilt?.style.setProperty('--shift-y', `${(normalizedY * (isImmersive ? 3.5 : 2)).toFixed(2)}px`);
 
       const stageRect = stage.getBoundingClientRect();
       pointerLabel?.style.setProperty('--pointer-x', `${clientX - stageRect.left + 16}px`);
@@ -534,7 +676,9 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     nextButton.addEventListener('click', () => selectProject(activeIndex + 1), { signal });
 
     const resizeObserver = new ResizeObserver(() => {
-      radius = Math.min(stage.clientWidth * 0.38, 440);
+      radius = isImmersive
+        ? Math.min(stage.clientWidth * 0.43, 520)
+        : Math.min(stage.clientWidth * 0.38, 440);
       scheduleRender();
     });
     resizeObserver.observe(stage);
@@ -556,7 +700,9 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     visibilityObserver.observe(stage);
 
     cards.forEach((card, index) => setFaceAccessibility(card, index === 0));
-    radius = Math.min(stage.clientWidth * 0.38, 440);
+    radius = isImmersive
+      ? Math.min(stage.clientWidth * 0.43, 520)
+      : Math.min(stage.clientWidth * 0.38, 440);
     renderCards();
 
     document.addEventListener('astro:before-swap', () => {

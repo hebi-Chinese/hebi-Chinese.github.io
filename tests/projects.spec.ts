@@ -18,3 +18,20 @@ test('project controls select a card and its button reveals the details', async 
   await expect(detailsButton).toHaveAttribute('aria-expanded', 'true');
   await expect(page.getByText('Euterpe.Bot 多 Agent 系统', { exact: true })).toBeVisible();
 });
+
+test('homepage immersive project scene keeps the same keyboard controls', async ({ page }) => {
+  await page.goto('/');
+
+  const status = page.getByRole('status', { name: '当前项目' });
+  const stage = page.locator('[aria-label="3D 项目轮盘"]');
+  await stage.scrollIntoViewIfNeeded();
+  await expect(stage).toBeInViewport();
+  await expect(status).toHaveText('01 / 05 · Euterpe');
+
+  const nextProjectButton = page.getByRole('button', { name: '下一个项目' });
+  await nextProjectButton.focus();
+  await nextProjectButton.press('Enter');
+
+  await expect(status).toHaveText('02 / 05 · Euterpe.Bot');
+  await expect(nextProjectButton).toBeFocused();
+});

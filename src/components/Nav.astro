@@ -1,5 +1,6 @@
 ---
 import { navigationItems } from '../data/site';
+import NavGlyph from './NavGlyph.astro';
 
 const desktopItems = navigationItems.filter((item) => item.placements.includes('desktop'));
 const mobileItems = navigationItems.filter((item) => item.placements.includes('mobile'));
@@ -51,11 +52,14 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
 
   .nav-links {
     display: flex;
-    gap: 2rem;
+    gap: clamp(1.15rem, 2.2vw, 2rem);
   }
 
   .nav-links a {
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
     color: var(--text-muted);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.7rem;
@@ -63,6 +67,12 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     letter-spacing: 0.1em;
     text-transform: lowercase;
     transition: color var(--duration-fast);
+  }
+
+  .nav-link-icon {
+    display: grid;
+    place-items: center;
+    transition: color var(--duration-fast), transform 360ms var(--ease-out-expo);
   }
 
   .nav-links a::after {
@@ -169,6 +179,13 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     transform: translateY(-0.28em);
   }
 
+  .nav-links a:hover .nav-link-icon,
+  .nav-links a:focus-visible .nav-link-icon,
+  .nav-links a[aria-current='page'] .nav-link-icon {
+    color: var(--accent);
+    transform: translateY(-0.12rem);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .nav-link-char {
       transition: color var(--duration-fast);
@@ -178,6 +195,11 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     .nav-links a:focus-visible .nav-link-char {
       transform: none;
     }
+
+    .nav-link-icon { transition: color var(--duration-fast); }
+    .nav-links a:hover .nav-link-icon,
+    .nav-links a:focus-visible .nav-link-icon,
+    .nav-links a[aria-current='page'] .nav-link-icon { transform: none; }
 
     .nav,
     .nav-burger span,
@@ -214,6 +236,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
             aria-label={item.label}
             aria-current={isCurrentPage(item.href) ? 'page' : undefined}
           >
+            <span class="nav-link-icon" aria-hidden="true"><NavGlyph kind={item.key} /></span>
             <span class="nav-link-text" aria-hidden="true">
               {item.label.split('').map((char, index) => (
                 <span class="nav-link-char" style={`--char-index: ${index}`}>{char}</span>

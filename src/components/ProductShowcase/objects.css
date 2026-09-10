@@ -1,0 +1,27 @@
+/* Product colors describe the supplied interfaces, not the site's global palette. */
+.product-showcase .float-layer { position: absolute; inset: 0; pointer-events: none; }
+.product-showcase .float-object { position: absolute; --lift: 0; --dx: 0px; --dy: 0px; --magnify: 1; --angle: 0deg; --tone: #b9acf3; --edge: #665a91; }
+.product-showcase [data-showcase-product='aoai'] .float-object { --tone: #519489; --edge: #618d82; }
+.product-showcase .float-erase { position: absolute; inset: -1px; border-radius: 7px; background: #0b0a19; opacity: var(--lift); }
+.product-showcase [data-showcase-product='aoai'] .float-erase { background: #e4eeed; }
+.product-showcase .float-ground { position: absolute; inset: 0; background: var(--tone); border-radius: 6px; opacity: calc(var(--lift) * .13); transform: translate3d(3px, 10px, 0) scale(1.04); }
+.product-showcase .float-face { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 5px; transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--angle)) scale(var(--magnify)); opacity: var(--lift); filter: drop-shadow(0 2px 0 var(--edge)) drop-shadow(0 9px 6px #00000047); }
+.product-showcase .float-face svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.product-showcase .float-face.logo { color: #eeedf7; --edge: #898493; }
+.product-showcase .avatar { border-radius: 50%; width: 32%; aspect-ratio: 1; display: grid; place-items: center; font-size: clamp(8px, .85vw, 12px); color: white; border: 1px solid #ffffff38; background: #316e9e; }
+.product-showcase .avatar.her { background: #9b557d; }
+.product-showcase .avatars small { color: #b6aec9; font-size: clamp(6px, .65vw, 9px); white-space: nowrap; }
+.product-showcase .send { border-radius: 7px; background: #5d5acf; border: 1px solid #a6a4ff77; color: #f7f6ff; }
+.product-showcase .send svg { width: 55%; height: 55%; }
+.product-showcase .role { gap: 3px; background: #12101f; border: 1px solid #514865; border-radius: 7px; color: #ada5c1; padding: 3px; white-space: nowrap; font-size: clamp(5px, .53vw, 8px); }
+.product-showcase .role svg { width: 14%; height: 65%; color: #c3bad4; }
+.product-showcase .role span { padding: 5px 3px; }
+.product-showcase .selected-role { background: #393653; border: 1px solid #7672ce; border-radius: 4px; color: #eceafc; }
+.product-showcase .archive { gap: 7px; color: #244953; background: #f5fbf9; border: 1px solid #8db7b1; border-radius: 7px; font-size: clamp(8px, .9vw, 13px); font-weight: 600; white-space: nowrap; }
+.product-showcase .archive svg { width: 20%; height: 65%; }
+.product-showcase .wave { color: #27897f; --edge: #266058; }
+.product-showcase .start { background: #00818a; color: white; border: 1px solid #49b4b7; border-radius: 7px; font-size: clamp(5px, .60vw, 9px); font-weight: 600; white-space: nowrap; }
+.product-showcase .start i { display: block; flex: none; width: 6px; height: 6px; border-radius: 50%; background: #f9d8d0; }
+.product-showcase .float-note { position: absolute; left: 50%; top: 0; transform: translate(calc(-50% + var(--dx)), calc(-100% - 10px + var(--dy))); opacity: var(--lift); color: #e5deed; font: 9px/1.5 'JetBrains Mono', monospace; white-space: nowrap; padding: 3px 6px; background: #151124e8; border: 1px solid #b7a1d055; border-radius: 3px; }
+.product-showcase [data-showcase-product='aoai'] .float-note { color: #295f56; background: #f1f8f4ee; border-color: #7fab9e; }
+.product-showcase .float-thread { position: absolute; top: 50%; left: 50%; height: 1px; background: var(--tone); transform-origin: left center; opacity: calc(var(--lift) * .55); }
