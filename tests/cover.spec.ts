@@ -29,32 +29,34 @@ test('the third sheet covers a stationary second page with a single bookmark', a
 });
 
 test('a fast scroll produces intermediate image frames without exposing the paper', async ({ page }, testInfo) => {
+  // Linux WebKit may deliver <2 frames/s while recording a software-rendered trace.
+  // Control the browser clock to verify the 500ms contract, not the runner's FPS.
+  await page.clock.install({ time: new Date('2026-09-20T00:00:00Z') });
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
   const surface = page.getByRole('region', { name: '做过的东西' });
   await surface.getByRole('button', { name: '查看双棱镜', exact: true }).click();
   await expect(surface.locator('img').nth(1)).toHaveCSS('opacity', '0');
-  const samples = await surface.evaluate(async root => {
+  await page.clock.pauseAt(new Date('2026-09-20T00:01:00Z'));
+  await surface.evaluate(root => new Promise<void>(resolve => {
     const images = root.querySelectorAll('img');
     const r = images[0].getBoundingClientRect();
+    // Let the native scroll event reach the surface before advancing its queued frames.
+    addEventListener('scroll', () => resolve(), { once: true });
     scrollTo({ top: scrollY + r.top + r.height / 2 - innerHeight * .37, behavior: 'instant' });
-    const start = performance.now();
-    const result: { elapsed: number; wallElapsed: number; incoming: number; backing: number; top: number; height: number; scroll: number }[] = [];
-    // Sample the public 500ms transition over 800ms, not an arbitrary synchronization sleep.
-    await new Promise<void>(resolve => {
-      function sample(now: number) {
-        const rect = images[0].getBoundingClientRect();
-        result.push({ elapsed: now - start, wallElapsed: performance.now() - start,
-          incoming: Number(getComputedStyle(images[1]).opacity), backing: Number(getComputedStyle(images[0]).opacity),
-          top: rect.top, height: rect.height, scroll: scrollY });
-        if (now - start < 800) requestAnimationFrame(sample); else resolve();
-      }
-      requestAnimationFrame(sample);
-    });
-    return result;
-  });
+  }));
+  const samples: { elapsed: number; incoming: number; backing: number }[] = [];
+  let elapsed = 0;
+  for (const step of [16, 125, 125, 125, 125, 32]) {
+    await page.clock.runFor(step);
+    elapsed += step;
+    const [backing, incoming] = await surface.locator('img').evaluateAll(images =>
+      images.map(image => Number(getComputedStyle(image).opacity)));
+    samples.push({ elapsed, incoming, backing });
+  }
   await testInfo.attach('crossfade-frames', { body: JSON.stringify(samples), contentType: 'application/json' });
-  expect(samples.some(sample => sample.incoming > .05 && sample.incoming < .95)).toBe(true);
+  expect(samples[2].incoming).toBeGreaterThan(.05);
+  expect(samples[2].incoming).toBeLessThan(.95);
   expect(samples.every(sample => sample.backing === 1)).toBe(true);
   expect(samples.at(-1)!.incoming).toBe(1);
 });
