@@ -47,8 +47,8 @@ test('desktop scrolling dissolves two interfaces in place without holding the pa
   await moveImageCenter(.64);
   await expect(second.locator('img')).toHaveCSS('opacity', '0');
   await expect(first).toHaveAttribute('aria-hidden', 'false');
-  await page.getByRole('heading', { name: '经常碰到的技术' }).scrollIntoViewIfNeeded();
-  await expect(page.getByRole('heading', { name: '经常碰到的技术' })).toBeInViewport();
+  await page.getByRole('heading', { name: '做过的、在做的、想做的' }).scrollIntoViewIfNeeded();
+  await expect(page.getByRole('heading', { name: '做过的、在做的、想做的' })).toBeInViewport();
 });
 
 test('reduced motion keeps content readable and leaves no decorative animation loop running', async ({ page }) => {

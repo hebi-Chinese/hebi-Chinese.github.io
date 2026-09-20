@@ -58,7 +58,10 @@ test('homepage uses the editorial introduction and section hierarchy', async ({ 
   await expect(showcase.getByRole('button', { name: '查看双棱镜' })).toHaveCount(1);
   await expect(showcase.getByRole('button', { name: '查看 AOAI' })).toHaveCount(1);
   await expect(page.getByText('cat /etc/hebi/profile')).toHaveCount(0);
-  await expect(page.getByRole('heading', { level: 2, name: '经常碰到的技术' })).toHaveCount(1);
+  await expect(page.getByRole('heading', { level: 2, name: '经常碰到的技术' })).toHaveCount(0);
+  const sectionHeadings = await page.getByRole('heading', { level: 2 }).allTextContents();
+  const showcaseIndex = sectionHeadings.findIndex(text => text.trim() === '做过的东西');
+  expect(sectionHeadings[showcaseIndex + 1].trim()).toBe('做过的、在做的、想做的');
   await expect(page.getByRole('heading', { level: 2, name: '最近写下来的' })).toHaveCount(1);
   await expect(page.getByText('主线：学习')).toHaveCount(0);
   await expect(page.getByText('副本：???')).toHaveCount(0);

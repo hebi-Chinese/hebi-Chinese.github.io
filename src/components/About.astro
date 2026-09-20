@@ -114,9 +114,6 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     font-family: 'JetBrains Mono', monospace;
     font-size: var(--text-caption);
     letter-spacing: 0.1em;
-  }
-
-  .profile-index {
     color: var(--accent);
   }
 
@@ -187,7 +184,7 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 
 <section class="about" data-profile-surface>
   <div class="wrap">
-    <header class="about-intro" data-reveal>
+    <header class="about-intro">
       <div>
         <div class="section-label">About</div>
         <p class="about-code">Profile / in progress</p>
@@ -218,26 +215,22 @@ const ProfileHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     if (root.dataset.profileSurfaceReady === 'true') return;
     root.dataset.profileSurfaceReady = 'true';
 
-    const map = root.querySelector<HTMLElement>('[data-profile-map]');
+    const glyphs = root.querySelector<HTMLElement>('[data-profile-glyphs]')!;
     const rows = root.querySelectorAll<HTMLElement>('[data-profile-key]');
-    const nodes = map?.querySelectorAll<HTMLElement>('[data-profile-node]') ?? [];
-    if (!map || nodes.length === 0) return;
+    const nodes = glyphs.querySelectorAll<HTMLElement>('[data-profile-node]');
 
     const controller = new AbortController();
     const { signal } = controller;
     const setActiveNode = (key: string | null) => {
-      map.classList.toggle('is-filtering', key !== null);
+      glyphs.classList.toggle('is-filtering', key !== null);
       nodes.forEach((node) => node.classList.toggle('is-active', node.dataset.profileNode === key));
     };
 
     rows.forEach((row) => {
-      const key = row.dataset.profileKey ?? null;
+      const key = row.dataset.profileKey!;
+      // Decorative hover only: the same information is always present in the text.
       row.addEventListener('pointerenter', () => setActiveNode(key), { passive: true, signal });
       row.addEventListener('pointerleave', () => setActiveNode(null), { passive: true, signal });
-      row.addEventListener('focusin', () => setActiveNode(key), { signal });
-      row.addEventListener('focusout', (event) => {
-        if (!row.contains(event.relatedTarget as Node | null)) setActiveNode(null);
-      }, { signal });
     });
 
     document.addEventListener('astro:before-swap', () => controller.abort(), { once: true, signal });

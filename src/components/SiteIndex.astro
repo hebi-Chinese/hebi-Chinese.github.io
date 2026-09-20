@@ -1,21 +1,17 @@
 ---
 import SectionGlyph from './SectionGlyph.astro';
+import { navigationItems } from '../data/site';
 
-const entries = [
-  { href: '/about', label: 'about', kind: 'about' as const },
-  { href: '/projects', label: 'work', kind: 'projects' as const },
-  { href: '/essays', label: 'essays', kind: 'essays' as const },
-  { href: '/notes', label: 'notes', kind: 'notes' as const },
-  { href: '/likes', label: 'likes', kind: 'likes' as const },
-];
+const entries = navigationItems.flatMap(item => item.siteIndex
+  ? [{ ...item, kind: item.siteIndex.glyph }] : []);
 ---
 
-<nav class="site-index" aria-label="站点索引" data-reveal>
-  <span class="site-index__caption">SITE / INDEX 05</span>
+<nav class="site-index" aria-label="站点索引" data-reveal style={`--index-count: ${entries.length}`}>
+  <span class="site-index__caption">SITE / INDEX {String(entries.length).padStart(2, '0')}</span>
   <div class="site-index__items">
     {entries.map((entry, index) => (
       <a href={entry.href} class="site-index__item" aria-label={`站点索引：${entry.label}`}>
-        <span class="site-index__number">0{index + 1}</span>
+        <span class="site-index__number">{String(index + 1).padStart(2, '0')}</span>
         <span class="site-index__glyph"><SectionGlyph kind={entry.kind} /></span>
         <span class="site-index__label">{entry.label}</span>
       </a>
@@ -38,7 +34,7 @@ const entries = [
     font-size: 0.48rem;
     letter-spacing: 0.18em;
   }
-  .site-index__items { display: grid; grid-template-columns: repeat(5, 1fr); }
+  .site-index__items { display: grid; grid-template-columns: repeat(var(--index-count), 1fr); }
   .site-index__item {
     position: relative;
     display: grid;

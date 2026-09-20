@@ -1,5 +1,5 @@
 ---
-import { navigationItems } from '../data/site';
+import { navigationItems, siteProfile } from '../data/site';
 import NavGlyph from './NavGlyph.astro';
 
 const desktopItems = navigationItems.filter((item) => item.placements.includes('desktop'));
@@ -37,6 +37,10 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
   }
 
   .nav-logo {
+    display: inline-flex;
+    align-items: center;
+    min-width: 44px;
+    min-height: 44px;
     color: var(--text-secondary);
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.8rem;
@@ -54,6 +58,8 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     display: flex;
     gap: clamp(1.15rem, 2.2vw, 2rem);
   }
+
+  .nav-logo img { display: block; width: 46px; height: auto; }
 
   .nav-links a {
     position: relative;
@@ -226,7 +232,9 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
 <header data-navigation>
   <nav class="nav" data-navigation-bar aria-label="主导航">
     <div class="nav-inner">
-      <a href="/" class="nav-logo" aria-current={currentPath === '/' ? 'page' : undefined}>何必</a>
+      <a href="/" class="nav-logo" aria-label={siteProfile.name} aria-current={currentPath === '/' ? 'page' : undefined}>
+        {currentPath === '/' ? <img src={siteProfile.logo.src} width={siteProfile.logo.width} height={siteProfile.logo.height} alt="" /> : siteProfile.name}
+      </a>
       <div class="nav-links">
         {desktopItems.map((item) => (
           <a

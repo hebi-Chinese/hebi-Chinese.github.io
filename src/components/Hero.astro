@@ -39,6 +39,8 @@ import { siteProfile } from '../data/site';
     margin-bottom: var(--space-6);
     letter-spacing: var(--text-display-ls);
   }
+  .hero-side { display: grid; justify-items: center; gap: var(--space-8); }
+  .hero-logo { display: block; width: min(100%, 23rem); height: auto; }
   .hero-name .char {
     display: inline-block;
     transition: color 0.6s var(--ease-out-expo), transform 0.1s ease-out;
@@ -128,8 +130,8 @@ import { siteProfile } from '../data/site';
   .hero > .wrap { position: relative; z-index: 2; }
   .hero-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: end;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
     gap: clamp(2rem, 6vw, 7rem);
   }
   .hero-index { align-self: end; margin-bottom: 0.2rem; }
@@ -144,7 +146,10 @@ import { siteProfile } from '../data/site';
     .hero-intro { max-width: 31rem; }
   }
   @media (max-width: 900px) {
+    .hero { padding-bottom: 24vh; padding-top: 6rem; }
     .hero-layout { grid-template-columns: 1fr; gap: 2.5rem; }
+    .hero-side { width: 100%; }
+    .hero-logo { width: clamp(12rem, 45vw, 20rem); }
     .hero-index { width: 100%; }
   }
   @media (max-width: 520px) {
@@ -192,7 +197,10 @@ import { siteProfile } from '../data/site';
           <a href={`mailto:${siteProfile.email}`} class="hero-link">发封邮件 <span aria-hidden="true">↗</span></a>
         </div>
       </div>
-      <div class="hero-index"><SiteIndex /></div>
+      <div class="hero-side">
+        <img class="hero-logo" src={siteProfile.logo.src} width={siteProfile.logo.width} height={siteProfile.logo.height} alt="" fetchpriority="high" data-reveal />
+        <div class="hero-index"><SiteIndex /></div>
+      </div>
     </div>
   </div>
 </section>

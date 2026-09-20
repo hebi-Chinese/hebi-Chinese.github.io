@@ -1,5 +1,5 @@
 .product-showcase {
-  --showcase-paper: #f0ece4;
+  --showcase-paper: var(--surface-0);
   --showcase-line: #c7bcac;
   --scroll-start: .73;
   --scroll-range: .46;
