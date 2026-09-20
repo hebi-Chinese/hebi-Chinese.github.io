@@ -222,6 +222,21 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     .nav-burger {
       display: flex;
     }
+
+    /* Links remain available until this instance has a working menu controller. */
+    [data-navigation]:not([data-navigation-ready]) .nav { position: relative; }
+    [data-navigation]:not([data-navigation-ready]) .nav-burger { display: none; }
+    [data-navigation]:not([data-navigation-ready]) .nav-mobile {
+      position: static;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: var(--space-4);
+      padding: var(--space-4) clamp(1.5rem, 4vw, 3rem);
+      background: var(--surface-0);
+    }
+    [data-navigation]:not([data-navigation-ready]) .nav-mobile a { font-size: 1rem; }
   }
 
   :global(body.is-navigation-open) {
@@ -265,7 +280,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     </div>
   </nav>
 
-  <div class="nav-mobile" data-navigation-menu aria-hidden="true">
+  <div class="nav-mobile" data-navigation-menu>
     {mobileItems.map((item) => (
       <a
         href={item.href}
@@ -286,7 +301,6 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
 
   navigationRoots.forEach((root, index) => {
     if (root.dataset.navigationReady === 'true') return;
-    root.dataset.navigationReady = 'true';
 
     const navigationBar = root.querySelector<HTMLElement>('[data-navigation-bar]');
     const menuButton = root.querySelector<HTMLButtonElement>('[data-navigation-toggle]');
@@ -301,6 +315,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     let focusFrame = 0;
 
     mobileMenu.id = menuId;
+    mobileMenu.setAttribute('aria-hidden', 'true');
     menuButton.setAttribute('aria-controls', menuId);
 
     const updateBodyLock = () => {
@@ -378,5 +393,6 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
       if (focusFrame) cancelAnimationFrame(focusFrame);
       controller.abort();
     }, { once: true, signal });
+    root.dataset.navigationReady = 'true';
   });
 </script>

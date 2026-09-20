@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 
+// Per-action DOM/screencast snapshots delay native Firefox input enough to turn
+// a 120ms release pause into >280ms. Keep the event trace and failure screenshot;
+// measure gesture timing without adding a screenshot round trip to every move.
+test.use({ trace: { mode: 'retain-on-failure', snapshots: false, screenshots: false } });
+
 async function openWheel(page: Page, route: string) {
   await page.goto(route);
   const card = page.getByRole('link', { name: 'Deepulse（GitHub，新标签页）', exact: true });
@@ -70,6 +75,9 @@ for (const route of ['/', '/projects']) {
 test('a tiny final pointer movement does not erase the swipe, and pressing catches it', async ({ page }) => {
   const { x, y } = await openWheel(page, '/');
   await swipe(page, x, y);
+  // This is inside the supported brief-release pause. Firefox rounds the final
+  // 0.1px move to a whole CSS pixel; it must not replace the last swipe sample.
+  await page.waitForTimeout(120);
   await page.mouse.move(x - 176.1, y);
   await page.mouse.up();
   expect(travel(await samplePath(page, 180))).toBeGreaterThan(5);

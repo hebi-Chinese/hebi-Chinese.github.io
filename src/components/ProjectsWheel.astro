@@ -400,6 +400,7 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     const samples: { x: number; time: number }[] = [];
     const dragSensitivity = 0.003;
     const dragThreshold = 6;
+    const momentumSampleDistance = 2;
     const longPressDuration = 400;
     let gesture: { pointerId: number; startX: number; startY: number; startedAt: number; caughtMotion: boolean } | null = null;
     let suppressPointerClick = false;
@@ -634,8 +635,9 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       const now = performance.now();
       desiredRotation += dx * dragSensitivity;
       if (motionQuery.matches) rotation = desiredRotation;
-      // Subpixel pointer noise must not replace the last meaningful velocity sample.
-      if (Math.abs(event.clientX - samples[samples.length - 1].x) >= 1) {
+      // Firefox can quantize a subpixel move to 1px. Keep that release noise from
+      // replacing the last swipe sample; smaller movements still update position.
+      if (Math.abs(event.clientX - samples[samples.length - 1].x) >= momentumSampleDistance) {
         samples.push({ x: event.clientX, time: now });
         // Retain one sample before the window boundary to cover its first segment.
         while (samples.length > 2 && samples[1].time < now - 100) samples.shift();

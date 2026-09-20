@@ -163,7 +163,8 @@ import { siteProfile } from '../data/site';
   }
   @media (prefers-reduced-motion: reduce) {
     .ripple-canvas { display: none; }
-    .hero-name .char { transition: color var(--duration-fast); }
+    .hero-name .char,
+    .hero-name .char.repulse-return { transition: none; }
     .hero-link,
     .hero-link span { transition: none; }
   }
@@ -212,9 +213,10 @@ import { siteProfile } from '../data/site';
 
     const canvas = root.querySelector<HTMLCanvasElement>('[data-ripple-canvas]');
     const nameCharacters = Array.from(root.querySelectorAll<HTMLElement>('.hero-name .char'));
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const canUsePointerEffects = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    if (!canvas || reducedMotion || !canUsePointerEffects) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const pointerCapability = window.matchMedia('(hover: hover) and (pointer: fine)');
+    const canUsePointerEffects = () => !reducedMotion.matches && pointerCapability.matches;
+    if (!canvas) return;
 
     const context = canvas.getContext('2d');
     if (!context) return;
@@ -331,6 +333,7 @@ import { siteProfile } from '../data/site';
     };
 
     root.addEventListener('pointermove', (event) => {
+      if (!canUsePointerEffects()) return;
       pointer = { x: event.clientX, y: event.clientY };
       if (!repulseFrame) repulseFrame = requestAnimationFrame(updateRepulsion);
 
@@ -344,6 +347,7 @@ import { siteProfile } from '../data/site';
 
     root.addEventListener('pointerleave', resetCharacters, { signal });
     root.addEventListener('click', (event) => {
+      if (!canUsePointerEffects()) return;
       const rect = canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
@@ -352,6 +356,13 @@ import { siteProfile } from '../data/site';
       }
       startRippleAnimation();
     }, { signal });
+
+    const resetEffects = () => {
+      stopRippleAnimation();
+      resetCharacters();
+    };
+    reducedMotion.addEventListener('change', resetEffects, { signal });
+    pointerCapability.addEventListener('change', resetEffects, { signal });
 
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) return;
