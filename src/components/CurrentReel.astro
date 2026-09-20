@@ -1,0 +1,351 @@
+---
+import { currentSignals } from '../data/site';
+---
+
+<style>
+  .current-reel {
+    --reel-ink: #f5f0e8;
+    --reel-muted: #a79c8f;
+    --reel-line: rgba(245, 240, 232, 0.17);
+    position: relative;
+    z-index: 3;
+    height: max(190vh, 76rem);
+    background: #171411;
+    color: var(--reel-ink);
+  }
+
+  .current-reel__stage {
+    position: sticky;
+    top: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-height: 100svh;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .current-reel__stage::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+      linear-gradient(90deg, transparent 0 17%, var(--reel-line) 17% calc(17% + 1px), transparent calc(17% + 1px) 83%, var(--reel-line) 83% calc(83% + 1px), transparent calc(83% + 1px)),
+      radial-gradient(circle at 50% 55%, rgba(196, 113, 11, 0.1), transparent 36%);
+  }
+
+  .current-reel__stage::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: rgba(245, 240, 232, 0.34);
+  }
+
+  .current-reel__header,
+  .current-reel__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-6) clamp(1.5rem, 4vw, 3rem);
+    color: var(--reel-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-caption);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .current-reel__counter {
+    color: var(--accent-bright);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .current-reel__body {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.52fr) minmax(0, 1fr);
+    align-items: center;
+    width: min(100% - 3rem, 72rem);
+    margin: 0 auto;
+  }
+
+  .current-reel__intro {
+    position: relative;
+    z-index: 2;
+    max-width: 22rem;
+  }
+
+  .current-reel__kicker {
+    margin-bottom: var(--space-6);
+    color: var(--accent-bright);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.2em;
+  }
+
+  .current-reel__intro h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(2.4rem, 1.55rem + 3vw, 4rem);
+    font-weight: 400;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+  }
+
+  .current-reel__intro h2 span { display: block; white-space: nowrap; }
+
+  .current-reel__aperture {
+    position: relative;
+    height: min(66vh, 38rem);
+    min-height: 28rem;
+    overflow: hidden;
+    mask-image: linear-gradient(to bottom, transparent, #000 21%, #000 79%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 21%, #000 79%, transparent);
+  }
+
+  .current-reel__aperture::before,
+  .current-reel__aperture::after {
+    content: '';
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    width: clamp(1.5rem, 4vw, 3.5rem);
+    height: 1px;
+    background: var(--accent-bright);
+  }
+
+  .current-reel__aperture::before { left: 0; }
+  .current-reel__aperture::after { right: 0; }
+
+  .current-reel__signal {
+    position: absolute;
+    top: 50%;
+    right: clamp(2.5rem, 7vw, 6.5rem);
+    left: clamp(2.5rem, 7vw, 6.5rem);
+    opacity: var(--signal-opacity, 0.16);
+    filter: blur(var(--signal-blur, 3px));
+    transform: translate3d(0, var(--signal-y, 0), 0) scale(var(--signal-scale, 0.88));
+    transform-origin: 0 50%;
+    transition: opacity 120ms linear, filter 120ms linear;
+  }
+
+  .current-reel.is-scrolling .current-reel__signal { will-change: transform, opacity, filter; }
+
+  .current-reel__signal-code {
+    display: block;
+    margin-bottom: var(--space-3);
+    color: var(--accent-bright);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.17em;
+  }
+
+  .current-reel__signal-title {
+    display: block;
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(4.5rem, 2rem + 8vw, 10rem);
+    line-height: 0.78;
+    letter-spacing: -0.06em;
+    white-space: nowrap;
+  }
+
+  .current-reel__signal-detail {
+    display: block;
+    width: min(27rem, 80%);
+    margin-top: var(--space-6);
+    color: var(--reel-muted);
+    font-size: var(--text-small);
+    line-height: var(--text-small-lh);
+  }
+
+  .current-reel__footer a {
+    padding-bottom: var(--space-1);
+    border-bottom: 1px solid currentColor;
+    color: var(--reel-ink);
+    transition: color var(--duration-fast), transform var(--duration-normal) var(--ease-out-expo);
+  }
+
+  .current-reel__footer a:hover,
+  .current-reel__footer a:focus-visible {
+    color: var(--accent-bright);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 760px) {
+    .current-reel { height: auto; }
+    .current-reel__stage { position: relative; min-height: auto; }
+    .current-reel__body {
+      display: block;
+      width: min(100% - 3rem, 34rem);
+      padding: var(--space-24) 0 var(--space-16);
+    }
+    .current-reel__intro { max-width: 22rem; margin-bottom: var(--space-16); }
+    .current-reel__aperture {
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+    .current-reel__aperture::before,
+    .current-reel__aperture::after { display: none; }
+    .current-reel__signal {
+      position: relative;
+      inset: auto;
+      padding: var(--space-8) 0;
+      border-top: 1px solid var(--reel-line);
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+    .current-reel__signal:last-child { border-bottom: 1px solid var(--reel-line); }
+    .current-reel__signal-title { font-size: clamp(3.7rem, 18vw, 6rem); }
+    .current-reel__signal-detail { width: 100%; margin-top: var(--space-4); }
+    .current-reel__counter { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .current-reel { height: auto; }
+    .current-reel__stage { position: relative; min-height: auto; }
+    .current-reel__body { padding-top: var(--space-24); padding-bottom: var(--space-24); }
+    .current-reel__aperture {
+      display: grid;
+      align-content: center;
+      gap: var(--space-8);
+      height: auto;
+      min-height: 36rem;
+      overflow: visible;
+      mask-image: none;
+      -webkit-mask-image: none;
+    }
+    .current-reel__aperture::before,
+    .current-reel__aperture::after { display: none; }
+    .current-reel__signal {
+      position: relative;
+      inset: auto;
+      opacity: 1;
+      filter: none;
+      transform: none;
+      transition: none;
+    }
+    .current-reel__signal-title { font-size: clamp(3.2rem, 7vw, 6rem); }
+    .current-reel__signal-detail { margin-top: var(--space-3); }
+    .current-reel__footer a { transition: color var(--duration-fast); }
+    .current-reel__footer a:hover,
+    .current-reel__footer a:focus-visible { transform: none; }
+  }
+</style>
+
+<section class="current-reel" aria-labelledby="current-reel-heading" data-current-reel>
+  <div class="current-reel__stage">
+    <header class="current-reel__header">
+      <span>Current signal</span>
+      <span class="current-reel__counter" aria-label="当前频段">01 / {String(currentSignals.length).padStart(2, '0')}</span>
+    </header>
+
+    <div class="current-reel__body">
+      <div class="current-reel__intro">
+        <p class="current-reel__kicker">NOW / ON THE BENCH</p>
+        <h2 id="current-reel-heading"><span>现在占据</span><span>工作台的事</span></h2>
+      </div>
+
+      <div class="current-reel__aperture">
+        {currentSignals.map((signal, index) => (
+          <article class="current-reel__signal" data-current-signal data-signal-index={index}>
+            <span class="current-reel__signal-code">{signal.code}</span>
+            <span class="current-reel__signal-title">{signal.title}</span>
+            <span class="current-reel__signal-detail">{signal.detail}</span>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <footer class="current-reel__footer">
+      <span>Scroll to tune</span>
+      <a href="/now">查看现在 ↗</a>
+    </footer>
+  </div>
+</section>
+
+<script>
+  const getReelPosition = (progress: number, signalCount: number) => {
+    if (progress >= 1) return signalCount - 1;
+    const phaseCount = signalCount * 2 - 1;
+    const scaledProgress = progress * phaseCount;
+    const phase = Math.floor(scaledProgress);
+    const signalIndex = Math.floor(phase / 2);
+    if (phase % 2 === 0) return signalIndex;
+
+    const transitionProgress = scaledProgress - phase;
+    const easedProgress = transitionProgress * transitionProgress * (3 - 2 * transitionProgress);
+    return signalIndex + easedProgress;
+  };
+
+  document.querySelectorAll<HTMLElement>('[data-current-reel]').forEach((root) => {
+    if (root.dataset.currentReelReady === 'true') return;
+    root.dataset.currentReelReady = 'true';
+
+    const signals = [...root.querySelectorAll<HTMLElement>('[data-current-signal]')];
+    const counter = root.querySelector<HTMLElement>('.current-reel__counter');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (signals.length === 0 || reducedMotion || window.matchMedia('(max-width: 760px)').matches) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let animationFrame = 0;
+    let isVisible = false;
+    let settleTimer = 0;
+
+    const render = () => {
+      animationFrame = 0;
+      if (!isVisible) return;
+      const rect = root.getBoundingClientRect();
+      const travel = Math.max(root.offsetHeight - window.innerHeight, 1);
+      const progress = Math.max(0, Math.min(-rect.top / travel, 1));
+      const position = getReelPosition(progress, signals.length);
+      const activeIndex = Math.round(position);
+
+      signals.forEach((item, index) => {
+        const distance = index - position;
+        const magnitude = Math.min(Math.abs(distance), 1.6);
+        item.style.setProperty('--signal-y', `${(distance * 12).toFixed(3)}rem`);
+        item.style.setProperty('--signal-opacity', `${Math.max(0.12, 1 - magnitude * 0.68).toFixed(3)}`);
+        item.style.setProperty('--signal-blur', `${(magnitude * 2.5).toFixed(2)}px`);
+        item.style.setProperty('--signal-scale', `${(1 - magnitude * 0.08).toFixed(3)}`);
+        if (index === activeIndex) item.setAttribute('aria-current', 'step');
+        else item.removeAttribute('aria-current');
+      });
+
+      if (counter) counter.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(signals.length).padStart(2, '0')}`;
+      root.classList.add('is-scrolling');
+      window.clearTimeout(settleTimer);
+      settleTimer = window.setTimeout(() => root.classList.remove('is-scrolling'), 140);
+    };
+
+    const schedule = () => {
+      if (!isVisible || animationFrame) return;
+      animationFrame = requestAnimationFrame(render);
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      isVisible = entries.some((entry) => entry.isIntersecting);
+      if (isVisible) schedule();
+      else if (animationFrame) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
+    });
+
+    observer.observe(root);
+    window.addEventListener('scroll', schedule, { passive: true, signal });
+    window.addEventListener('resize', schedule, { signal });
+    document.addEventListener('astro:before-swap', () => {
+      controller.abort();
+      observer.disconnect();
+      window.clearTimeout(settleTimer);
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+    }, { once: true, signal });
+  });
+</script>

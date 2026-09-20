@@ -3,15 +3,31 @@ import { getProjectDisplayNumber, projects } from '../data/site';
 
 interface Props {
   headingLevel?: 'h1' | 'h2';
+  immersive?: boolean;
 }
 
-const { headingLevel = 'h2' } = Astro.props;
+const { headingLevel = 'h2', immersive = false } = Astro.props;
 const HeadingTag = headingLevel;
 const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 ---
 <style>
   .projects { padding: var(--section-sparse) 0; overflow: hidden; }
   .projects-header { margin-bottom: 2rem; }
+  .projects-scene-note {
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.52rem;
+    line-height: 1.8;
+    letter-spacing: 0.13em;
+    text-align: right;
+  }
+  .projects--immersive .projects-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+  }
 
   .wheel-stage {
     position: relative; width: 100%;
@@ -22,7 +38,54 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     touch-action: pan-y;
   }
   .wheel-stage:active { cursor: grabbing; }
-  .wheel-group { position: relative; width: 0; height: 0; transform-style: preserve-3d; }
+  .wheel-stage.is-dragging .wheel-card { cursor: grabbing; }
+  .wheel-card { -webkit-touch-callout: none; }
+  .wheel-group { position: relative; width: 0; height: 0; transform-style: flat; }
+
+  .projects--immersive .wheel-stage {
+    height: clamp(440px, 47vw, 590px);
+    perspective: 920px;
+    perspective-origin: 50% 42%;
+    isolation: isolate;
+  }
+  .projects--immersive .wheel-stage::before,
+  .projects--immersive .wheel-stage::after {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .projects--immersive .wheel-stage::before {
+    right: 4%;
+    bottom: -5%;
+    left: 4%;
+    height: 48%;
+    background-image:
+      linear-gradient(to right, rgba(26, 22, 18, 0.055) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26, 22, 18, 0.055) 1px, transparent 1px),
+      linear-gradient(to right, rgba(152, 84, 10, 0.08) 1px, transparent 1px);
+    background-size: 54px 54px, 54px 54px, 216px 216px;
+    mask-image: radial-gradient(ellipse at 50% 15%, #000 0%, rgba(0,0,0,0.84) 34%, transparent 73%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 15%, #000 0%, rgba(0,0,0,0.84) 34%, transparent 73%);
+    opacity: 0.74;
+    transform: rotateX(68deg) translateZ(-84px);
+    transform-origin: 50% 100%;
+  }
+  .projects--immersive .wheel-stage::after {
+    right: 16%;
+    bottom: 12%;
+    left: 16%;
+    height: 5rem;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(26, 22, 18, 0.21), rgba(152, 84, 10, 0.08) 42%, transparent 72%);
+    filter: blur(18px);
+    opacity: 0.72;
+    transform: translateZ(-96px) rotateX(72deg);
+  }
+  .projects--immersive .wheel-group {
+    z-index: 1;
+    transform: translateZ(-250px);
+  }
 
   .wheel-card {
     position: absolute;
@@ -30,41 +93,22 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     transform-style: preserve-3d; transition: filter 0.3s;
     left: 50%; top: 50%; transform-origin: center center;
   }
+  .projects--immersive .wheel-card {
+    width: clamp(300px, 34vw, 430px);
+    height: clamp(225px, 25vw, 300px);
+  }
   .wheel-stage.is-moving .wheel-card { will-change: transform; }
   .wheel-card-tilt {
     width: 100%; height: 100%;
-    transform-style: preserve-3d;
+    transform-style: flat;
     transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) scale(1);
     transition: transform 420ms var(--ease-out-expo);
   }
   .wheel-card-inner {
     position: relative; width: 100%; height: 100%;
-    transform-style: preserve-3d;
+    /* Keep the clickable face in one plane so Safari hit testing matches its bounds. */
+    transform-style: flat;
     transition: transform 0.6s var(--ease-out-expo);
-  }
-  .wheel-card.is-flipped .wheel-card-inner { transform: rotateY(180deg); }
-  .wheel-card-toggle {
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    z-index: 4;
-    min-width: 3rem;
-    min-height: 2rem;
-    padding: 0.35rem 0.65rem;
-    border: 1px solid rgba(26, 22, 18, 0.14);
-    border-radius: 100px;
-    background: rgba(250, 248, 244, 0.9);
-    color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.55rem;
-    letter-spacing: 0.08em;
-    cursor: pointer;
-    transition: color var(--duration-fast), border-color var(--duration-fast);
-  }
-  .wheel-card-toggle:hover,
-  .wheel-card-toggle:focus-visible {
-    border-color: var(--accent);
-    color: var(--accent);
   }
   .wheel-card.is-hovered .wheel-card-tilt {
     transform:
@@ -88,7 +132,19 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       opacity var(--duration-normal) var(--ease-out-expo),
       filter var(--duration-normal) var(--ease-out-expo);
   }
+  .projects--immersive .wheel-card-face {
+    border-radius: var(--radius-md);
+    transform-style: preserve-3d;
+  }
   .wheel-card-front { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.06); }
+  .projects--immersive .wheel-card-front {
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.98), rgba(250,248,244,0.94));
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.95) inset,
+      0 26px 65px rgba(26,22,18,0.14),
+      0 6px 18px rgba(152,84,10,0.07);
+  }
   .wheel-card-front::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
@@ -104,22 +160,16 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   .wheel-card:hover .wheel-card-front::after { opacity: 1; }
   @keyframes borderShimmer { 0% { background-position: 100% 100%; } 50% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
 
-  .wheel-card-back { background: var(--surface-1); box-shadow: 0 8px 40px rgba(0,0,0,0.08); transform: rotateY(180deg); overflow-y: auto; }
-
   .wheel-card-num { font-family: 'Instrument Serif', serif; font-size: 3rem; font-weight: 400; color: var(--text-muted); line-height: 1; margin-bottom: 0.8rem; transition: color var(--duration-normal); }
   .wheel-card:hover .wheel-card-num { color: rgba(232, 168, 76, 0.15); }
   .wheel-card-title { font-family: 'Space Grotesk', sans-serif; font-size: var(--text-h2); font-weight: var(--text-h2-w); margin-bottom: var(--space-2); }
-  .wheel-card-title a { color: var(--text-primary); border-bottom: 1px solid transparent; transition: border-color var(--duration-fast), color var(--duration-fast); pointer-events: auto; position: relative; z-index: 2; }
-  .wheel-card-title a:hover { border-color: var(--accent); color: var(--accent); }
   .wheel-card-brief { font-size: var(--text-small); font-weight: var(--text-small-w); color: var(--text-secondary); line-height: var(--text-small-lh); flex: 1; }
-  .wheel-card-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.8rem; }
-  .wheel-card-tags span { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; font-weight: 400; color: var(--text-muted); padding: 0.2rem 0.55rem; background: var(--surface-3); border-radius: 100px; letter-spacing: 0.04em; }
 
-  .wheel-card-back .back-title { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 0.6rem; }
-  .wheel-card-back .back-desc { font-size: 0.82rem; font-weight: 300; color: var(--text-secondary); line-height: 1.7; flex: 1; }
-  .wheel-card-back .back-link { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent); margin-top: 0.6rem; display: inline-flex; align-items: center; gap: 0.3rem; }
+  .projects--immersive .wheel-card-num { transform: translateZ(28px); }
+  .projects--immersive .wheel-card-title { transform: translateZ(52px); }
+  .projects--immersive .wheel-card-brief { transform: translateZ(38px); }
 
-  .wheel-hint { text-align: center; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; opacity: 0.6; }
+  .wheel-hint { text-align: center; margin-top: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 300; color: var(--text-muted); letter-spacing: 0.08em; }
 
   .wheel-controls {
     display: flex;
@@ -202,72 +252,103 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       animation: none;
       transition: none;
     }
+  .projects--immersive .wheel-card-num,
+  .projects--immersive .wheel-card-title,
+  .projects--immersive .wheel-card-brief { transform: none; }
   }
 
   @media (max-width: 768px) {
     .wheel-card { width: clamp(220px, 55vw, 300px); height: clamp(160px, 40vw, 220px); }
     .wheel-stage { height: clamp(300px, 50vw, 400px); }
+    .projects--immersive .wheel-card { width: clamp(250px, 64vw, 330px); height: clamp(200px, 48vw, 245px); }
+    .projects--immersive .wheel-stage { height: clamp(390px, 74vw, 480px); perspective: 760px; }
+    .projects--immersive .wheel-group { transform: translateZ(-110px); }
   }
   @media (max-width: 480px) {
     .wheel-card { width: clamp(220px, 72vw, 280px); height: clamp(240px, 68vw, 250px); }
     .wheel-stage { height: clamp(330px, 92vw, 370px); }
     .wheel-controls { gap: var(--space-3); }
+    .projects--immersive .projects-header { grid-template-columns: 1fr; }
+    .projects--immersive .projects-scene-note { text-align: left; }
+    .projects--immersive .wheel-card { width: clamp(235px, 76vw, 285px); height: clamp(230px, 68vw, 255px); }
+    .projects--immersive .wheel-stage { height: clamp(370px, 112vw, 430px); }
+    .projects--immersive .wheel-group { transform: translateZ(-70px); }
+    .projects--immersive .wheel-stage::before { right: -16%; left: -16%; }
   }
+
+  .wheel-card { color: var(--text-primary); text-decoration: none; cursor: pointer; border-radius: var(--radius-lg); }
+  .wheel-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+  .wheel-card-destination { color: var(--accent); font-size: var(--text-small); margin-top: var(--space-3); }
+
+  /* The readable list is the default. Only a mounted runtime enables the 3D scene. */
+  .projects:not([data-wheel-enhanced]) .wheel-stage {
+    display: block; height: auto; perspective: none; cursor: auto; user-select: auto;
+  }
+  .projects:not([data-wheel-enhanced]) .wheel-group {
+    width: 100%; height: auto; transform: none;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: var(--space-6);
+  }
+  .projects:not([data-wheel-enhanced]) .wheel-card {
+    position: relative; inset: auto; width: auto; height: auto;
+  }
+  .projects:not([data-wheel-enhanced]) .wheel-card-face { position: relative; min-height: 18rem; }
+  .projects:not([data-wheel-enhanced]) .wheel-card-tilt,
+  .projects:not([data-wheel-enhanced]) .wheel-card-inner,
+  .projects:not([data-wheel-enhanced]) .wheel-card-num,
+  .projects:not([data-wheel-enhanced]) .wheel-card-title,
+  .projects:not([data-wheel-enhanced]) .wheel-card-brief { transform: none; }
+  .projects:not([data-wheel-enhanced]) .wheel-controls,
+  .projects:not([data-wheel-enhanced]) .wheel-hint,
+  .projects:not([data-wheel-enhanced]) .wheel-pointer-label,
+  .projects:not([data-wheel-enhanced]) .projects-scene-note,
+  .projects:not([data-wheel-enhanced]) .wheel-stage::before,
+  .projects:not([data-wheel-enhanced]) .wheel-stage::after,
+  .projects:not([data-wheel-enhanced]) .wheel-card-front::after { display: none; animation: none; }
 </style>
 
-<section class="projects" data-projects-wheel>
+<section
+  class:list={['projects', { 'projects--immersive': immersive }]}
+  data-projects-wheel
+  data-scene-depth={immersive ? 'immersive' : 'standard'}
+>
   <div class="wrap">
-    <div class="projects-header" data-reveal>
-      <div class="section-label">Projects</div>
-      <HeadingTag class="section-title">做过的、在做的、想做的</HeadingTag>
+    <div class="projects-header">
+      <div>
+        <div class="section-label">Projects</div>
+        <HeadingTag class="section-title">做过的、在做的、想做的</HeadingTag>
+      </div>
+      {immersive && (
+        <p class="projects-scene-note">DEPTH INDEX / 04<br />拖动场景，沿 Z 轴查看</p>
+      )}
     </div>
     <div class="wheel-stage" data-wheel-stage aria-label="3D 项目轮盘">
       <div class="wheel-group">
         {projects.map((project, index) => (
-          <article
+          <a
             class="wheel-card"
+            href={project.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${project.title}（GitHub，新标签页）`}
+            draggable="false"
             data-project-card
             data-project-title={project.title}
             data-active={index === 0 ? 'true' : 'false'}
-            aria-hidden={index === 0 ? 'false' : 'true'}
-            inert={index === 0 ? undefined : true}
           >
             <div class="wheel-card-tilt">
               <div class="wheel-card-inner">
-                <div class="wheel-card-face wheel-card-front" data-card-front aria-hidden="false">
-                  <div class="wheel-card-num">{getProjectDisplayNumber(index)}</div>
-                  <CardHeadingTag class="wheel-card-title">
-                    {project.href ? (
-                      <a href={project.href} target="_blank" rel="noopener noreferrer">{project.title}</a>
-                    ) : project.title}
-                  </CardHeadingTag>
+                <div class="wheel-card-face wheel-card-front">
+                  <div class="wheel-card-num" aria-hidden="true">{getProjectDisplayNumber(index)}</div>
+                  <CardHeadingTag class="wheel-card-title">{project.title}</CardHeadingTag>
                   <p class="wheel-card-brief">{project.brief}</p>
-                  <div class="wheel-card-tags">{project.tags.map((tag) => <span>{tag}</span>)}</div>
-                </div>
-                <div class="wheel-card-face wheel-card-back" data-card-back aria-hidden="true" inert>
-                  <CardHeadingTag class="back-title">{project.detailTitle}</CardHeadingTag>
-                  <p class="back-desc">{project.detail}</p>
-                  {project.href && project.linkText && (
-                    <a href={project.href} target="_blank" rel="noopener noreferrer" class="back-link">
-                      {project.linkText}
-                    </a>
-                  )}
+                  <span class="wheel-card-destination">{project.linkText}</span>
                 </div>
               </div>
-              <button
-                class="wheel-card-toggle"
-                type="button"
-                data-card-toggle
-                aria-expanded="false"
-                aria-label={`查看 ${project.title} 详情`}
-              >
-                详情
-              </button>
             </div>
-          </article>
+          </a>
         ))}
       </div>
-      <div class="wheel-pointer-label" data-wheel-pointer-label aria-hidden="true">查看</div>
+      <div class="wheel-pointer-label" data-wheel-pointer-label aria-hidden="true">轻点查看 · 按住拖动</div>
     </div>
     <div class="wheel-controls" data-reveal>
       <button class="wheel-control" type="button" data-project-previous aria-label="上一个项目">←</button>
@@ -276,7 +357,7 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       </p>
       <button class="wheel-control" type="button" data-project-next aria-label="下一个项目">→</button>
     </div>
-    <p class="wheel-hint" data-reveal>左右拖拽旋转 · 方向按钮切换 · 详情按钮翻面</p>
+    <p class="wheel-hint">按住卡片或空白拖动旋转 · 轻点卡片查看 GitHub</p>
   </div>
 </section>
 
@@ -292,6 +373,7 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     const nextButton = root.querySelector<HTMLButtonElement>('[data-project-next]');
     const status = root.querySelector<HTMLElement>('[data-wheel-status]');
     const count = cards.length;
+    const isImmersive = root.dataset.sceneDepth === 'immersive';
     if (!stage || !previousButton || !nextButton || !status || count === 0) return;
 
     const angleStep = (2 * Math.PI) / count;
@@ -302,16 +384,26 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
 
     let radius = 0;
     let rotation = 0;
+    let desiredRotation = 0;
+    let lastFrameTime = 0;
     let velocity = 0;
     let targetRotation: number | null = null;
     let renderFrame = 0;
     let isDragging = false;
     let isWheelVisible = true;
     let activeIndex = 0;
-    let lastMoveTime = 0;
     let lastPointerX = 0;
-    const friction = 0.94;
+    // Milliseconds and radians/ms keep the same coast-down on 60/120 Hz screens.
+    const momentumDecay = 600;
+    const followTime = 55;
+    const stopSpeed = 0.00002;
+    const samples: { x: number; time: number }[] = [];
     const dragSensitivity = 0.003;
+    const dragThreshold = 6;
+    const momentumSampleDistance = 2;
+    const longPressDuration = 400;
+    let gesture: { pointerId: number; startX: number; startY: number; startedAt: number; caughtMotion: boolean } | null = null;
+    let suppressPointerClick = false;
 
     let focusedCard: HTMLElement | null = null;
     let pointerFrame = 0;
@@ -320,23 +412,8 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       && !motionQuery.matches;
 
     const setFaceAccessibility = (card: HTMLElement, isActive: boolean) => {
-      const isFlipped = card.classList.contains('is-flipped');
-      const front = card.querySelector<HTMLElement>('[data-card-front]');
-      const back = card.querySelector<HTMLElement>('[data-card-back]');
-      const toggle = card.querySelector<HTMLButtonElement>('[data-card-toggle]');
-      if (!front || !back || !toggle) return;
-
       card.toggleAttribute('inert', !isActive);
       card.setAttribute('aria-hidden', String(!isActive));
-      front.toggleAttribute('inert', !isActive || isFlipped);
-      front.setAttribute('aria-hidden', String(!isActive || isFlipped));
-      back.toggleAttribute('inert', !isActive || !isFlipped);
-      back.setAttribute('aria-hidden', String(!isActive || !isFlipped));
-      toggle.setAttribute('aria-expanded', String(isFlipped));
-      toggle.setAttribute('aria-label', isFlipped
-        ? `返回 ${card.dataset.projectTitle ?? ''} 摘要`
-        : `查看 ${card.dataset.projectTitle ?? ''} 详情`);
-      toggle.textContent = isFlipped ? '摘要' : '详情';
     };
 
     const setActiveCard = (nextIndex: number) => {
@@ -366,13 +443,16 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     const renderCards = () => {
       cards.forEach((card, index) => {
         const angle = cardAngles[index] + rotation;
+        const wrappedAngle = Math.atan2(Math.sin(angle), Math.cos(angle));
         const x = Math.sin(angle) * radius;
         const z = Math.cos(angle) * radius;
         const depth = (z + radius) / (2 * radius || 1);
-        const scale = 0.55 + depth * 0.45;
-        const opacity = 0.15 + depth * 0.85;
+        const scale = (isImmersive ? 0.58 : 0.55) + depth * (isImmersive ? 0.42 : 0.45);
+        const opacity = (isImmersive ? 0.24 : 0.15) + depth * (isImmersive ? 0.76 : 0.85);
         const blur = depth < 0.25 ? (1 - depth / 0.25) * 3 : 0;
-        card.style.transform = `translate(-50%, -50%) translate3d(${x}px, 0, ${z}px) scale(${scale})`;
+        const y = isImmersive ? (1 - depth) * 34 : 0;
+        const yaw = isImmersive ? wrappedAngle * (180 / Math.PI) * 0.68 : 0;
+        card.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px) perspective(1000px) rotateY(${yaw.toFixed(2)}deg) scale(${scale})`;
         card.style.opacity = String(opacity);
         card.style.zIndex = String(Math.round(depth * 100));
         card.style.filter = blur > 0 ? `blur(${blur}px)` : 'none';
@@ -381,13 +461,16 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
     };
 
     const scheduleRender = () => {
-      if (renderFrame) return;
+      if (renderFrame || !isWheelVisible || document.hidden) return;
+      if (lastFrameTime === 0) lastFrameTime = performance.now();
       renderFrame = requestAnimationFrame(updateMotion);
     };
 
-    const updateMotion = () => {
+    const updateMotion = (time: number) => {
       renderFrame = 0;
-      if (!isWheelVisible) return;
+      if (!isWheelVisible || document.hidden) { lastFrameTime = 0; return; }
+      const elapsed = time - lastFrameTime;
+      lastFrameTime = time;
       let shouldContinue = false;
 
       if (targetRotation !== null) {
@@ -396,19 +479,27 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
           rotation = targetRotation;
           targetRotation = null;
         } else {
-          rotation += distance * 0.18;
+          rotation += distance * (1 - Math.exp(-elapsed / 85));
           shouldContinue = true;
         }
-      } else if (!isDragging && Math.abs(velocity) >= 0.00005 && !motionQuery.matches) {
-        velocity *= friction;
-        rotation += velocity;
-        shouldContinue = Math.abs(velocity) >= 0.00005;
-        if (!shouldContinue) velocity = 0;
+        desiredRotation = rotation;
+      } else {
+        if (!gesture && Math.abs(velocity) >= stopSpeed && !motionQuery.matches) {
+          const decay = Math.exp(-elapsed / momentumDecay);
+          desiredRotation += velocity * momentumDecay * (1 - decay);
+          velocity *= decay;
+          if (Math.abs(velocity) < stopSpeed) velocity = 0;
+        }
+        const distance = desiredRotation - rotation;
+        rotation = motionQuery.matches || Math.abs(distance) < 0.0001
+          ? desiredRotation : rotation + distance * (1 - Math.exp(-elapsed / followTime));
+        shouldContinue = velocity !== 0 || Math.abs(desiredRotation - rotation) >= 0.0001;
       }
 
       stage.classList.toggle('is-moving', shouldContinue || isDragging);
       renderCards();
       if (shouldContinue) scheduleRender();
+      else lastFrameTime = 0;
     };
 
     const selectProject = (index: number) => {
@@ -452,7 +543,7 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       pointerFrame = 0;
       const pointer = pendingPointer;
       pendingPointer = null;
-      if (!pointer || isDragging) return;
+      if (!pointer || gesture || velocity !== 0) return;
       const { clientX, clientY, target } = pointer;
       const card = target.closest<HTMLElement>('[data-project-card]');
       if (!card || card.dataset.active !== 'true') {
@@ -460,15 +551,15 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
         return;
       }
 
-      setFocusedCard(card, !target.closest('a, button'));
+      setFocusedCard(card, true);
       const cardRect = card.getBoundingClientRect();
       const normalizedX = ((clientX - cardRect.left) / cardRect.width - 0.5) * 2;
       const normalizedY = ((clientY - cardRect.top) / cardRect.height - 0.5) * 2;
       const tilt = card.querySelector('.wheel-card-tilt') as HTMLElement | null;
-      tilt?.style.setProperty('--tilt-x', `${(-normalizedY * 2.4).toFixed(2)}deg`);
-      tilt?.style.setProperty('--tilt-y', `${(normalizedX * 3.2).toFixed(2)}deg`);
-      tilt?.style.setProperty('--shift-x', `${(normalizedX * 3).toFixed(2)}px`);
-      tilt?.style.setProperty('--shift-y', `${(normalizedY * 2).toFixed(2)}px`);
+      tilt?.style.setProperty('--tilt-x', `${(-normalizedY * (isImmersive ? 4.8 : 2.4)).toFixed(2)}deg`);
+      tilt?.style.setProperty('--tilt-y', `${(normalizedX * (isImmersive ? 6.4 : 3.2)).toFixed(2)}deg`);
+      tilt?.style.setProperty('--shift-x', `${(normalizedX * (isImmersive ? 5 : 3)).toFixed(2)}px`);
+      tilt?.style.setProperty('--shift-y', `${(normalizedY * (isImmersive ? 3.5 : 2)).toFixed(2)}px`);
 
       const stageRect = stage.getBoundingClientRect();
       pointerLabel?.style.setProperty('--pointer-x', `${clientX - stageRect.left + 16}px`);
@@ -481,90 +572,164 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       pointerFrame = requestAnimationFrame(updateCardPointerEffects);
     };
 
+    const endGesture = (cancelled = false) => {
+      if (!gesture) return;
+      const releasedAt = performance.now();
+      suppressPointerClick = cancelled || isDragging || gesture.caughtMotion
+        || releasedAt - gesture.startedAt >= longPressDuration;
+      velocity = 0;
+      if (!cancelled && isDragging && !motionQuery.matches && samples.length >= 2) {
+        const first = samples[0];
+        const last = samples[samples.length - 1];
+        const gap = releasedAt - last.time;
+        const duration = last.time - first.time;
+        if (gap < 280 && duration > 0) {
+          const speed = (last.x - first.x) * dragSensitivity / duration;
+          velocity = Math.max(-0.007, Math.min(0.007, speed)) * Math.exp(-gap / 240);
+        }
+      }
+      if (Math.abs(velocity) < stopSpeed) velocity = 0;
+      if (cancelled) desiredRotation = rotation;
+      samples.length = 0;
+      const pointerId = gesture.pointerId;
+      gesture = null;
+      isDragging = false;
+      stage.style.removeProperty('cursor');
+      stage.classList.remove('is-dragging');
+      if (stage.hasPointerCapture(pointerId)) stage.releasePointerCapture(pointerId);
+      scheduleRender();
+    };
+
     const onPointerDown = (event: PointerEvent) => {
-      if (event.button !== 0 || (event.target as HTMLElement).closest('a, button')) return;
-      isDragging = true;
+      if (event.button !== 0 || !event.isPrimary || gesture
+        || (event.target as HTMLElement).closest('button')) return;
+      // Preserve native link activation until movement or hold duration proves a gesture.
+      suppressPointerClick = false;
+      gesture = { pointerId: event.pointerId, startX: event.clientX,
+        startY: event.clientY, startedAt: performance.now(),
+        caughtMotion: velocity !== 0 || targetRotation !== null };
+      desiredRotation = rotation;
+      samples.length = 0;
+      samples.push({ x: event.clientX, time: gesture.startedAt });
       targetRotation = null;
+      velocity = 0;
       clearPointerEffects();
       lastPointerX = event.clientX;
-      lastMoveTime = performance.now();
-      velocity = 0;
-      stage.style.cursor = 'grabbing';
-      stage.setPointerCapture(event.pointerId);
     };
     const onPointerMove = (event: PointerEvent) => {
-      if (!isDragging) return;
+      if (!gesture || event.pointerId !== gesture.pointerId) return;
+      const totalX = event.clientX - gesture.startX;
+      const totalY = event.clientY - gesture.startY;
+      if (!isDragging) {
+        if (Math.hypot(totalX, totalY) < dragThreshold) return;
+        if (event.pointerType === 'touch' && Math.abs(totalY) > Math.abs(totalX)) {
+          endGesture(true);
+          return;
+        }
+        isDragging = true;
+        stage.setPointerCapture(event.pointerId);
+        stage.classList.add('is-dragging');
+        stage.style.cursor = 'grabbing';
+      }
       const dx = event.clientX - lastPointerX;
       const now = performance.now();
-      const dt = Math.max(now - lastMoveTime, 1);
-      velocity = (dx * dragSensitivity) / (dt / 16);
-      rotation += dx * dragSensitivity;
+      desiredRotation += dx * dragSensitivity;
+      if (motionQuery.matches) rotation = desiredRotation;
+      // Firefox can quantize a subpixel move to 1px. Keep that release noise from
+      // replacing the last swipe sample; smaller movements still update position.
+      if (Math.abs(event.clientX - samples[samples.length - 1].x) >= momentumSampleDistance) {
+        samples.push({ x: event.clientX, time: now });
+        // Retain one sample before the window boundary to cover its first segment.
+        while (samples.length > 2 && samples[1].time < now - 100) samples.shift();
+      }
       lastPointerX = event.clientX;
-      lastMoveTime = now;
       stage.classList.add('is-moving');
       scheduleRender();
     };
     const onPointerUp = (event: PointerEvent) => {
-      if (!isDragging) return;
-      isDragging = false;
-      stage.style.cursor = 'grab';
-      if (stage.hasPointerCapture(event.pointerId)) stage.releasePointerCapture(event.pointerId);
-      if (motionQuery.matches) velocity = 0;
-      scheduleRender();
+      if (event.pointerId === gesture?.pointerId) endGesture(event.type === 'pointercancel');
     };
 
     stage.addEventListener('pointerdown', onPointerDown, { signal });
-    stage.addEventListener('pointermove', onPointerMove, { signal });
-    stage.addEventListener('pointerup', onPointerUp, { signal });
-    stage.addEventListener('pointercancel', onPointerUp, { signal });
+    // Window listeners finish short presses released outside the original card too.
+    window.addEventListener('pointermove', onPointerMove, { signal });
+    window.addEventListener('pointerup', onPointerUp, { signal });
+    window.addEventListener('pointercancel', onPointerUp, { signal });
+    window.addEventListener('blur', () => endGesture(true), { signal });
+    stage.addEventListener('lostpointercapture', (event) => {
+      // Touch transfers implicit capture from the card to the stage when drag starts.
+      if (event.target === stage) endGesture(true);
+    }, { signal });
+    stage.addEventListener('dragstart', (event) => event.preventDefault(), { signal });
+    stage.addEventListener('click', (event) => {
+      // Keyboard Enter has detail=0 and must retain normal anchor behavior.
+      if (suppressPointerClick && event.detail > 0) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      suppressPointerClick = false;
+    }, { capture: true, signal });
     if (canUsePointerEffects) {
       stage.addEventListener('mousemove', scheduleCardPointerEffects, { signal });
       stage.addEventListener('mouseleave', clearPointerEffects, { signal });
     }
 
-    cards.forEach((card) => {
-      const toggle = card.querySelector<HTMLButtonElement>('[data-card-toggle]');
-      toggle?.addEventListener('click', () => {
-        card.classList.toggle('is-flipped');
-        setFaceAccessibility(card, card.dataset.active === 'true');
-      }, { signal });
-    });
-
     previousButton.addEventListener('click', () => selectProject(activeIndex - 1), { signal });
     nextButton.addEventListener('click', () => selectProject(activeIndex + 1), { signal });
 
     const resizeObserver = new ResizeObserver(() => {
-      radius = Math.min(stage.clientWidth * 0.38, 440);
+      radius = isImmersive
+        ? Math.min(stage.clientWidth * 0.43, 520)
+        : Math.min(stage.clientWidth * 0.38, 440);
       scheduleRender();
     });
     resizeObserver.observe(stage);
 
-    const visibilityObserver = new IntersectionObserver((entries) => {
-      isWheelVisible = entries.some((entry) => entry.isIntersecting);
-      if (isWheelVisible) {
-        renderCards();
-        return;
-      }
-
+    const stopMotion = () => {
+      endGesture(true);
       targetRotation = null;
+      desiredRotation = rotation;
       velocity = 0;
+      lastFrameTime = 0;
       stage.classList.remove('is-moving');
       if (renderFrame) cancelAnimationFrame(renderFrame);
       renderFrame = 0;
       clearPointerEffects();
+    };
+    const visibilityObserver = new IntersectionObserver((entries) => {
+      isWheelVisible = entries.some((entry) => entry.isIntersecting);
+      if (isWheelVisible) renderCards();
+      else stopMotion();
     });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) stopMotion();
+    }, { signal });
+    motionQuery.addEventListener('change', () => {
+      if (motionQuery.matches) stopMotion();
+    }, { signal });
     visibilityObserver.observe(stage);
 
+    root.dataset.wheelEnhanced = 'true';
     cards.forEach((card, index) => setFaceAccessibility(card, index === 0));
-    radius = Math.min(stage.clientWidth * 0.38, 440);
+    radius = isImmersive
+      ? Math.min(stage.clientWidth * 0.43, 520)
+      : Math.min(stage.clientWidth * 0.38, 440);
     renderCards();
 
     document.addEventListener('astro:before-swap', () => {
+      stopMotion();
       controller.abort();
       resizeObserver.disconnect();
       visibilityObserver.disconnect();
       if (renderFrame) cancelAnimationFrame(renderFrame);
       if (pointerFrame) cancelAnimationFrame(pointerFrame);
+      delete root.dataset.wheelEnhanced;
+      delete root.dataset.projectsWheelReady;
+      cards.forEach(card => {
+        card.removeAttribute('inert');
+        card.removeAttribute('aria-hidden');
+        for (const property of ['transform', 'opacity', 'z-index', 'filter']) card.style.removeProperty(property);
+      });
     }, { once: true, signal });
   });
 </script>

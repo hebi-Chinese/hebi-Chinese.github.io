@@ -2,8 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Nav from '../components/Nav.astro';
 import HeroAboutFlow from '../components/HeroAboutFlow.astro';
-import Terminal from '../components/Terminal.astro';
-import Skills from '../components/Skills.astro';
+import ProductShowcase from '../components/ProductShowcase/ProductShowcase.astro';
 import ProjectsWheel from '../components/ProjectsWheel.astro';
 import Blog from '../components/Blog.astro';
 import Contact from '../components/Contact.astro';
@@ -12,11 +11,10 @@ import '../styles/global.css';
 <BaseLayout>
   <Nav />
   <main>
-    <HeroAboutFlow />
-    <Terminal />
-    <Skills />
-    <div class="divider"></div>
-    <ProjectsWheel />
+    <HeroAboutFlow>
+      <ProductShowcase slot="after-about" />
+    </HeroAboutFlow>
+    <ProjectsWheel immersive />
     <Blog />
     <Contact />
   </main>

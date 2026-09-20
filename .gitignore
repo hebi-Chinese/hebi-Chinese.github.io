@@ -4,6 +4,9 @@ dist/
 # generated types
 .astro/
 
+# local agent recovery records (not website source)
+.codex/
+
 # dependencies
 node_modules/
 

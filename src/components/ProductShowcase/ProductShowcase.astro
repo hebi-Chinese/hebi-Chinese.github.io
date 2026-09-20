@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import { showcaseProducts } from '../../data/site';
+import FloatObject from './FloatObject.astro';
+import { floatObjects } from './objects';
+import './showcase.css';
+import './objects.css';
+
+const instance = `showcase-${crypto.randomUUID()}`;
+---
+<section class="product-showcase" data-product-showcase aria-labelledby={`${instance}-title`}>
+  <div class="showcase-bookmark" aria-hidden="true"><span>WORK / 03</span><span>↓</span></div>
+  <header class="showcase-header">
+    <div><p class="showcase-eyebrow">SELECTED WORK</p><h2 id={`${instance}-title`}>做过的东西</h2></div>
+    <span class="showcase-code" aria-hidden="true">SELECTED INTERFACES</span>
+  </header>
+  <div class="showcase-products">
+    {showcaseProducts.map((product, index) => (
+      <article class="showcase-product" data-showcase-product={product.key} id={`${instance}-${product.key}`}>
+        <h3><small>{String(index + 1).padStart(2, '0')} / {String(showcaseProducts.length).padStart(2, '0')}</small>{product.title}</h3>
+        <div class="product-art" data-showcase-art>
+          <div class="art-plane">
+            <!-- https://docs.astro.build/en/guides/images/#creating-responsive-images-with-the-image-component -->
+            <Image src={product.image} alt={product.alt} widths={[640, 960, 1440, 1920]} sizes="(max-width: 720px) 90vw, min(80vw, 1190px, 104svh)" format="webp" loading="lazy" decoding="async" />
+            <div class="float-layer" aria-hidden="true">
+              {floatObjects.filter((object) => object.product === product.key).map((object) => <FloatObject object={object} />)}
+            </div>
+          </div>
+        </div>
+        <p class="showcase-description">{product.description}</p>
+      </article>
+    ))}
+  </div>
+  <div class="showcase-footer">
+    <div class="showcase-controls" role="group" aria-label="选择作品" hidden>
+      {showcaseProducts.map((product) => <button type="button" data-showcase-select={product.key} aria-label={`查看${product.key === 'aoai' ? ' ' : ''}${product.title}`} aria-controls={`${instance}-${product.key}`} aria-pressed="false">{product.title}</button>)}
+    </div>
+    <span class="showcase-code">WORK / IN PROGRESS</span>
+  </div>
+</section>
+<script>
+  import { mountShowcases } from './runtime';
+  // Bundled once; per-root controllers keep repeated instances independent.
+  // https://docs.astro.build/en/guides/client-side-scripts/#handle-onclick-and-other-events
+  const lifecycle = new AbortController();
+  mountShowcases();
+  document.addEventListener('astro:page-load', mountShowcases, { signal: lifecycle.signal });
+  addEventListener('pagehide', (event) => {
+    if (!event.persisted) lifecycle.abort();
+  }, { signal: lifecycle.signal });
+</script>

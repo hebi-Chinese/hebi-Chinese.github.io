@@ -1,6 +1,7 @@
 ---
 import Hero from './Hero.astro';
 import About from './About.astro';
+const hasCover = Astro.slots.has('after-about');
 ---
 
 <style>
@@ -13,28 +14,72 @@ import About from './About.astro';
   /* The positive X rotation brings the panel's lower half toward the viewer.
      Source: https://www.w3.org/TR/css-transforms-2/#perspective-property */
   .about-flow-stage {
-    --about-angle: 64deg;
-    --about-scale: 0.94;
+    --about-angle: 68deg;
+    --about-scale: 0.925;
     position: relative;
     z-index: 2;
     margin-top: -24vh;
-    perspective: 1600px;
+    background:
+      linear-gradient(to bottom, rgba(216, 208, 196, 0.64), rgba(236, 231, 221, 0.18) 10rem, transparent 28rem);
+    perspective: 1250px;
     perspective-origin: 50% 0;
-    pointer-events: none;
+    pointer-events: auto;
   }
 
   .about-flow-panel {
     position: relative;
+    isolation: isolate;
     width: 100%;
-    background: var(--surface-0);
-    border-top: 1px solid rgba(216, 208, 196, 0.82);
-    box-shadow: 0 -12px 36px rgba(26, 22, 18, 0.055);
-    transform:
-      translateZ(0)
-      rotateX(var(--about-angle))
-      scale(var(--about-scale));
+    background:
+      linear-gradient(to bottom, #f3eee6 0, var(--surface-0) min(38rem, 55vh));
+    border-top: 1px solid rgba(152, 84, 10, 0.34);
+    box-shadow:
+      0 -1px 0 rgba(250, 248, 244, 0.9),
+      0 -20px 55px rgba(26, 22, 18, 0.115),
+      0 -52px 120px rgba(26, 22, 18, 0.045);
+    transform: none;
     transform-origin: 50% 0;
+    transform-style: preserve-3d;
     backface-visibility: hidden;
+  }
+
+  .about-flow-panel::before {
+    content: '';
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: clamp(1.5rem, 4vw, 3rem);
+    left: clamp(1.5rem, 4vw, 3rem);
+    height: min(42rem, 62vh);
+    pointer-events: none;
+    background-image:
+      linear-gradient(to right, rgba(26, 22, 18, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26, 22, 18, 0.04) 1px, transparent 1px),
+      linear-gradient(to right, rgba(152, 84, 10, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(152, 84, 10, 0.05) 1px, transparent 1px);
+    background-size: 72px 72px, 72px 72px, 288px 288px, 288px 288px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.22) 52%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.22) 52%, transparent 100%);
+  }
+
+  .about-flow-edge {
+    position: absolute;
+    z-index: 3;
+    top: -1px;
+    right: 0;
+    left: 0;
+    height: 0.75rem;
+    background:
+      linear-gradient(to bottom, rgba(250, 248, 244, 0.98), rgba(186, 174, 159, 0.78));
+    border-top: 1px solid rgba(152, 84, 10, 0.28);
+    transform: rotateX(-90deg);
+    transform-origin: 50% 0;
+    pointer-events: none;
+  }
+
+  .about-flow-panel > :global(.about) {
+    position: relative;
+    z-index: 1;
   }
 
   .about-flow-stage.is-transforming .about-flow-panel {
@@ -47,95 +92,80 @@ import About from './About.astro';
     transition: none;
   }
 
-  .about-flow-stage.is-readable {
+  .motion-ready .about-flow-stage { pointer-events: none; }
+  .motion-ready .about-flow-panel {
+    transform: translateZ(0) rotateX(var(--about-angle)) scale(var(--about-scale));
+  }
+  .hero-about-flow:not(.motion-ready) .about-flow-stage { margin-top: 0; perspective: none; }
+  .hero-about-flow:not(.motion-ready) .about-flow-edge { display: none; }
+  .motion-ready .about-flow-stage.is-readable {
     pointer-events: auto;
   }
 
+  .about-flow-hold { perspective: inherit; perspective-origin: 50% 0; }
+  .hero-about-flow { --cover-travel: 88svh; }
+  .cover-ready .about-flow-stage { height: calc(var(--about-height) + var(--cover-travel)); }
+  .cover-ready .about-flow-hold { position: sticky; top: var(--about-rest-top, 0px); }
+  .cover-ready .cover-sheet { position: relative; z-index: 4; margin-top: calc(-1 * var(--cover-travel)); }
+  .cover-sheet > :global(.product-showcase) { margin-top: 0; }
+
   @media (max-width: 768px) {
     .about-flow-stage {
-      --about-angle: 48deg;
-      --about-scale: 0.97;
+      --about-angle: 52deg;
+      --about-scale: 0.96;
       margin-top: -14vh;
-      perspective: 1200px;
+      perspective: 980px;
+    }
+
+    .about-flow-panel::before {
+      right: 1.25rem;
+      left: 1.25rem;
+      background-size: 48px 48px, 48px 48px, 192px 192px, 192px 192px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .about-flow-stage {
+    .cover-ready .about-flow-stage { height: auto; }
+    .cover-ready .about-flow-hold { position: relative; top: 0; }
+    .cover-ready .cover-sheet { margin-top: 0; }
+    .about-flow-stage, .motion-ready .about-flow-stage {
       margin-top: 0;
       perspective: none;
       pointer-events: auto;
     }
 
-    .about-flow-panel {
+    .about-flow-panel, .motion-ready .about-flow-panel {
       box-shadow: none;
       transform: none;
+    }
+
+    .about-flow-edge {
+      display: none;
     }
   }
 </style>
 
-<div class="hero-about-flow" data-hero-about-flow>
+<div class="hero-about-flow" data-hero-about-flow data-about-cover={hasCover || undefined}>
   <Hero />
   <div class="about-flow-stage" data-about-flow-stage>
-    <div class="about-flow-panel">
-      <About />
+    <div class="about-flow-hold">
+      <div class="about-flow-panel">
+        <div class="about-flow-edge" aria-hidden="true"></div>
+        <About />
+      </div>
     </div>
   </div>
+  {hasCover && <div class="cover-sheet"><slot name="after-about" /></div>}
 </div>
 
 <script>
-  document.querySelectorAll<HTMLElement>('[data-hero-about-flow]').forEach((root) => {
-    if (root.dataset.heroAboutFlowReady === 'true') return;
-    root.dataset.heroAboutFlowReady = 'true';
-
-    const stage = root.querySelector<HTMLElement>('[data-about-flow-stage]');
-    const panel = stage?.querySelector<HTMLElement>('.about-flow-panel');
-    if (!stage || !panel || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const controller = new AbortController();
-    const { signal } = controller;
-    let animationFrame = 0;
-    let isNearViewport = false;
-
-    const updateFlow = () => {
-      animationFrame = 0;
-      if (!isNearViewport) return;
-      const rect = stage.getBoundingClientRect();
-      const start = window.innerHeight * 0.9;
-      const end = window.innerHeight * 0.1;
-      const progress = Math.max(0, Math.min((start - rect.top) / (start - end), 1));
-      const stageStyles = getComputedStyle(stage);
-      const initialAngle = Number.parseFloat(stageStyles.getPropertyValue('--about-angle')) || 0;
-      const initialScale = Number.parseFloat(stageStyles.getPropertyValue('--about-scale')) || 1;
-      const angle = initialAngle * (1 - progress);
-      const scale = initialScale + progress * (1 - initialScale);
-
-      panel.style.transform = `translateZ(0) rotateX(${angle.toFixed(3)}deg) scale(${scale.toFixed(4)})`;
-      stage.classList.toggle('is-transforming', progress > 0 && progress < 1);
-      stage.classList.toggle('is-readable', progress > 0.65);
-    };
-
-    const scheduleFlowUpdate = () => {
-      if (!isNearViewport || animationFrame) return;
-      animationFrame = requestAnimationFrame(updateFlow);
-    };
-
-    const visibilityObserver = new IntersectionObserver((entries) => {
-      isNearViewport = entries.some((entry) => entry.isIntersecting);
-      if (isNearViewport) scheduleFlowUpdate();
-      else if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
-        animationFrame = 0;
-      }
-    }, { rootMargin: '100% 0px' });
-
-    visibilityObserver.observe(stage);
-    window.addEventListener('scroll', scheduleFlowUpdate, { passive: true, signal });
-    window.addEventListener('resize', scheduleFlowUpdate, { signal });
-    document.addEventListener('astro:before-swap', () => {
-      controller.abort();
-      visibilityObserver.disconnect();
-      if (animationFrame) cancelAnimationFrame(animationFrame);
-    }, { once: true, signal });
-  });
+  import { mountAboutCovers } from './hero-about-cover';
+  import { mountAboutMotion } from './hero-about-motion';
+  const lifecycle = new AbortController();
+  const mount = () => { mountAboutCovers(); mountAboutMotion(); };
+  mount();
+  document.addEventListener('astro:page-load', mount, { signal: lifecycle.signal });
+  addEventListener('pagehide', event => {
+    if (!event.persisted) lifecycle.abort();
+  }, { signal: lifecycle.signal });
 </script>

@@ -2,17 +2,22 @@
   "name": "hebi-site",
   "private": true,
   "type": "module",
-  "version": "1.1.0",
+  "version": "1.2.0",
+  "engines": {
+    "node": ">=22.12.0",
+    "npm": ">=9.6.5"
+  },
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
+    "pretest": "npm run build",
     "test": "playwright test",
     "build": "astro build",
     "preview": "astro preview",
-    "verify": "npm run check && npm test && npm run build"
+    "verify": "npm run check && npm test"
   },
   "dependencies": {
-    "astro": "^5.7.0"
+    "astro": "^7.3.2"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

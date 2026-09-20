@@ -9,8 +9,9 @@ test('mobile navigation opens from the keyboard and Escape restores focus', asyn
   await menuButton.press('Enter');
 
   await expect(menuButton).toHaveAttribute('aria-expanded', 'true');
-  const firstLink = page.getByRole('link', { name: 'about', exact: true });
-  const lastLink = page.getByRole('link', { name: 'contact', exact: true });
+  const mobileMenu = page.locator('[id^="site-navigation-menu"]');
+  const firstLink = mobileMenu.getByRole('link', { name: 'about', exact: true });
+  const lastLink = mobileMenu.getByRole('link', { name: 'contact', exact: true });
   await expect(firstLink).toBeFocused();
 
   await page.keyboard.press('Shift+Tab');

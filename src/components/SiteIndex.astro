@@ -1,0 +1,79 @@
+---
+import SectionGlyph from './SectionGlyph.astro';
+import { navigationItems } from '../data/site';
+
+const entries = navigationItems.flatMap(item => item.siteIndex
+  ? [{ ...item, kind: item.siteIndex.glyph }] : []);
+---
+
+<nav class="site-index" aria-label="站点索引" data-reveal style={`--index-count: ${entries.length}`}>
+  <span class="site-index__caption">SITE / INDEX {String(entries.length).padStart(2, '0')}</span>
+  <div class="site-index__items">
+    {entries.map((entry, index) => (
+      <a href={entry.href} class="site-index__item" aria-label={`站点索引：${entry.label}`}>
+        <span class="site-index__number">{String(index + 1).padStart(2, '0')}</span>
+        <span class="site-index__glyph"><SectionGlyph kind={entry.kind} /></span>
+        <span class="site-index__label">{entry.label}</span>
+      </a>
+    ))}
+  </div>
+</nav>
+
+<style>
+  .site-index {
+    width: min(34rem, 43vw);
+    border-top: 1px solid rgba(216, 208, 196, 0.92);
+    border-bottom: 1px solid rgba(216, 208, 196, 0.72);
+  }
+  .site-index__caption {
+    display: block;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--surface-2);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.48rem;
+    letter-spacing: 0.18em;
+  }
+  .site-index__items { display: grid; grid-template-columns: repeat(var(--index-count), 1fr); }
+  .site-index__item {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 0.35rem 0.65rem;
+    border-left: 1px solid var(--surface-2);
+    color: var(--text-muted);
+    transition: color var(--duration-fast), transform var(--duration-fast);
+  }
+  .site-index__item:first-child { border-left: 0; }
+  .site-index__item:hover,
+  .site-index__item:focus-visible {
+    color: var(--accent);
+    transform: translateY(-0.2rem);
+  }
+  .site-index__number {
+    justify-self: start;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.42rem;
+  }
+  .site-index__glyph { width: clamp(2.75rem, 4vw, 3.8rem); }
+  .site-index__label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.48rem;
+    letter-spacing: 0.08em;
+  }
+  @media (max-width: 900px) {
+    .site-index { width: 100%; }
+  }
+  @media (max-width: 520px) {
+    .site-index__number { display: none; }
+    .site-index__glyph { width: 2.6rem; }
+    .site-index__label { font-size: 0.42rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .site-index__item { transition: color var(--duration-fast); }
+    .site-index__item:hover,
+    .site-index__item:focus-visible { transform: none; }
+  }
+</style>

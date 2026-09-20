@@ -153,6 +153,25 @@ a { color: inherit; text-decoration: none; }
   padding-top: 3.25rem;
 }
 
+.page-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 42rem) minmax(14rem, 1fr);
+  align-items: start;
+  gap: clamp(3rem, 8vw, 9rem);
+}
+
+.page-hero-glyph {
+  width: min(100%, 22rem);
+  margin: 0 auto;
+  color: var(--text-secondary);
+  opacity: 0.82;
+}
+
+@media (max-width: 760px) {
+  .page-hero-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .page-hero-glyph { width: min(13rem, 55vw); margin: 0 0 2rem; opacity: 0.72; }
+}
+
 .page-title {
   margin-bottom: var(--space-12);
 }
@@ -336,6 +355,11 @@ a { color: inherit; text-decoration: none; }
 .has-js [data-reveal].is-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Small accent labels must keep AA contrast throughout the reveal transition. */
+.has-js .section-label[data-reveal] {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
