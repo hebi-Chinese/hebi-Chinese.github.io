@@ -28,7 +28,7 @@ test('the third sheet covers a stationary second page with a single bookmark', a
   await expect(about).toHaveCount(1);
 });
 
-test('a fast scroll produces intermediate image frames without exposing the paper', async ({ page }) => {
+test('a fast scroll produces intermediate image frames without exposing the paper', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
   const surface = page.getByRole('region', { name: '做过的东西' });
@@ -39,17 +39,21 @@ test('a fast scroll produces intermediate image frames without exposing the pape
     const r = images[0].getBoundingClientRect();
     scrollTo({ top: scrollY + r.top + r.height / 2 - innerHeight * .37, behavior: 'instant' });
     const start = performance.now();
-    const result: { elapsed: number; incoming: number; backing: number }[] = [];
+    const result: { elapsed: number; wallElapsed: number; incoming: number; backing: number; top: number; height: number; scroll: number }[] = [];
     // Sample the public 500ms transition over 800ms, not an arbitrary synchronization sleep.
     await new Promise<void>(resolve => {
       function sample(now: number) {
-        result.push({ elapsed: now - start, incoming: Number(getComputedStyle(images[1]).opacity), backing: Number(getComputedStyle(images[0]).opacity) });
+        const rect = images[0].getBoundingClientRect();
+        result.push({ elapsed: now - start, wallElapsed: performance.now() - start,
+          incoming: Number(getComputedStyle(images[1]).opacity), backing: Number(getComputedStyle(images[0]).opacity),
+          top: rect.top, height: rect.height, scroll: scrollY });
         if (now - start < 800) requestAnimationFrame(sample); else resolve();
       }
       requestAnimationFrame(sample);
     });
     return result;
   });
+  await testInfo.attach('crossfade-frames', { body: JSON.stringify(samples), contentType: 'application/json' });
   expect(samples.some(sample => sample.incoming > .05 && sample.incoming < .95)).toBe(true);
   expect(samples.every(sample => sample.backing === 1)).toBe(true);
   expect(samples.at(-1)!.incoming).toBe(1);

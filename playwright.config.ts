@@ -7,17 +7,16 @@ export default defineConfig({
   retries: 0,
   reporter: [['line'], ['html', { open: 'never', outputFolder: '.playwright/report' }]],
   use: {
-    baseURL: 'http://127.0.0.1:4321',
+    baseURL: 'http://127.0.0.1:4338',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
   webServer: {
-    command: 'npm run dev -- --host 127.0.0.1',
-    // Playwright must own the server process, including inside coding agents.
-    // https://docs.astro.build/en/guides/build-with-ai/#background-mode
-    env: { ASTRO_DEV_BACKGROUND: '0' },
-    url: 'http://127.0.0.1:4321',
-    reuseExistingServer: true,
+    // npm pretest builds first; test the same static assets that Pages publishes.
+    command: 'npm run preview -- --host 127.0.0.1 --port 4338',
+    env: { ASTRO_PREVIEW_BACKGROUND: '0' },
+    url: 'http://127.0.0.1:4338',
+    reuseExistingServer: false,
     timeout: 120_000,
   },
   projects: [

@@ -31,6 +31,11 @@ npm audit --omit=dev --audit-level=critical
 git diff --check
 ```
 
+`npm test` builds the site first, then tests the resulting static pages using an
+exclusive preview server on `127.0.0.1:4338`. Keep that port free. It never reuses
+an existing development server; `npm run verify` runs diagnostics and this same
+build-and-browser gate. For a focused test, use `npm test -- tests/<file>.spec.ts`.
+
 For UI changes, manually inspect the affected surface at relevant mobile, tablet, and desktop sizes. Include keyboard and reduced-motion behavior in the PR evidence.
 
 ## Architecture summary

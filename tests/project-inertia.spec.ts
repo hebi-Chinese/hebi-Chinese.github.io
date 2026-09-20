@@ -23,18 +23,20 @@ async function swipe(page: Page, x: number, y: number) {
 
 async function samplePath(page: Page, duration: number) {
   return page.locator('[data-project-card]').evaluateAll((cards, duration) => new Promise<number[][]>(resolve => {
-    const start = performance.now();
+    let start: number | undefined;
     const positions: number[][] = [];
-    const sample = () => {
+    const sample = (now: number) => {
+      start ??= now;
       // One card can be at an orbital turning point while the rest still travels.
       positions.push(cards.map(card => {
         const rect = card.getBoundingClientRect();
         return rect.x + rect.width / 2;
       }));
-      if (performance.now() - start >= duration) resolve(positions);
+      if (now - start >= duration) resolve(positions);
       else requestAnimationFrame(sample);
     };
-    sample();
+    // Apply the pending input frame before measuring post-release motion.
+    requestAnimationFrame(sample);
   }), duration);
 }
 const travel = (positions: number[][]) => positions.slice(1).reduce((sum, frame, i) =>
@@ -89,13 +91,26 @@ test('a tiny final pointer movement does not erase the swipe, and pressing catch
   await page.mouse.up();
 });
 
-test('holding still before release and reduced motion both suppress coast', async ({ page }) => {
+test('holding still before release and reduced motion both suppress coast', async ({ page }, testInfo) => {
+  await page.addInitScript(() => {
+    const events: object[] = [];
+    Object.defineProperty(window, '__wheelTiming', { value: events });
+    for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel']) {
+      document.addEventListener(type, event => {
+        const pointer = event as PointerEvent;
+        events.push({ type, x: pointer.clientX, time: performance.now(), stamp: event.timeStamp });
+      }, true);
+    }
+  });
   const { x, y } = await openWheel(page, '/');
   await swipe(page, x, y);
   // Holding still for 400 ms signals a deliberate stop, not a fling.
   await page.waitForTimeout(400);
   await page.mouse.up();
-  expect(travel(await samplePath(page, 200))).toBeLessThan(2);
+  const positions = await samplePath(page, 200);
+  const input = await page.evaluate(() => (window as typeof window & { __wheelTiming: object[] }).__wheelTiming);
+  await testInfo.attach('hold-release', { body: JSON.stringify({ input, positions }), contentType: 'application/json' });
+  expect(travel(positions)).toBeLessThan(2);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.reload();
   const next = await openWheel(page, '/');

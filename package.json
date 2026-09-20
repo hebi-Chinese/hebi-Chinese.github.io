@@ -10,10 +10,11 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
+    "pretest": "npm run build",
     "test": "playwright test",
     "build": "astro build",
     "preview": "astro preview",
-    "verify": "npm run check && npm test && npm run build"
+    "verify": "npm run check && npm test"
   },
   "dependencies": {
     "astro": "^7.3.2"

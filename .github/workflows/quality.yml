@@ -37,11 +37,8 @@ jobs:
       - name: Astro diagnostics
         run: npm run check
 
-      - name: Cross-browser behavior and accessibility
+      - name: Build and cross-browser behavior and accessibility
         run: npm test
-
-      - name: Static build
-        run: npm run build
 
       - name: Critical dependency audit
         run: npm audit --omit=dev --audit-level=critical
@@ -61,5 +58,6 @@ jobs:
         with:
           name: playwright-diagnostics
           path: .playwright/
-          if-no-files-found: ignore
+          include-hidden-files: true
+          if-no-files-found: warn
           retention-days: 7
