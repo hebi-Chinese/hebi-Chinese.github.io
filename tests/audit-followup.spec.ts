@@ -34,6 +34,8 @@ test('mobile navigation remains usable without JavaScript', async ({ browser }) 
   const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 375, height: 812 } });
   const page = await context.newPage();
   await page.goto('/about');
+  // The fallback font can move a link between hit testing and native mouse input.
+  await expect.poll(() => page.evaluate(() => document.fonts.status)).toBe('loaded');
   const navigation = page.locator('[data-navigation]');
   for (const name of ['about', 'work', 'essays', 'notes', 'likes', 'github', 'contact']) {
     await expect(navigation.getByRole('link', { name, exact: true })).toBeVisible();
