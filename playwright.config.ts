@@ -26,7 +26,12 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        // Linux CI has no usable GL driver in Firefox's headless mode.
+        // The workflow supplies Xvfb so real WebGL behavior stays covered.
+        headless: !(process.env.CI && process.platform === 'linux'),
+      },
     },
     {
       name: 'webkit',

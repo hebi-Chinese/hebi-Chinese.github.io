@@ -1,12 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Nav from '../components/Nav.astro';
-import ProjectsWheel from '../components/ProjectsWheel.astro';
-import '../styles/global.css';
+import { homeLinks } from '../data/site';
+import LegacyRedirect from '../components/LegacyRedirect.astro';
 ---
-<BaseLayout title="何必 / projects">
-  <Nav />
-  <main class="page-main page-main--projects">
-    <ProjectsWheel headingLevel="h1" />
-  </main>
-</BaseLayout>
+<LegacyRedirect href={homeLinks.work} />

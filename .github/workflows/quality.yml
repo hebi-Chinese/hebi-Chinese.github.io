@@ -37,8 +37,11 @@ jobs:
       - name: Astro diagnostics
         run: npm run check
 
+      - name: Build and Firefox graphics smoke test
+        run: xvfb-run -a --server-args="-screen 0 1920x1080x24" npm test -- tests/logo-zoom.spec.ts --project=firefox
+
       - name: Build and cross-browser behavior and accessibility
-        run: npm test
+        run: xvfb-run -a --server-args="-screen 0 1920x1080x24" npm test
 
       - name: Critical dependency audit
         run: npm audit --omit=dev --audit-level=critical

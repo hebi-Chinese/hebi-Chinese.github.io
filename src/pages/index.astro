@@ -6,16 +6,18 @@ import ProductShowcase from '../components/ProductShowcase/ProductShowcase.astro
 import ProjectsWheel from '../components/ProjectsWheel.astro';
 import Blog from '../components/Blog.astro';
 import Contact from '../components/Contact.astro';
+import HomeExtras from '../components/HomeExtras.astro';
 import '../styles/global.css';
 ---
 <BaseLayout>
   <Nav />
-  <main>
+  <main id="top" data-home-sections>
     <HeroAboutFlow>
       <ProductShowcase slot="after-about" />
     </HeroAboutFlow>
-    <ProjectsWheel immersive />
+    <ProjectsWheel immersive id="work" />
     <Blog />
+    <HomeExtras />
     <Contact />
   </main>
   <footer class="site-footer">

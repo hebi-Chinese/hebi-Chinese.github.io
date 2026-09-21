@@ -1,0 +1,17 @@
+---
+interface Props { href: string }
+const { href } = Astro.props;
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content={`0;url=${href}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={new URL(href, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>返回何必的首页</title>
+  </head>
+  <body><p><a href={href}>前往首页对应内容</a></p></body>
+</html>

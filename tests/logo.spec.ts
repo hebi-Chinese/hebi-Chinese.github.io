@@ -1,5 +1,15 @@
 import { expect, test } from '@playwright/test';
 
+test('approved logo asset serves the navy and amber palette', async ({ request }) => {
+  const response = await request.get('/brand/hebi-logo-v1.svg');
+  expect(response.ok()).toBe(true);
+  const svg = await response.text();
+  expect(svg).toContain('fill="#182d43"');
+  expect(svg).toContain('fill="#bd7d2b"');
+  expect(svg).not.toContain('#e52629');
+  expect(svg).not.toContain('#101010');
+});
+
 test('homepage displays the approved logo and keeps the home link accessible', async ({ page }) => {
   await page.goto('/');
   const home = page.getByRole('navigation', { name: '主导航' }).getByRole('link', { name: '何必' , exact: true });
@@ -23,6 +33,6 @@ test('homepage displays the approved logo and keeps the home link accessible', a
       expect(mark!.width).toBeGreaterThan(200);
     }
   }
-  await page.goto('/about');
-  await expect(page.getByRole('navigation', { name: '主导航' }).getByRole('link', { name: '何必', exact: true })).toHaveText('何必');
+  await page.goto('/notes');
+  await expect(page.getByRole('navigation', { name: '主导航' }).getByRole('link', { name: '何必', exact: true }).locator('img')).toHaveAttribute('src', '/brand/hebi-logo-v1.svg');
 });

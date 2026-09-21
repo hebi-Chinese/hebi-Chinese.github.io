@@ -1,0 +1,172 @@
+---
+import { siteProfile } from '../data/site';
+---
+
+<button class="logo-play" data-logo-zoom type="button" disabled aria-label="放大查看何必 Logo" aria-pressed="false" data-reveal>
+  <img src={siteProfile.logo.src} width={siteProfile.logo.width} height={siteProfile.logo.height} alt="" fetchpriority="high" />
+  <canvas aria-hidden="true"></canvas>
+</button>
+
+<style>
+  .logo-play {
+    --bulge-strength: 0.60;
+    --bulge-radius: 0.43;
+    --bulge-padding: 0.2;
+    position: relative;
+    display: block;
+    width: min(100%, 23rem);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
+  }
+  .logo-play:disabled { opacity: 1; cursor: default; }
+  .logo-play:focus-visible { outline: 2px solid var(--accent); outline-offset: 12px; border-radius: 18px; }
+  .logo-play img { display: block; width: 100%; height: auto; pointer-events: none; }
+  .logo-play[data-bulging] img { opacity: 0; }
+  .logo-play canvas {
+    position: absolute;
+    left: calc(var(--bulge-padding) * -100%);
+    top: calc(var(--bulge-padding) * -100% * 460 / 406);
+    width: calc(100% * (1 + 2 * var(--bulge-padding)));
+    height: calc(100% * (1 + 2 * var(--bulge-padding) * 460 / 406));
+    opacity: 0;
+    pointer-events: none;
+  }
+  .logo-play[data-bulging] canvas { opacity: 1; }
+  @media (max-width: 900px) { .logo-play { width: clamp(12rem, 45vw, 20rem); } }
+</style>
+
+<script>
+  import { createLogoBulge } from './logo-bulge';
+  document.querySelectorAll<HTMLButtonElement>('[data-logo-zoom]').forEach((root) => {
+    const canvas = root.querySelector('canvas')!;
+    const image = root.querySelector('img')!;
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointer = matchMedia('(hover: hover) and (pointer: fine)');
+    const events = new AbortController();
+    const { signal } = events;
+    const style = getComputedStyle(root);
+    const strength = Number(style.getPropertyValue('--bulge-strength'));
+    const radius = Number(style.getPropertyValue('--bulge-radius'));
+    const padding = Number(style.getPropertyValue('--bulge-padding'));
+    let renderer: ReturnType<typeof createLogoBulge> = null;
+    let width = root.clientWidth, height = root.clientHeight;
+    const target = { x: width * .55, y: height * .52, p: 0 };
+    const current = { ...target };
+    const velocity = { x: 0, y: 0, p: 0 };
+    let frame = 0, lastTime = 0, pinned = false, hovering = false;
+
+    function draw() {
+      if (!renderer) return;
+      renderer.draw(current.x, current.y, width * radius, strength * Math.max(0, current.p));
+      root.toggleAttribute('data-bulging', current.p > .001);
+    }
+
+    function tick(time: number) {
+      frame = 0;
+      const step = lastTime ? Math.min((time - lastTime) / 16.667, 2) : 1;
+      lastTime = time;
+      let moving = false;
+      for (const key of ['x', 'y', 'p'] as const) {
+        velocity[key] += (target[key] - current[key]) * .13 * step;
+        velocity[key] *= Math.pow(key === 'p' ? .68 : .72, step);
+        current[key] += velocity[key] * step;
+        const epsilon = key === 'p' ? .001 : .05;
+        if (Math.abs(target[key] - current[key]) + Math.abs(velocity[key]) > epsilon) moving = true;
+        else { current[key] = target[key]; velocity[key] = 0; }
+      }
+      draw();
+      if (moving) frame = requestAnimationFrame(tick);
+      else lastTime = 0;
+    }
+
+    function update() {
+      if (motion.matches) {
+        cancelAnimationFrame(frame); frame = 0; lastTime = 0;
+        Object.assign(current, target); velocity.x = velocity.y = velocity.p = 0;
+        draw();
+      } else if (!frame) frame = requestAnimationFrame(tick);
+    }
+
+    function locate(event: PointerEvent) {
+      const box = root.getBoundingClientRect();
+      target.x = (event.clientX - box.left) * width / box.width;
+      target.y = (event.clientY - box.top) * height / box.height;
+    }
+    function retract() {
+      pinned = hovering = false;
+      root.setAttribute('aria-pressed', 'false'); target.p = 0; update();
+    }
+    function stop() {
+      cancelAnimationFrame(frame); frame = 0; lastTime = 0;
+      pinned = hovering = false; root.setAttribute('aria-pressed', 'false');
+      target.p = current.p = 0; velocity.x = velocity.y = velocity.p = 0; draw();
+    }
+    function activate() {
+      if (signal.aborted) return;
+      renderer = createLogoBulge(canvas, image, padding);
+      if (!renderer) return;
+      renderer.resize(width, height); draw(); root.disabled = false;
+    }
+    // Decoding failure retains the original image instead of enabling a blank canvas.
+    image.decode().then(activate, () => {});
+    canvas.addEventListener('webglcontextlost', (event) => {
+      event.preventDefault(); stop(); renderer = null;
+      root.removeAttribute('data-bulging'); root.disabled = true;
+    }, { signal });
+    canvas.addEventListener('webglcontextrestored', activate, { signal });
+    root.addEventListener('pointermove', (event) => {
+      if (event.pointerType === 'touch' || !finePointer.matches) return;
+      // Inspecting the logo should not also trigger the enclosing Hero's ripple effects.
+      event.stopPropagation();
+      if (root.disabled) return;
+      if (!hovering && current.p === 0) {
+        locate(event); current.x = target.x; current.y = target.y;
+      }
+      hovering = true; locate(event); target.p = 1; update();
+    }, { signal });
+    root.addEventListener('pointerleave', () => { hovering = false; if (!pinned) { target.p = 0; update(); } }, { signal });
+    root.addEventListener('click', (event) => {
+      event.stopPropagation();
+      pinned = !pinned; root.setAttribute('aria-pressed', String(pinned));
+      if (!hovering && event.detail === 0) { target.x = width * .55; target.y = height * .52; }
+      else if (!hovering) {
+        const box = root.getBoundingClientRect();
+        target.x = (event.clientX - box.left) * width / box.width;
+        target.y = (event.clientY - box.top) * height / box.height;
+      }
+      target.p = pinned ? 1 : 0; update();
+    }, { signal });
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') { event.preventDefault(); retract(); return; }
+      const steps: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+      const direction = steps[event.key];
+      if (!pinned || !direction) return;
+      event.preventDefault();
+      target.x = Math.max(width * .08, Math.min(width * .92, target.x + direction[0] * width * .12));
+      target.y = Math.max(height * .08, Math.min(height * .92, target.y + direction[1] * height * .12)); update();
+    }, { signal });
+    root.addEventListener('blur', retract, { signal });
+    motion.addEventListener('change', update, { signal });
+    finePointer.addEventListener('change', stop, { signal });
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); }, { signal });
+    window.addEventListener('pagehide', stop, { signal });
+    const resize = new ResizeObserver(() => {
+      width = root.clientWidth; height = root.clientHeight;
+      target.x = width * .55; target.y = height * .52;
+      current.x = target.x; current.y = target.y;
+      velocity.x = velocity.y = 0; renderer?.resize(width, height); draw();
+    });
+    resize.observe(root);
+    const intersection = new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) stop(); });
+    intersection.observe(root);
+    document.addEventListener('astro:before-swap', () => {
+      stop(); events.abort(); resize.disconnect(); intersection.disconnect();
+      renderer?.dispose(); renderer = null;
+    }, { once: true, signal });
+  });
+</script>

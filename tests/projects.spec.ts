@@ -8,7 +8,7 @@ const projects = [
   ['Euterpe', 'https://github.com/Euterpe-org/Euterpe'],
 ] as const;
 
-for (const route of ['/', '/projects']) {
+for (const route of ['/', '/#work']) {
   test(`${route}: every project card opens its repository from padding and keyboard`, async ({ page, context }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await context.route('https://github.com/**', (route) => route.fulfill({ body: 'GitHub destination' }));
@@ -40,7 +40,7 @@ for (const route of ['/', '/projects']) {
   });
 }
 
-for (const route of ['/', '/projects']) {
+for (const route of ['/', '/#work']) {
   test(`${route}: dragging a card rotates without opening GitHub, and the next click works`, async ({ page, context }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await context.route('https://github.com/**', r => r.fulfill({ body: 'GitHub' }));

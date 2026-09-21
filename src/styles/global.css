@@ -31,14 +31,19 @@
   --duration-slow: 800ms;
 
   /* ---- TYPOGRAPHY ---- */
+  --font-body: 'Space Grotesk', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  --font-title: 'Hebi Hand', var(--font-body);
+  --font-annotation: 'Hebi Pen', var(--font-body);
+  --font-mono: 'JetBrains Mono', Menlo, Consolas, 'PingFang SC', 'Microsoft YaHei', monospace;
+
   --text-display: clamp(3.5rem, 1rem + 10vw, 9rem);
-  --text-display-lh: 0.9;
-  --text-display-ls: -0.03em;
+  --text-display-lh: 1.1;
+  --text-display-ls: 0;
   --text-display-w: 400;
 
   --text-h1: clamp(1.75rem, 1.2rem + 2.5vw, 2.75rem);
-  --text-h1-lh: 1.15;
-  --text-h1-ls: -0.02em;
+  --text-h1-lh: 1.3;
+  --text-h1-ls: 0;
   --text-h1-w: 400;
 
   --text-h2: clamp(1.1rem, 0.95rem + 0.6vw, 1.35rem);
@@ -46,30 +51,30 @@
   --text-h2-ls: -0.01em;
   --text-h2-w: 600;
 
-  --text-body: clamp(0.9rem, 0.85rem + 0.25vw, 1.05rem);
+  --text-body: clamp(1rem, 0.95rem + 0.12vw, 1.05rem);
   --text-body-lh: 1.7;
   --text-body-ls: 0;
   --text-body-w: 400;
 
-  --text-small: clamp(0.78rem, 0.74rem + 0.15vw, 0.88rem);
+  --text-small: clamp(0.875rem, 0.84rem + 0.15vw, 0.95rem);
   --text-small-lh: 1.65;
   --text-small-ls: 0.01em;
-  --text-small-w: 300;
+  --text-small-w: 400;
 
-  --text-caption: 0.65rem;
+  --text-caption: 0.75rem;
   --text-caption-lh: 1.4;
   --text-caption-ls: 0.08em;
   --text-caption-w: 400;
 
-  --text-mono: 0.72rem;
+  --text-mono: 0.75rem;
   --text-mono-lh: 1.6;
   --text-mono-ls: 0.04em;
   --text-mono-w: 400;
 
-  --text-eyebrow: 0.6rem;
+  --text-eyebrow: 0.75rem;
   --text-eyebrow-lh: 1.4;
   --text-eyebrow-ls: 0.2em;
-  --text-eyebrow-w: 300;
+  --text-eyebrow-w: 400;
 
   /* ---- SPACING (8px base) ---- */
   --space-1: 0.25rem;
@@ -100,8 +105,12 @@ html {
   scrollbar-color: var(--text-muted) var(--surface-0);
 }
 
+/* Native no-script fragment navigation must settle before the next interaction.
+   The enhanced homepage owns its bounded scroll animation separately. */
+html:not(.has-js) { scroll-behavior: auto; }
+
 body {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-body);
   background: var(--surface-0);
   color: var(--text-primary);
   line-height: 1.6;
@@ -148,6 +157,8 @@ a { color: inherit; text-decoration: none; }
   min-height: 100vh;
   padding-top: 6rem;
 }
+
+[data-home-section] { scroll-margin-top: 4.5rem; }
 
 .page-main--projects {
   padding-top: 3.25rem;
@@ -200,7 +211,7 @@ a { color: inherit; text-decoration: none; }
 
 .content-empty p {
   color: var(--text-muted);
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-annotation);
   font-size: 1.3rem;
   line-height: 2;
 }
@@ -221,7 +232,7 @@ a { color: inherit; text-decoration: none; }
 
 .content-list time {
   color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--text-eyebrow);
   letter-spacing: 0.1em;
 }
@@ -229,8 +240,10 @@ a { color: inherit; text-decoration: none; }
 .content-list h2 {
   margin-top: 0.4rem;
   color: var(--text-secondary);
-  font-size: 1.05rem;
-  font-weight: 500;
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  font-weight: 400;
+  line-height: 1.4;
 }
 
 .content-list p {
@@ -253,8 +266,8 @@ a { color: inherit; text-decoration: none; }
   display: inline-block;
   margin-bottom: var(--space-8);
   color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
   letter-spacing: 0.05em;
 }
 
@@ -267,14 +280,14 @@ a { color: inherit; text-decoration: none; }
   display: block;
   margin-bottom: var(--space-2);
   color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--text-eyebrow);
   letter-spacing: 0.1em;
 }
 
 .article-title {
   margin-bottom: var(--space-8);
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-title);
   font-size: var(--text-h1);
   font-weight: var(--text-h1-w);
   line-height: var(--text-h1-lh);
@@ -297,7 +310,7 @@ a { color: inherit; text-decoration: none; }
 
 .site-footer p {
   color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--text-eyebrow);
   letter-spacing: 0.08em;
 }
@@ -306,7 +319,7 @@ a { color: inherit; text-decoration: none; }
    SECTION LABELS
    ======================================== */
 .section-label {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: var(--text-eyebrow);
   font-weight: var(--text-eyebrow-w);
   color: var(--accent);
@@ -324,7 +337,7 @@ a { color: inherit; text-decoration: none; }
   background: var(--accent);
 }
 .section-title {
-  font-family: 'Instrument Serif', serif;
+  font-family: var(--font-title);
   font-size: var(--text-h1);
   font-weight: var(--text-h1-w);
   line-height: var(--text-h1-lh);

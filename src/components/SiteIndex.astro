@@ -30,8 +30,8 @@ const entries = navigationItems.flatMap(item => item.siteIndex
     padding: 0.65rem 0;
     border-bottom: 1px solid var(--surface-2);
     color: var(--text-muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.48rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
     letter-spacing: 0.18em;
   }
   .site-index__items { display: grid; grid-template-columns: repeat(var(--index-count), 1fr); }
@@ -54,13 +54,13 @@ const entries = navigationItems.flatMap(item => item.siteIndex
   .site-index__number {
     justify-self: start;
     color: var(--text-muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.42rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
   }
   .site-index__glyph { width: clamp(2.75rem, 4vw, 3.8rem); }
   .site-index__label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.48rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
     letter-spacing: 0.08em;
   }
   @media (max-width: 900px) {
@@ -69,7 +69,7 @@ const entries = navigationItems.flatMap(item => item.siteIndex
   @media (max-width: 520px) {
     .site-index__number { display: none; }
     .site-index__glyph { width: 2.6rem; }
-    .site-index__label { font-size: 0.42rem; }
+    .site-index__label { font-size: var(--text-caption); }
   }
   @media (prefers-reduced-motion: reduce) {
     .site-index__item { transition: color var(--duration-fast); }

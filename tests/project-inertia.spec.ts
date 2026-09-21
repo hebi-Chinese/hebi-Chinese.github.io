@@ -50,7 +50,7 @@ async function samplePath(page: Page, duration: number) {
 const travel = (positions: number[][]) => positions.slice(1).reduce((sum, frame, i) =>
   sum + frame.reduce((distance, x, card) => distance + Math.abs(x - positions[i][card]), 0) / frame.length, 0);
 
-for (const route of ['/', '/projects']) {
+for (const route of ['/', '/#work']) {
   test(`${route}: a swipe retains momentum across a brief release pause and settles`, async ({ page, context }) => {
     await page.addInitScript(() => {
       const pending = new Set<number>();

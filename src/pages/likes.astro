@@ -1,23 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Nav from '../components/Nav.astro';
-import SectionGlyph from '../components/SectionGlyph.astro';
-import '../styles/global.css';
+import { homeLinks } from '../data/site';
+import LegacyRedirect from '../components/LegacyRedirect.astro';
 ---
-<BaseLayout title="何必 / likes">
-  <Nav />
-  <main class="page-main">
-    <div class="wrap page-hero-grid">
-      <div>
-        <div class="section-label" data-reveal>Likes</div>
-        <h1 class="section-title page-title" data-reveal>推荐的东西</h1>
-
-      <article class="page-copy" data-reveal>
-        <h2>vibe coding</h2>
-        <p>最近发现 vibe coding 很好用，将 vibe coding 融入为生活的一部分，我感觉这是我保持活力的源泉之一。有了 vibe coding，对于现代生活的感知，也会变得不一样起来。</p>
-        </article>
-      </div>
-      <div class="page-hero-glyph" data-reveal><SectionGlyph kind="likes" label="推荐的东西" /></div>
-    </div>
-  </main>
-</BaseLayout>
+<LegacyRedirect href={homeLinks.likes} />

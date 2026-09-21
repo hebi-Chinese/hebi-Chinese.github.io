@@ -61,15 +61,15 @@ const titleSub = colonIdx >= 0 ? rawTitle.slice(colonIdx + 1).trim() : '';
     margin-bottom: 3rem;
   }
   .essay-head time {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
     color: var(--text-muted);
     letter-spacing: 0.1em;
     display: block;
     margin-bottom: 0.5rem;
   }
   .essay-head h1 {
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-title);
     font-size: var(--text-h1);
     font-weight: var(--text-h1-w);
     line-height: var(--text-h1-lh);
@@ -109,8 +109,8 @@ const titleSub = colonIdx >= 0 ? rawTitle.slice(colonIdx + 1).trim() : '';
     margin: 0;
   }
   .essay-body .essay-figure figcaption {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
     color: var(--text-muted);
     letter-spacing: 0.08em;
     text-align: center;
