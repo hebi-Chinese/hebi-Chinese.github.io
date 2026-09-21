@@ -138,6 +138,12 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
     .blog-item a:hover .blog-arrow,
     .blog-item a:focus-visible .blog-arrow { transform: none; }
   }
+  @media (max-width: 760px) {
+    .blog { padding: 40px 0; }
+    .blog-header { margin-bottom: 24px; gap: 16px; }
+    .blog-item a { padding: 24px 0; gap: 12px; }
+    .blog-item h3 { font-size: clamp(24px, 6vw, 28px); }
+  }
 </style>
 
 <section class="blog">

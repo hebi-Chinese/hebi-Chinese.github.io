@@ -28,4 +28,19 @@ import SectionGlyph from './SectionGlyph.astro';
 <style>
   .home-extra { padding: var(--section-normal) 0; }
   .page-copy h3 { margin-bottom: var(--space-2); font-size: var(--text-h2); font-weight: var(--text-h2-w); }
+  @media (max-width: 760px) {
+    .home-extra { padding: 36px 0; }
+    .home-extra .page-title { margin-bottom: 24px; }
+    .home-extra .page-copy { margin-bottom: 0; }
+    #likes .page-hero-grid { position: relative; display: block; }
+    #likes .section-label,
+    #likes .page-title { padding-right: 80px; }
+    #likes .page-hero-glyph {
+      position: absolute; top: 8px; right: clamp(1.5rem, 4vw, 3rem);
+      width: clamp(56px, 17vw, 72px); margin: 0; opacity: .85;
+    }
+    #now .page-hero-grid { gap: 20px; }
+    #now .page-title { margin-bottom: 20px; }
+    #now .page-hero-glyph { width: clamp(120px, 38vw, 160px); margin: 0; }
+  }
 </style>

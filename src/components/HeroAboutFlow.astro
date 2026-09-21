@@ -148,6 +148,9 @@ const hasCover = Astro.slots.has('after-about');
       display: none;
     }
   }
+  @media (max-width: 760px) {
+    .hero-about-flow { isolation: isolate; }
+  }
 </style>
 
 <div class="hero-about-flow" data-hero-about-flow data-profile-scroll-context data-about-cover={hasCover || undefined}>
