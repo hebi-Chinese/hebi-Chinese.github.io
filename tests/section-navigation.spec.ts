@@ -73,6 +73,9 @@ test('without JavaScript legacy routes and native homepage anchors remain usable
 
 test('a direct About bookmark reload lands on the flat panel', async ({ page }) => {
   await page.goto('/#about');
+  // Native fragment/reload positioning must not start a second scroll animation.
+  // Enhanced menu navigation has its own intermediate-position test below.
+  await expect(page.locator('html')).toHaveCSS('scroll-behavior', 'auto');
   await page.reload();
   const heading = page.getByRole('heading', { name: '关于这个人', exact: true });
   await expect(heading).toBeInViewport();

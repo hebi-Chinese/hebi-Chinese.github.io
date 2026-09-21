@@ -308,8 +308,12 @@ import { homeLinks, siteProfile } from '../data/site';
       stopRippleAnimation();
       resetCharacters();
     };
-    reducedMotion.addEventListener('change', resetEffects, { signal });
-    pointerCapability.addEventListener('change', resetEffects, { signal });
+    const resetWhenDisabled = () => {
+      // An enabling notification can arrive after fresh pointer input; keep that input.
+      if (!canUsePointerEffects()) resetEffects();
+    };
+    reducedMotion.addEventListener('change', resetWhenDisabled, { signal });
+    pointerCapability.addEventListener('change', resetWhenDisabled, { signal });
 
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) return;
