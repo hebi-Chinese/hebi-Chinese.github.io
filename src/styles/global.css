@@ -105,9 +105,10 @@ html {
   scrollbar-color: var(--text-muted) var(--surface-0);
 }
 
-/* Native no-script fragment navigation must settle before the next interaction.
-   The enhanced homepage owns its bounded scroll animation separately. */
+/* Native fragment/reload positioning must not race the homepage's own animation.
+   https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior */
 html:not(.has-js) { scroll-behavior: auto; }
+html:has([data-home-sections]) { scroll-behavior: auto; }
 
 body {
   font-family: var(--font-body);

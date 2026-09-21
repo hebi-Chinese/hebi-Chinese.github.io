@@ -1,5 +1,6 @@
 ---
 import { getProjectDisplayNumber, projects } from '../data/site';
+import MobileProjectCards from './MobileProjectCards.astro';
 
 interface Props {
   id?: string;
@@ -305,6 +306,14 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
   .projects:not([data-wheel-enhanced]) .wheel-stage::before,
   .projects:not([data-wheel-enhanced]) .wheel-stage::after,
   .projects:not([data-wheel-enhanced]) .wheel-card-front::after { display: none; animation: none; }
+  @media (max-width: 760px) {
+    .projects--immersive { position: relative; background: var(--surface-0); padding: 48px 0; }
+    .projects--immersive .projects-header { gap: 12px; margin-bottom: 16px; grid-template-columns: 1fr; }
+    .projects--immersive .projects-scene-note,
+    .projects.projects--immersive .wheel-stage,
+    .projects--immersive .wheel-controls,
+    .projects--immersive .wheel-hint { display: none; }
+  }
 </style>
 
 <section
@@ -361,6 +370,7 @@ const CardHeadingTag = headingLevel === 'h1' ? 'h2' : 'h3';
       <button class="wheel-control" type="button" data-project-next aria-label="下一个项目">→</button>
     </div>
     <p class="wheel-hint">按住卡片或空白拖动旋转 · 轻点卡片查看 GitHub</p>
+    {immersive && <MobileProjectCards headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'} />}
   </div>
 </section>
 

@@ -94,7 +94,9 @@ export function mountSectionNavigation() {
   addEventListener('touchstart', interrupt, { passive: true, signal });
   addEventListener('pointerdown', interrupt, { passive: true, signal });
   addEventListener('keydown', event => {
-    if (['Escape', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) interrupt();
+    // Widget arrow input takes precedence over a pending initial-hash focus.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/keydown_event
+    if (['Escape', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) interrupt();
   }, { signal });
   addEventListener('popstate', fromHash, { signal });
   addEventListener('hashchange', fromHash, { signal });
