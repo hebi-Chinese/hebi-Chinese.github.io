@@ -1,0 +1,31 @@
+---
+import SectionGlyph from './SectionGlyph.astro';
+---
+
+<section id="likes" data-home-section class="home-extra" aria-labelledby="likes-title">
+  <div class="wrap page-hero-grid">
+    <div>
+      <div class="section-label" data-reveal>Likes</div>
+      <h2 id="likes-title" class="section-title page-title" data-reveal>推荐的东西</h2>
+      <article class="page-copy" data-reveal>
+        <h3>vibe coding</h3>
+        <p>最近发现 vibe coding 很好用，将 vibe coding 融入为生活的一部分，我感觉这是我保持活力的源泉之一。有了 vibe coding，对于现代生活的感知，也会变得不一样起来。</p>
+      </article>
+    </div>
+    <div class="page-hero-glyph" data-reveal><SectionGlyph kind="likes" label="推荐的东西" /></div>
+  </div>
+</section>
+<section id="now" data-home-section class="home-extra" aria-labelledby="now-title">
+  <div class="wrap page-hero-grid">
+    <div>
+      <div class="section-label" data-reveal>Now</div>
+      <h2 id="now-title" class="section-title page-title" data-reveal>当下</h2>
+      <div class="page-copy" data-reveal><p>主线：学习。副本：即将解锁。</p></div>
+    </div>
+    <div class="page-hero-glyph" data-reveal><SectionGlyph kind="now" label="当下" /></div>
+  </div>
+</section>
+<style>
+  .home-extra { padding: var(--section-normal) 0; }
+  .page-copy h3 { margin-bottom: var(--space-2); font-size: var(--text-h2); font-weight: var(--text-h2-w); }
+</style>

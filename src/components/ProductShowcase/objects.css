@@ -22,6 +22,6 @@
 .product-showcase .wave { color: #27897f; --edge: #266058; }
 .product-showcase .start { background: #00818a; color: white; border: 1px solid #49b4b7; border-radius: 7px; font-size: clamp(5px, .60vw, 9px); font-weight: 600; white-space: nowrap; }
 .product-showcase .start i { display: block; flex: none; width: 6px; height: 6px; border-radius: 50%; background: #f9d8d0; }
-.product-showcase .float-note { position: absolute; left: 50%; top: 0; transform: translate(calc(-50% + var(--dx)), calc(-100% - 10px + var(--dy))); opacity: var(--lift); color: #e5deed; font: 9px/1.5 'JetBrains Mono', monospace; white-space: nowrap; padding: 3px 6px; background: #151124e8; border: 1px solid #b7a1d055; border-radius: 3px; }
+.product-showcase .float-note { position: absolute; left: 50%; top: 0; transform: translate(calc(-50% + var(--dx)), calc(-100% - 10px + var(--dy))); opacity: var(--lift); color: #e5deed; font: 9px/1.5 var(--font-mono); white-space: nowrap; padding: 3px 6px; background: #151124e8; border: 1px solid #b7a1d055; border-radius: 3px; }
 .product-showcase [data-showcase-product='aoai'] .float-note { color: #295f56; background: #f1f8f4ee; border-color: #7fab9e; }
 .product-showcase .float-thread { position: absolute; top: 50%; left: 50%; height: 1px; background: var(--tone); transform-origin: left center; opacity: calc(var(--lift) * .55); }

@@ -1,0 +1,57 @@
+---
+import type { ProfileSectionKey } from '../data/site';
+interface Props { kind: ProfileSectionKey }
+const { kind } = Astro.props;
+---
+{kind === 'future' && (<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+            <ellipse class="profile-glyph__soft" cx="39" cy="68" rx="23" ry="8" />
+            <path class="profile-glyph__ink" d="M16 68v9c0 5 10 9 23 9s23-4 23-9v-9M18 59c3 4 11 7 21 7s18-3 21-7M18 50c3 4 11 7 21 7s18-3 21-7" />
+            <path class="profile-glyph__ink" d="M18 50c0-5 9-9 21-9 5 0 10 1 14 3" />
+            <path class="profile-glyph__detail" d="M55 42l22-22M65 20h12v12" />
+            <circle class="profile-glyph__dot" cx="39" cy="50" r="2.5" />
+          </svg>)}
+{kind === 'seasons' && (<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+            <path class="profile-glyph__soft" d="M48 78S19 61 19 38c0-12 9-20 20-20 7 0 12 4 16 10 4-6 9-10 16-10 11 0 20 8 20 20 0 23-29 40-43 40Z" />
+            <path class="profile-glyph__ink" d="M48 78S19 61 19 38c0-12 9-20 20-20 7 0 12 4 16 10 4-6 9-10 16-10 11 0 20 8 20 20 0 23-29 40-43 40Z" />
+            <path class="profile-glyph__detail" d="M27 64a31 31 0 0 0 42 0" />
+            <path class="profile-glyph__detail" d="M65 58l5 6-7 3" />
+            <circle class="profile-glyph__dot" cx="25" cy="32" r="3" />
+            <circle class="profile-glyph__dot" cx="78" cy="34" r="3" opacity="0.55" />
+          </svg>)}
+{kind === 'badminton' && (<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+            <ellipse class="profile-glyph__soft" cx="39" cy="34" rx="23" ry="27" transform="rotate(-30 39 34)" />
+            <path class="profile-glyph__ink" d="M54 55l24 28M24 18l30 34M17 32l44 10M20 47l34-29M33 59l28-34" />
+            <path class="profile-glyph__ink" d="M55 55l7-6 22 27-8 7Z" />
+            <path class="profile-glyph__detail" d="M72 16l6 14M65 22l13 8M79 30l8-12" />
+            <path class="profile-glyph__detail" d="M68 14l4-5 5 4 5-4 4 5-4 5H72Z" />
+          </svg>)}
+{kind === 'budget' && (<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+            <path class="profile-glyph__soft" d="M17 68a31 31 0 0 1 62 0Z" />
+            <path class="profile-glyph__ink" d="M17 68a31 31 0 0 1 62 0M25 68h46M28 52l-6-4M40 40l-2-7M55 40l3-7M69 52l7-4" />
+            <path class="profile-glyph__detail" d="M48 65l19-23" />
+            <circle class="profile-glyph__dot" cx="48" cy="68" r="4" />
+            <path class="profile-glyph__detail" d="M70 20l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" />
+          </svg>)}
+{kind === 'archive' && (<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+            <rect class="profile-glyph__soft" x="17" y="15" width="62" height="67" rx="6" />
+            <path class="profile-glyph__ink" d="M17 29h62M28 22h1M36 22h1M44 22h1M28 43h38M28 53h31M28 63h23" />
+            <path class="profile-glyph__detail" d="M63 68l16-16 6 6-16 16-9 3Z" />
+            <path class="profile-glyph__detail" d="M75 56l6 6" />
+          </svg>)}
+{kind === 'now' && (<svg viewBox="0 0 96 96" aria-hidden="true" focusable="false">
+            <path class="profile-glyph__soft" d="M48 86S23 61 23 39a25 25 0 1 1 50 0c0 22-25 47-25 47Z" />
+            <path class="profile-glyph__ink" d="M48 86S23 61 23 39a25 25 0 1 1 50 0c0 22-25 47-25 47Z" />
+            <circle class="profile-glyph__ink" cx="48" cy="39" r="9" />
+            <path class="profile-glyph__detail" d="M48 13V4M48 74v9M22 39h-9M83 39h-9" />
+            <circle class="profile-glyph__dot" cx="48" cy="39" r="3" />
+          </svg>)}
+<style>
+  svg { width: 100%; height: 100%; overflow: visible; }
+  .profile-glyph__ink, .profile-glyph__soft, .profile-glyph__detail {
+    vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .profile-glyph__ink { fill: none; stroke: currentColor; stroke-width: 2.4; }
+  .profile-glyph__soft { fill: var(--accent-soft); stroke: currentColor; stroke-width: 1.7; }
+  .profile-glyph__detail { fill: none; stroke: var(--accent); stroke-width: 1.8; }
+  .profile-glyph__dot { fill: var(--accent); }
+</style>

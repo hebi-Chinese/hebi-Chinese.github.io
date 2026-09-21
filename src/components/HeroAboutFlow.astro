@@ -14,6 +14,7 @@ const hasCover = Astro.slots.has('after-about');
   /* The positive X rotation brings the panel's lower half toward the viewer.
      Source: https://www.w3.org/TR/css-transforms-2/#perspective-property */
   .about-flow-stage {
+    scroll-margin-top: 4.5rem;
     --about-angle: 68deg;
     --about-scale: 0.925;
     position: relative;
@@ -21,7 +22,8 @@ const hasCover = Astro.slots.has('after-about');
     margin-top: -24vh;
     background:
       linear-gradient(to bottom, rgba(216, 208, 196, 0.64), rgba(236, 231, 221, 0.18) 10rem, transparent 28rem);
-    perspective: 1250px;
+    /* Keep the entire tall About sheet in front of the camera at its initial tilt. */
+    perspective: max(1250px, calc(var(--about-height, 0px) * 1.15));
     perspective-origin: 50% 0;
     pointer-events: auto;
   }
@@ -93,6 +95,8 @@ const hasCover = Astro.slots.has('after-about');
   }
 
   .motion-ready .about-flow-stage { pointer-events: none; }
+  /* Land beyond the tilt's end (stage.top <= -8vh), before the cover begins. */
+  .motion-ready .about-flow-stage { scroll-margin-top: calc(-8vh - 2px); }
   .motion-ready .about-flow-panel {
     transform: translateZ(0) rotateX(var(--about-angle)) scale(var(--about-scale));
   }
@@ -114,7 +118,7 @@ const hasCover = Astro.slots.has('after-about');
       --about-angle: 52deg;
       --about-scale: 0.96;
       margin-top: -14vh;
-      perspective: 980px;
+      perspective: max(980px, calc(var(--about-height, 0px) * 1.15));
     }
 
     .about-flow-panel::before {
@@ -129,6 +133,7 @@ const hasCover = Astro.slots.has('after-about');
     .cover-ready .about-flow-hold { position: relative; top: 0; }
     .cover-ready .cover-sheet { margin-top: 0; }
     .about-flow-stage, .motion-ready .about-flow-stage {
+      scroll-margin-top: 4.5rem;
       margin-top: 0;
       perspective: none;
       pointer-events: auto;
@@ -145,17 +150,17 @@ const hasCover = Astro.slots.has('after-about');
   }
 </style>
 
-<div class="hero-about-flow" data-hero-about-flow data-about-cover={hasCover || undefined}>
+<div class="hero-about-flow" data-hero-about-flow data-profile-scroll-context data-about-cover={hasCover || undefined}>
   <Hero />
-  <div class="about-flow-stage" data-about-flow-stage>
-    <div class="about-flow-hold">
+  <div class="about-flow-stage" data-about-flow-stage data-profile-flow-origin id="about" data-home-section>
+    <div class="about-flow-hold" data-profile-flow-hold>
       <div class="about-flow-panel">
         <div class="about-flow-edge" aria-hidden="true"></div>
         <About />
       </div>
     </div>
   </div>
-  {hasCover && <div class="cover-sheet"><slot name="after-about" /></div>}
+  {hasCover && <div class="cover-sheet" data-profile-next-sheet><slot name="after-about" /></div>}
 </div>
 
 <script>

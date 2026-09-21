@@ -52,7 +52,7 @@ import { currentSignals } from '../data/site';
     gap: var(--space-6);
     padding: var(--space-6) clamp(1.5rem, 4vw, 3rem);
     color: var(--reel-muted);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: var(--text-caption);
     letter-spacing: 0.15em;
     text-transform: uppercase;
@@ -81,17 +81,17 @@ import { currentSignals } from '../data/site';
   .current-reel__kicker {
     margin-bottom: var(--space-6);
     color: var(--accent-bright);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: var(--text-eyebrow);
     letter-spacing: 0.2em;
   }
 
   .current-reel__intro h2 {
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-title);
     font-size: clamp(2.4rem, 1.55rem + 3vw, 4rem);
     font-weight: 400;
-    line-height: 0.98;
-    letter-spacing: -0.025em;
+    line-height: 1.2;
+    letter-spacing: 0;
   }
 
   .current-reel__intro h2 span { display: block; white-space: nowrap; }
@@ -137,17 +137,17 @@ import { currentSignals } from '../data/site';
     display: block;
     margin-bottom: var(--space-3);
     color: var(--accent-bright);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: var(--text-eyebrow);
     letter-spacing: 0.17em;
   }
 
   .current-reel__signal-title {
     display: block;
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-title);
     font-size: clamp(4.5rem, 2rem + 8vw, 10rem);
-    line-height: 0.78;
-    letter-spacing: -0.06em;
+    line-height: 1.1;
+    letter-spacing: 0;
     white-space: nowrap;
   }
 

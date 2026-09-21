@@ -64,12 +64,14 @@ export interface NavigationItem {
   siteIndex?: { glyph: SectionGlyphKind };
 }
 
+export const homeLinks = { about: '/#about', work: '/#work', likes: '/#likes', now: '/#now' } as const;
+
 export const navigationItems: readonly NavigationItem[] = [
-  { key: 'about', href: '/about', label: 'about', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'about' } },
-  { key: 'projects', href: '/projects', label: 'work', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'projects' } },
+  { key: 'about', href: homeLinks.about, label: 'about', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'about' } },
+  { key: 'projects', href: homeLinks.work, label: 'work', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'projects' } },
   { key: 'essays', href: '/essays', label: 'essays', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'essays' } },
   { key: 'notes', href: '/notes', label: 'notes', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'notes' } },
-  { key: 'likes', href: '/likes', label: 'likes', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'likes' } },
+  { key: 'likes', href: homeLinks.likes, label: 'likes', placements: ['desktop', 'mobile'], siteIndex: { glyph: 'likes' } },
   {
     key: 'github',
     href: siteProfile.githubUrl,
@@ -92,8 +94,8 @@ export interface Project {
   tags: readonly string[];
   detailTitle: string;
   detail: string;
-  href?: string;
-  linkText?: string;
+  href: string;
+  linkText: string;
   heroSignal?: {
     label: string;
     meta: string;

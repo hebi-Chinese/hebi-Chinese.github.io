@@ -65,7 +65,7 @@ const projectSignals = projects.flatMap((project, index) => project.heroSignal ?
     left: 50%;
     width: min(94vw, 96rem);
     transform: translateX(-50%);
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: var(--font-body);
     font-size: clamp(7rem, 22vw, 22rem);
     font-weight: 600;
     line-height: 0.78;
@@ -102,7 +102,7 @@ const projectSignals = projects.flatMap((project, index) => project.heroSignal ?
     align-items: center;
     gap: 0.45rem;
     color: rgba(107, 93, 79, 0.42);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.48rem;
     letter-spacing: 0.14em;
     transition: color var(--duration-normal), opacity var(--duration-normal);
@@ -170,7 +170,7 @@ const projectSignals = projects.flatMap((project, index) => project.heroSignal ?
   .hero-signal {
     position: absolute;
     left: 14px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     white-space: nowrap;
   }
 

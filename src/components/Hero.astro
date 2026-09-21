@@ -1,7 +1,8 @@
 ---
 import HeroBlueprint from './HeroBlueprint.astro';
+import HeroLogo from './HeroLogo.astro';
 import SiteIndex from './SiteIndex.astro';
-import { siteProfile } from '../data/site';
+import { homeLinks, siteProfile } from '../data/site';
 ---
 <style>
   .hero {
@@ -23,7 +24,7 @@ import { siteProfile } from '../data/site';
     filter: blur(80px);
   }
   .hero-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: var(--text-eyebrow);
     font-weight: var(--text-eyebrow-w);
     color: var(--text-muted);
@@ -32,7 +33,7 @@ import { siteProfile } from '../data/site';
     margin-bottom: var(--space-8);
   }
   .hero-name {
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-title);
     font-size: var(--text-display);
     font-weight: var(--text-display-w);
     line-height: var(--text-display-lh);
@@ -40,7 +41,6 @@ import { siteProfile } from '../data/site';
     letter-spacing: var(--text-display-ls);
   }
   .hero-side { display: grid; justify-items: center; gap: var(--space-8); }
-  .hero-logo { display: block; width: min(100%, 23rem); height: auto; }
   .hero-name .char {
     display: inline-block;
     transition: color 0.6s var(--ease-out-expo), transform 0.1s ease-out;
@@ -53,46 +53,12 @@ import { siteProfile } from '../data/site';
     max-width: 37rem;
     margin-bottom: var(--space-8);
     color: var(--text-secondary);
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-body);
     font-size: clamp(1.1rem, 0.9rem + 0.7vw, 1.55rem);
     line-height: 1.5;
     text-wrap: balance;
   }
-  .hero-nowrap { white-space: nowrap; }
-  .hero-register {
-    display: grid;
-    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
-    max-width: 39rem;
-    margin-bottom: var(--space-8);
-    border-top: 1px solid var(--surface-3);
-    border-bottom: 1px solid var(--surface-2);
-  }
-  .hero-register__item {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--space-3);
-    align-items: baseline;
-    padding: var(--space-3) 0;
-  }
-  .hero-register__item + .hero-register__item {
-    padding-left: var(--space-4);
-    border-left: 1px solid var(--surface-2);
-  }
-  .hero-register dt,
-  .hero-register dd {
-    margin: 0;
-  }
-  .hero-register dt {
-    color: var(--accent);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.52rem;
-    letter-spacing: 0.16em;
-  }
-  .hero-register dd {
-    color: var(--text-secondary);
-    font-size: var(--text-small);
-  }
-  .hero-register__item:last-child dd { white-space: nowrap; }
+  .hero-intro span { display: block; }
   .hero-cta {
     display: flex;
     flex-wrap: wrap;
@@ -106,8 +72,8 @@ import { siteProfile } from '../data/site';
     padding-bottom: var(--space-1);
     border-bottom: 1px solid currentColor;
     color: var(--text-primary);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: var(--text-caption);
+    font-family: var(--font-body);
+    font-size: var(--text-small);
     font-weight: 400;
     letter-spacing: 0.1em;
     transition:
@@ -142,24 +108,14 @@ import { siteProfile } from '../data/site';
 
   @media (max-width: 768px) {
     .hero { min-height: 85vh; }
-    .hero-eyebrow { font-size: 0.5rem; }
+    .hero-eyebrow { font-size: var(--text-eyebrow); }
     .hero-intro { max-width: 31rem; }
   }
   @media (max-width: 900px) {
     .hero { padding-bottom: 24vh; padding-top: 6rem; }
     .hero-layout { grid-template-columns: 1fr; gap: 2.5rem; }
     .hero-side { width: 100%; }
-    .hero-logo { width: clamp(12rem, 45vw, 20rem); }
     .hero-index { width: 100%; }
-  }
-  @media (max-width: 520px) {
-    .hero-register { grid-template-columns: 1fr; }
-    .hero-register__item + .hero-register__item {
-      padding-left: 0;
-      border-top: 1px solid var(--surface-2);
-      border-left: 0;
-    }
-    .hero-register__item:last-child dd { white-space: normal; }
   }
   @media (prefers-reduced-motion: reduce) {
     .ripple-canvas { display: none; }
@@ -181,25 +137,16 @@ import { siteProfile } from '../data/site';
           <span class="char">何</span><span class="char">必</span>
         </h1>
         <p class="hero-intro" data-reveal>
-          在毕业，也在做反作弊、<span class="hero-nowrap">多 Agent</span> 和模型微调。这里放项目，也放一些还没想完的文字。
+          <span>写代码，打羽毛球，玩游戏，看番剧。</span>
+          <span>这里放我做的东西，也放我喜欢的东西。</span>
         </p>
-        <dl class="hero-register" data-reveal>
-          <div class="hero-register__item">
-            <dt>NOW</dt>
-            <dd>毕业进行中</dd>
-          </div>
-          <div class="hero-register__item">
-            <dt>WORKING ON</dt>
-            <dd>Systems / Agents / Models</dd>
-          </div>
-        </dl>
         <div class="hero-cta" data-reveal>
-          <a href="/projects" class="hero-link">查看项目 <span aria-hidden="true">↘</span></a>
+          <a href={homeLinks.work} class="hero-link">查看项目 <span aria-hidden="true">↘</span></a>
           <a href={`mailto:${siteProfile.email}`} class="hero-link">发封邮件 <span aria-hidden="true">↗</span></a>
         </div>
       </div>
       <div class="hero-side">
-        <img class="hero-logo" src={siteProfile.logo.src} width={siteProfile.logo.width} height={siteProfile.logo.height} alt="" fetchpriority="high" data-reveal />
+        <HeroLogo />
         <div class="hero-index"><SiteIndex /></div>
       </div>
     </div>

@@ -1,21 +1,5 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Nav from '../components/Nav.astro';
-import SectionGlyph from '../components/SectionGlyph.astro';
-import '../styles/global.css';
+import { homeLinks } from '../data/site';
+import LegacyRedirect from '../components/LegacyRedirect.astro';
 ---
-<BaseLayout title="何必 / now">
-  <Nav />
-  <main class="page-main">
-    <div class="wrap page-hero-grid">
-      <div>
-        <div class="section-label" data-reveal>Now</div>
-        <h1 class="section-title page-title" data-reveal>当下</h1>
-        <div class="page-copy" data-reveal>
-          <p>主线：学习。副本：即将解锁。</p>
-        </div>
-      </div>
-      <div class="page-hero-glyph" data-reveal><SectionGlyph kind="now" label="当下" /></div>
-    </div>
-  </main>
-</BaseLayout>
+<LegacyRedirect href={homeLinks.now} />

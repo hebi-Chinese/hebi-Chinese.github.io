@@ -22,7 +22,7 @@ test('About responds to motion-preference changes in both directions', async ({ 
 });
 
 for (const width of [320, 375, 768, 1024, 1440]) {
-  for (const route of ['/', '/projects']) {
+  for (const route of ['/', '/#work']) {
     test(`${route}: all project links remain readable without JavaScript at ${width}px`, async ({ browser }) => {
       const context = await browser.newContext({ javaScriptEnabled: false, viewport: { width, height: 900 } });
       const page = await context.newPage();
@@ -55,10 +55,10 @@ test('site index matches the main navigation and derives its count', async ({ pa
   await expect(index).toContainText(`SITE / INDEX ${String(await links.count()).padStart(2, '0')}`);
 });
 
-test('About header keeps readable opacity without changing its type size', async ({ page }) => {
+test('About header keeps readable opacity with the approved 80px type size', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.goto('/about', { waitUntil: 'domcontentloaded' });
-  const heading = page.getByRole('heading', { level: 1, name: '关于这个人' });
+  await page.goto('/#about', { waitUntil: 'domcontentloaded' });
+  const heading = page.getByRole('heading', { level: 2, name: '关于这个人' });
   expect(await heading.evaluate(el => getComputedStyle(el.parentElement!.parentElement!).opacity)).toBe('1');
-  await expect(heading).toHaveCSS('font-size', '96px');
+  await expect(heading).toHaveCSS('font-size', '80px');
 });

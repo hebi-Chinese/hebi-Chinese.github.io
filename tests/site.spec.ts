@@ -3,14 +3,14 @@ import { expect, test } from '@playwright/test';
 
 const publicRoutes = [
   '/',
-  '/about',
-  '/projects',
+  '/#about',
+  '/#work',
   '/notes',
   '/notes/typing-or-speaking',
   '/essays',
   '/essays/post-01',
-  '/likes',
-  '/now',
+  '/#likes',
+  '/#now',
 ];
 
 for (const route of publicRoutes) {
@@ -31,7 +31,7 @@ for (const route of publicRoutes) {
   });
 }
 
-for (const route of ['/', '/about', '/projects', '/notes', '/notes/typing-or-speaking', '/essays', '/essays/post-01']) {
+for (const route of ['/', '/#about', '/#work', '/notes', '/notes/typing-or-speaking', '/essays', '/essays/post-01']) {
   test(`${route} has no serious WCAG 2.1 AA violation`, async ({ page }) => {
     await page.goto(route);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
@@ -50,7 +50,9 @@ test('homepage uses the editorial introduction and section hierarchy', async ({ 
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1, name: '何 必' })).toBeVisible();
-  await expect(page.getByText(/在毕业，也在做反作弊/)).toBeVisible();
+  await expect(page.getByText('写代码，打羽毛球，玩游戏，看番剧。')).toBeVisible();
+  await expect(page.getByText('这里放我做的东西，也放我喜欢的东西。')).toBeVisible();
+  await expect(page.getByText(/在毕业，也在做反作弊|毕业进行中|Systems \/ Agents \/ Models/)).toHaveCount(0);
   await expect(page.getByRole('link', { name: '查看项目' })).toBeVisible();
   await expect(page.getByRole('link', { name: '发封邮件' })).toBeVisible();
   await expect(page.getByRole('heading', { level: 2, name: '做过的东西' })).toHaveCount(1);
@@ -63,15 +65,17 @@ test('homepage uses the editorial introduction and section hierarchy', async ({ 
   const showcaseIndex = sectionHeadings.findIndex(text => text.trim() === '做过的东西');
   expect(sectionHeadings[showcaseIndex + 1].trim()).toBe('做过的、在做的、想做的');
   await expect(page.getByRole('heading', { level: 2, name: '最近写下来的' })).toHaveCount(1);
-  await expect(page.getByText('主线：学习')).toHaveCount(0);
-  await expect(page.getByText('副本：???')).toHaveCount(0);
+  // The legacy Now copy now lives below Blog; the Hero still uses the approved introduction.
+  await expect(page.locator('[data-hero]').getByText('主线：学习')).toHaveCount(0);
+  await expect(page.locator('[data-hero]').getByText('副本：???')).toHaveCount(0);
 });
 
 test('about profile headings follow the page hierarchy', async ({ page }) => {
-  await page.goto('/about');
+  await page.goto('/#about');
 
-  await expect(page.getByRole('heading', { level: 1, name: '关于这个人' })).toBeVisible();
-  await expect(page.getByRole('heading', { level: 2 })).toHaveCount(6);
+  const about = page.locator('[data-profile-surface]');
+  await expect(about.getByRole('heading', { level: 2, name: '关于这个人' })).toBeVisible();
+  await expect(about.getByRole('heading', { level: 3 })).toHaveCount(6);
 
   const expectedHeadings = [
     '真爱换季',
@@ -81,7 +85,7 @@ test('about profile headings follow the page hierarchy', async ({ page }) => {
     '公开留痕',
     '此刻坐标',
   ];
-  await expect(page.getByRole('heading', { level: 2 })).toHaveText(expectedHeadings);
+  await expect(about.getByRole('heading', { level: 3 })).toHaveText(expectedHeadings);
   await expect(page.locator('[data-profile-glyph]')).toHaveCount(6);
   await expect(page.getByText('待补')).toHaveCount(0);
 });
@@ -92,18 +96,19 @@ test('the homepage about surface omits the rejected lead copy', async ({ page })
   await expect(page.getByText('很多东西写下来的时候可能就已经过期了。')).toHaveCount(0);
 });
 
-test('about linked glyphs fill the profile list height on desktop', async ({ page }) => {
+test('about connector reaches the final glyph on desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1003, height: 869 });
-  await page.goto('/about');
+  await page.goto('/#about');
 
   await expect(page.locator('[data-profile-path]')).toHaveCount(1);
-  const heightDifference = await page.evaluate(() => {
-    const visual = document.querySelector('.about-visual-slot')?.getBoundingClientRect();
-    const list = document.querySelector('.profile-list')?.getBoundingClientRect();
-    if (!visual || !list) return Number.POSITIVE_INFINITY;
-    return Math.abs(visual.height - list.height);
+  await expect(page.locator('[data-profile-path] path').first()).toHaveAttribute('d', /^M /);
+  const distance = await page.evaluate(() => {
+    const path = document.querySelector<SVGPathElement>('[data-thread-progress]')!;
+    const end = path.getPointAtLength(path.getTotalLength()).matrixTransform(path.getScreenCTM()!);
+    const glyph = Array.from(document.querySelectorAll('[data-profile-glyph]')).at(-1)!.getBoundingClientRect();
+    return Math.hypot(end.x - (glyph.x + glyph.width / 2), end.y - (glyph.y + glyph.height / 2));
   });
-  expect(heightDifference).toBeLessThanOrEqual(1);
+  expect(distance).toBeLessThanOrEqual(8);
 });
 
 test('notes preserve the authored date and optional time', async ({ page }) => {
@@ -130,7 +135,7 @@ const responsiveCases = [
 ];
 
 for (const viewport of responsiveCases) {
-  for (const route of ['/', '/about', '/projects']) {
+  for (const route of ['/', '/#about', '/#work']) {
     test(`${route} fits ${viewport.width}px`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto(route);

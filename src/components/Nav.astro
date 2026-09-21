@@ -42,7 +42,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     min-width: 44px;
     min-height: 44px;
     color: var(--text-secondary);
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-size: 0.8rem;
     font-weight: 400;
     letter-spacing: 0.12em;
@@ -67,9 +67,9 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     align-items: center;
     gap: 0.42rem;
     color: var(--text-muted);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 300;
+    font-family: var(--font-mono);
+    font-size: var(--text-caption);
+    font-weight: 400;
     letter-spacing: 0.1em;
     text-transform: lowercase;
     transition: color var(--duration-fast);
@@ -94,13 +94,13 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
 
   .nav-links a:hover,
   .nav-links a:focus-visible,
-  .nav-links a[aria-current='page'] {
+  .nav-links a[aria-current] {
     color: var(--text-primary);
   }
 
   .nav-links a:hover::after,
   .nav-links a:focus-visible::after,
-  .nav-links a[aria-current='page']::after {
+  .nav-links a[aria-current]::after {
     width: 100%;
   }
 
@@ -140,8 +140,11 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     display: none;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--space-8);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: calc(3.25rem + var(--space-6)) var(--space-6) var(--space-6);
     background: rgba(250, 248, 244, 0.96);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -151,16 +154,21 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     display: flex;
   }
 
+  /* Auto margins center short menus but collapse when the links need to scroll. */
+  .nav-mobile.open a:first-child { margin-top: auto; }
+  .nav-mobile.open a:last-child { margin-bottom: auto; }
+
   .nav-mobile a {
+    flex-shrink: 0;
     color: var(--text-primary);
-    font-family: 'Instrument Serif', serif;
+    font-family: var(--font-body);
     font-size: 2rem;
     transition: color var(--duration-fast);
   }
 
   .nav-mobile a:hover,
   .nav-mobile a:focus-visible,
-  .nav-mobile a[aria-current='page'] {
+  .nav-mobile a[aria-current] {
     color: var(--accent);
   }
 
@@ -187,7 +195,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
 
   .nav-links a:hover .nav-link-icon,
   .nav-links a:focus-visible .nav-link-icon,
-  .nav-links a[aria-current='page'] .nav-link-icon {
+  .nav-links a[aria-current] .nav-link-icon {
     color: var(--accent);
     transform: translateY(-0.12rem);
   }
@@ -205,7 +213,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
     .nav-link-icon { transition: color var(--duration-fast); }
     .nav-links a:hover .nav-link-icon,
     .nav-links a:focus-visible .nav-link-icon,
-    .nav-links a[aria-current='page'] .nav-link-icon { transform: none; }
+    .nav-links a[aria-current] .nav-link-icon { transform: none; }
 
     .nav,
     .nav-burger span,
@@ -248,7 +256,7 @@ const isCurrentPage = (href: string) => href.startsWith('/') && (href.replace(/\
   <nav class="nav" data-navigation-bar aria-label="主导航">
     <div class="nav-inner">
       <a href="/" class="nav-logo" aria-label={siteProfile.name} aria-current={currentPath === '/' ? 'page' : undefined}>
-        {currentPath === '/' ? <img src={siteProfile.logo.src} width={siteProfile.logo.width} height={siteProfile.logo.height} alt="" /> : siteProfile.name}
+        <img src={siteProfile.logo.src} width={siteProfile.logo.width} height={siteProfile.logo.height} alt="" />
       </a>
       <div class="nav-links">
         {desktopItems.map((item) => (
