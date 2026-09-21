@@ -1,6 +1,21 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
+test('initial bookmark landing cannot take focus back after card keyboard input', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  // Delay rendering, not application handlers: reproduce input before initial landing paints.
+  await page.clock.install({ time: new Date('2026-09-21T00:00:00Z') });
+  await page.clock.pauseAt(new Date('2026-09-21T00:00:01Z'));
+  await page.goto('/#work');
+  await page.evaluate(() => document.fonts.ready);
+  const active = page.getByRole('link', { name: /（GitHub，新标签页）/ });
+  await active.focus();
+  await page.keyboard.press('ArrowRight');
+  await page.clock.runFor(64);
+  await expect(active).toBeFocused();
+  await expect(page.getByRole('status', { name: '当前项目' })).toHaveText('02 / 05 · Codex 工作看板');
+});
+
 test('inactive edge cards cannot take pointer focus or open a project', async ({ page, context }) => {
   await context.route('https://github.com/**', route => route.fulfill({ body: 'Project destination' }));
   await page.setViewportSize({ width: 375, height: 812 });
