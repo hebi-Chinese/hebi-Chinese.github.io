@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="148 168 460 406" width="460" height="406">
-  <title>何必 Logo · v1 · 墨蓝与琥珀</title>
-  <desc>以 P3-Q 为基础，仅将规整羽毛球改为长短错落的弯曲羽片与略偏斜球头。手柄、字形、竖钩、墨蓝与琥珀配色与透明背景均保持。</desc>
+  <title>何必 Logo · v1</title>
+  <desc>以 P3-Q 为基础，仅将规整羽毛球改为长短错落的弯曲羽片与略偏斜球头。手柄、字形、竖钩、黑灰红配色与透明背景均保持。</desc>
   <defs>
     <mask id="counter-break" maskUnits="userSpaceOnUse" x="0" y="0" width="768" height="768">
       <rect width="768" height="768" fill="white"/>
@@ -15,55 +15,55 @@
     <clipPath id="body-plane"><path d="M362 240 Q362 261 364 278 Q366 319 390 311 L487 275 L471 344 L531 419 L459 386 L412 467 Q446 479 454 462 L457 443 Q487 450 489 474 Q494 492 491 515 Q487 535 473 548 Q466 556 481 556 Q525 556 547 535 Q572 513 574 478 Q577 451 572 426 Q559 386 559 366 Q560 324 584 280 Q593 265 578 263 Q526 247 476 250 L402 251 Q376 251 362 240 Z"/></clipPath>
   </defs>
   <!-- Independent vertical: not replaced by the flight trail. -->
-  <path id="vertical" fill="#182d43" d="M245 308 Q255 299 266 306 Q277 314 275 332 L265 470 Q264 501 285 509 L277 534 Q257 546 244 533 Q230 519 231 501 L234 349 Q232 326 245 308 Z"/>
-  <g id="right-body" fill="#182d43" mask="url(#checkpoint)">
+  <path id="vertical" fill="#203447" d="M245 308 Q255 299 266 306 Q277 314 275 332 L265 470 Q264 501 285 509 L277 534 Q257 546 244 533 Q230 519 231 501 L234 349 Q232 326 245 308 Z"/>
+  <g id="right-body" fill="#203447" mask="url(#checkpoint)">
     <path d="M362 240 Q362 261 364 278 Q366 319 390 311 L487 275 L471 344 L531 419 L459 386 L412 467 Q446 479 454 462 L457 443 Q487 450 489 474 Q494 492 491 515 Q487 535 473 548 Q466 556 481 556 Q525 556 547 535 Q572 513 574 478 Q577 451 572 426 Q559 386 559 366 Q560 324 584 280 Q593 265 578 263 Q526 247 476 250 L402 251 Q376 251 362 240 Z"/>
   </g>
   <g clip-path="url(#body-plane)" mask="url(#checkpoint)">
-    <path fill="#657c91" d="M352 234 L583 253 L568 278 L382 292 Z"/>
-    <path fill="#354c62" d="M558 340 L599 362 L591 576 L481 568 L528 513 L547 463 L527 390 Z"/>
+    <path fill="#697e8d" d="M352 234 L583 253 L568 278 L382 292 Z"/>
+    <path fill="#3d5364" d="M558 340 L599 362 L591 576 L481 568 L528 513 L547 463 L527 390 Z"/>
   </g>
-  <path fill="#657c91" d="M245 326 Q250 316 256 318 L247 467 Q245 501 259 519 Q241 510 242 480 Z"/>
-  <g id="inner-reading" fill="#182d43" mask="url(#counter-break)" clip-path="url(#lower-only)">
+  <path fill="#697e8d" d="M245 326 Q250 316 256 318 L247 467 Q245 501 259 519 Q241 510 242 480 Z"/>
+  <g id="inner-reading" fill="#203447" mask="url(#counter-break)" clip-path="url(#lower-only)">
     <path fill-rule="evenodd" d="M349 332 Q393 312 420 322 Q443 329 432 363 Q416 411 387 450 Q351 492 296 524 Q273 541 255 536 L252 505 Q271 512 289 498 Q318 482 330 453 Q344 421 345 393 Q329 414 316 419 Q303 424 307 404 Q313 360 349 332 Z M366 346 Q372 369 369 412 Q391 399 404 374 Q418 351 366 346 Z"/>
   </g>
   <!-- The outline follows the former inner stroke, with unequal grips and a shared counterform. -->
   <g id="controller" mask="url(#controller-hole)">
-    <path fill="#182d43" d="M346 334 C356 328 357 318 370 321 C376 322 380 327 386 325 C410 313 434 317 441 332 C450 350 437 374 424 397 C415 413 411 428 407 441 C402 458 391 463 382 451 L363 426 C357 418 349 417 342 424 C332 436 315 442 308 430 C301 418 307 397 314 379 C322 358 331 341 346 334 Z"/>
-    <path fill="#bd7d2b" d="M349 340 C359 334 362 326 370 327 C377 329 381 334 390 330 C410 321 429 324 435 335 C441 350 429 372 418 393 C407 411 405 426 400 439 C397 451 393 453 386 444 L368 420 C358 408 347 410 336 422 C328 431 316 435 313 425 C309 415 314 397 320 382 C328 361 337 346 349 340 Z"/>
-    <path fill="#182d43" d="M435 335 C441 350 429 372 418 393 C407 411 405 426 400 439 C397 451 393 453 386 444 L368 420 L359 405 L389 425 L416 373 L409 377 Z"/>
-    <path fill="#b9c5cc" d="M349 340 C359 334 362 326 370 327 C377 329 381 334 390 330 C410 321 429 324 435 335 L417 331 L380 350 L362 340 L330 377 L337 353 L316 403 Q322 363 349 340 Z"/>
-    <path fill="#182d43" d="M313 413 Q310 430 319 430 Q327 430 336 422 Q347 410 358 413 L363 426 Q357 418 342 432 Q319 451 308 430 Z"/>
+    <path fill="#203447" d="M346 334 C356 328 357 318 370 321 C376 322 380 327 386 325 C410 313 434 317 441 332 C450 350 437 374 424 397 C415 413 411 428 407 441 C402 458 391 463 382 451 L363 426 C357 418 349 417 342 424 C332 436 315 442 308 430 C301 418 307 397 314 379 C322 358 331 341 346 334 Z"/>
+    <path fill="#98ad99" d="M349 340 C359 334 362 326 370 327 C377 329 381 334 390 330 C410 321 429 324 435 335 C441 350 429 372 418 393 C407 411 405 426 400 439 C397 451 393 453 386 444 L368 420 C358 408 347 410 336 422 C328 431 316 435 313 425 C309 415 314 397 320 382 C328 361 337 346 349 340 Z"/>
+    <path fill="#203447" d="M435 335 C441 350 429 372 418 393 C407 411 405 426 400 439 C397 451 393 453 386 444 L368 420 L359 405 L389 425 L416 373 L409 377 Z"/>
+    <path fill="#c1ccd0" d="M349 340 C359 334 362 326 370 327 C377 329 381 334 390 330 C410 321 429 324 435 335 L417 331 L380 350 L362 340 L330 377 L337 353 L316 403 Q322 363 349 340 Z"/>
+    <path fill="#203447" d="M313 413 Q310 430 319 430 Q327 430 336 422 Q347 410 358 413 L363 426 Q357 418 342 432 Q319 451 308 430 Z"/>
   </g>
   <!-- One offset stick and two pill keys are enough to suggest controls at this scale. -->
   <g id="controller-controls">
-    <ellipse cx="333" cy="379" rx="11" ry="9" transform="rotate(-26 333 379)" fill="#182d43"/>
-    <ellipse cx="331" cy="375" rx="8" ry="6" transform="rotate(-26 331 375)" fill="#b9c5cc" stroke="#182d43" stroke-width="2.5"/>
-    <path d="M401 338 L406 341 M411 347 L416 350" stroke="#b9c5cc" stroke-width="6" stroke-linecap="round"/>
-    <path d="M348 337 Q355 329 360 328" fill="none" stroke="#182d43" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="333" cy="379" rx="11" ry="9" transform="rotate(-26 333 379)" fill="#203447"/>
+    <ellipse cx="331" cy="375" rx="8" ry="6" transform="rotate(-26 331 375)" fill="#c1ccd0" stroke="#203447" stroke-width="2.5"/>
+    <path d="M401 338 L406 341 M411 347 L416 350" stroke="#c1ccd0" stroke-width="6" stroke-linecap="round"/>
+    <path d="M348 337 Q355 329 360 328" fill="none" stroke="#203447" stroke-width="4" stroke-linecap="round"/>
   </g>
   <!-- Three feather panels flare behind the leading cork; the existing flight stroke remains. -->
   <g id="shuttle-flight">
-    <path fill="#182d43" d="M297 223 Q270 278 229 328 Q198 365 166 390 Q213 324 245 272 Z"/>
-    <path fill="#bd7d2b" d="M284 231 Q259 283 221 320 Q245 280 259 255 Z"/>
+    <path fill="#203447" d="M297 223 Q270 278 229 328 Q198 365 166 390 Q213 324 245 272 Z"/>
+    <path fill="#98ad99" d="M284 231 Q259 283 221 320 Q245 280 259 255 Z"/>
     <g transform="translate(316 197) rotate(40)">
       <!-- Unequal curved feathers sweep behind the cork instead of forming a rigid fan. -->
-      <path fill="#182d43" d="M-7 4 C-9 18-23 25-29 37 Q-33 44-28 49 Q-17 51-10 44 Q-8 52-2 54 Q9 53 12 44 Q20 46 25 38 C29 24 11 17 9 4 Z"/>
-      <path fill="#b9c5cc" d="M-5 10 C-10 25-28 30-27 44 Q-26 49-15 41 Q-10 35-5 24 Z"/>
-      <path fill="#7d91a2" d="M-1 11 C1 23-7 36-5 47 Q-2 54 5 44 C12 31 5 20 3 11 Z"/>
-      <path fill="#b9c5cc" d="M6 10 C10 23 22 26 20 36 Q18 42 13 37 C12 28 6 23 6 10 Z"/>
-      <path fill="#bd7d2b" d="M-9 2 Q0 5 10 1 L9 8 Q0 11-8 7 Z"/>
-      <path fill="#bd7d2b" d="M-10 1 C-15-12-4-25 6-21 C17-17 15-5 10 1 Q1 6-10 1 Z"/>
-      <path fill="#b9c5cc" d="M-9-10 Q-6-20 4-19 Q-1-14-3-6 Z"/>
+      <path fill="#203447" d="M-7 4 C-9 18-23 25-29 37 Q-33 44-28 49 Q-17 51-10 44 Q-8 52-2 54 Q9 53 12 44 Q20 46 25 38 C29 24 11 17 9 4 Z"/>
+      <path fill="#c1ccd0" d="M-5 10 C-10 25-28 30-27 44 Q-26 49-15 41 Q-10 35-5 24 Z"/>
+      <path fill="#8195a1" d="M-1 11 C1 23-7 36-5 47 Q-2 54 5 44 C12 31 5 20 3 11 Z"/>
+      <path fill="#c1ccd0" d="M6 10 C10 23 22 26 20 36 Q18 42 13 37 C12 28 6 23 6 10 Z"/>
+      <path fill="#98ad99" d="M-9 2 Q0 5 10 1 L9 8 Q0 11-8 7 Z"/>
+      <path fill="#98ad99" d="M-10 1 C-15-12-4-25 6-21 C17-17 15-5 10 1 Q1 6-10 1 Z"/>
+      <path fill="#c1ccd0" d="M-9-10 Q-6-20 4-19 Q-1-14-3-6 Z"/>
     </g>
   </g>
   <!-- A curved inset and small turned end articulate the hook without closing the bottom. -->
   <g id="hook-turn" clip-path="url(#body-plane)">
-    <path fill="#7d91a2" d="M503 463 C525 477 532 508 513 530 Q504 542 481 549 Q505 527 504 505 Q505 483 503 463 Z"/>
-    <path fill="#bd7d2b" d="M481 549 Q504 542 513 530 Q523 529 532 527 Q514 548 481 554 Q474 555 473 552 Z"/>
-    <path fill="#354c62" d="M503 463 Q511 481 511 499 L522 489 Q518 473 503 463 Z"/>
+    <path fill="#8195a1" d="M503 463 C525 477 532 508 513 530 Q504 542 481 549 Q505 527 504 505 Q505 483 503 463 Z"/>
+    <path fill="#98ad99" d="M481 549 Q504 542 513 530 Q523 529 532 527 Q514 548 481 554 Q474 555 473 552 Z"/>
+    <path fill="#3d5364" d="M503 463 Q511 481 511 499 L522 489 Q518 473 503 463 Z"/>
   </g>
   <!-- Two-plane upper fold echoes the feather plane without a second icon. -->
-  <path id="fold" fill="#bd7d2b" d="M545 254 Q565 256 581 263 L565 279 L547 291 Z"/>
-  <path fill="#b9c5cc" d="M545 254 L581 263 L559 266 Z"/>
+  <path id="fold" fill="#98ad99" d="M545 254 Q565 256 581 263 L565 279 L547 291 Z"/>
+  <path fill="#c1ccd0" d="M545 254 L581 263 L559 266 Z"/>
 </svg>

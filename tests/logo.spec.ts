@@ -1,11 +1,14 @@
 import { expect, test } from '@playwright/test';
 
-test('approved logo asset serves the navy and amber palette', async ({ request }) => {
+test('v1.4.1 logo asset serves the approved softened blue and green palette', async ({ request }) => {
   const response = await request.get('/brand/hebi-logo-v1.svg');
   expect(response.ok()).toBe(true);
   const svg = await response.text();
-  expect(svg).toContain('fill="#182d43"');
-  expect(svg).toContain('fill="#bd7d2b"');
+  expect(svg).toContain('fill="#203447"');
+  expect(svg).toContain('fill="#98ad99"');
+  expect(svg).toContain('fill="#c1ccd0"');
+  expect(svg).not.toContain('#182d43');
+  expect(svg).not.toContain('#bd7d2b');
   expect(svg).not.toContain('#e52629');
   expect(svg).not.toContain('#101010');
 });
