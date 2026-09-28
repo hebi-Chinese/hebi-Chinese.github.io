@@ -41,9 +41,16 @@ for (const route of ['/', '/#about', '/#work', '/notes', '/notes/typing-or-speak
   });
 }
 
-test('the site favicon is available', async ({ request }) => {
-  const response = await request.get('/favicon.svg');
+test('the site uses its full-color logo as the favicon', async ({ page, request }) => {
+  await page.goto('/');
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/favicon.svg?v=2');
+
+  const response = await request.get('/favicon.svg?v=2');
   expect(response.status()).toBe(200);
+  const svg = await response.text();
+  expect(svg).toContain('fill="#ffffff"');
+  expect(svg).toContain('#203447');
+  expect(svg).toContain('#98ad99');
 });
 
 test('homepage uses the editorial introduction and section hierarchy', async ({ page }) => {
