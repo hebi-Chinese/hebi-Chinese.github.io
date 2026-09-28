@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const headedFirefox = Boolean(process.env.CI) && process.platform === 'linux';
+
 export default defineConfig({
   testDir: './tests',
   outputDir: '.playwright/test-results',
@@ -26,11 +28,14 @@ export default defineConfig({
     },
     {
       name: 'firefox',
+      // Headed windows share Xvfb's native pointer; concurrent workers lose hover.
+      // Keep Chromium/WebKit parallel and preserve every Firefox assertion.
+      workers: headedFirefox ? 1 : undefined,
       use: {
         ...devices['Desktop Firefox'],
         // Linux CI has no usable GL driver in Firefox's headless mode.
         // The workflow supplies Xvfb so real WebGL behavior stays covered.
-        headless: !(process.env.CI && process.platform === 'linux'),
+        headless: !headedFirefox,
       },
     },
     {
