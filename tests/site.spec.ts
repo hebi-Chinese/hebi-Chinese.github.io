@@ -7,6 +7,7 @@ const publicRoutes = [
   '/#work',
   '/notes',
   '/notes/typing-or-speaking',
+  '/notes/creative-atmosphere',
   '/essays',
   '/essays/post-01',
   '/#likes',
@@ -31,7 +32,7 @@ for (const route of publicRoutes) {
   });
 }
 
-for (const route of ['/', '/#about', '/#work', '/notes', '/notes/typing-or-speaking', '/essays', '/essays/post-01']) {
+for (const route of ['/', '/#about', '/#work', '/notes', '/notes/typing-or-speaking', '/notes/creative-atmosphere', '/essays', '/essays/post-01']) {
   test(`${route} has no serious WCAG 2.1 AA violation`, async ({ page }) => {
     await page.goto(route);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
@@ -121,7 +122,7 @@ test('about connector reaches the final glyph on desktop', async ({ page }) => {
 test('notes preserve the authored date and optional time', async ({ page }) => {
   await page.goto('/notes');
 
-  const timestamp = page.locator('time').first();
+  const timestamp = page.getByRole('link', { name: /能说话以后，我开始懒得打字了/ }).locator('time');
   await expect(timestamp).toHaveText('2026/08/12 · 11:30');
   await expect(timestamp).toHaveAttribute('datetime', '2026-08-12T11:30:00');
 });
@@ -136,13 +137,14 @@ test('essays preserve the authored calendar date', async ({ page }) => {
 
 const responsiveCases = [
   { width: 320, height: 700 },
+  { width: 375, height: 812 },
   { width: 768, height: 900 },
   { width: 1024, height: 900 },
   { width: 1440, height: 1000 },
 ];
 
 for (const viewport of responsiveCases) {
-  for (const route of ['/', '/#about', '/#work']) {
+  for (const route of ['/', '/#about', '/#work', '/notes/creative-atmosphere']) {
     test(`${route} fits ${viewport.width}px`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto(route);
