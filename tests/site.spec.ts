@@ -8,6 +8,7 @@ const publicRoutes = [
   '/notes',
   '/notes/typing-or-speaking',
   '/notes/creative-atmosphere',
+  '/notes/hong-kong-baidu-maps',
   '/essays',
   '/essays/post-01',
   '/#likes',
@@ -32,7 +33,7 @@ for (const route of publicRoutes) {
   });
 }
 
-for (const route of ['/', '/#about', '/#work', '/notes', '/notes/typing-or-speaking', '/notes/creative-atmosphere', '/essays', '/essays/post-01']) {
+for (const route of ['/', '/#about', '/#work', '/notes', '/notes/typing-or-speaking', '/notes/creative-atmosphere', '/notes/hong-kong-baidu-maps', '/essays', '/essays/post-01']) {
   test(`${route} has no serious WCAG 2.1 AA violation`, async ({ page }) => {
     await page.goto(route);
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
@@ -144,7 +145,7 @@ const responsiveCases = [
 ];
 
 for (const viewport of responsiveCases) {
-  for (const route of ['/', '/#about', '/#work', '/notes/creative-atmosphere']) {
+  for (const route of ['/', '/#about', '/#work', '/notes/creative-atmosphere', '/notes/hong-kong-baidu-maps']) {
     test(`${route} fits ${viewport.width}px`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto(route);
