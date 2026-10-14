@@ -41,3 +41,19 @@ test('the approved creative-atmosphere note is listed in date order and preserve
   await expect(paragraphs.nth(3)).toContainText('无论是出于装逼、分享,还是希望大家都能共赢,总之我有了这个欲望。');
   await expect(paragraphs.last()).toContainText('那些技术大佬的执行力,还是比我厉害得多。');
 });
+
+test('the approved Hong Kong note is linked with its date and preserves all four paragraphs', async ({ page }) => {
+  await page.goto('/notes');
+  const entry = page.getByRole('main').getByRole('link', { name: /在香港，百度地图把我绕晕了/ });
+  await expect(entry).toHaveAttribute('href', '/notes/hong-kong-baidu-maps');
+  await expect(entry.locator('time')).toHaveText('2026/10/14');
+  await entry.click();
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('在香港，百度地图把我绕晕了');
+  await expect(page.locator('time')).toHaveAttribute('datetime', '2026-10-14');
+  const paragraphs = page.getByRole('article').locator('p');
+  await expect(paragraphs).toHaveCount(4);
+  await expect(paragraphs.first()).toContainText('这次香港行,百度地图算是把我坑惨了。');
+  await expect(paragraphs.nth(2)).toContainText('不过 Google 地图我还没亲自用过。');
+  await expect(paragraphs.last()).toContainText('我真的要被气死了。');
+});
